@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.Demo.ViewModels;
 using CoreMVVM.Demo.Views;
+using CoreMVVM.IOC.Builder;
 using CoreMVVM.Windows;
 using System.Windows;
 

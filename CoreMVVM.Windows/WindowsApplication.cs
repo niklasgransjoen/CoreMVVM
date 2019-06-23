@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using CoreMVVM.IOC.Builder;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;

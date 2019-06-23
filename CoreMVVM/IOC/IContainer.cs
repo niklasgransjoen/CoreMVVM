@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM
+namespace CoreMVVM.IOC
 {
     /// <summary>
     /// Stores registrated components.

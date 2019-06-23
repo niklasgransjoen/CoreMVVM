@@ -1,4 +1,7 @@
-﻿using NUnit.Framework;
+﻿using CoreMVVM.IOC;
+using CoreMVVM.IOC.Builder;
+using CoreMVVM.IOC.Core;
+using NUnit.Framework;
 using System;
 
 namespace CoreMVVM.Tests
@@ -132,9 +135,23 @@ namespace CoreMVVM.Tests
             {
                 container.Resolve<IUnregistered>();
                 Assert.Fail();
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Assert.AreEqual(typeof(ResolveUnregisteredInterfaceException), e.GetType());
+            }
+        }
+
+        [Test]
+        public void ResolveSomethingIDK()
+        {
+            try
+            {
+                container.Resolve<string>();
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual(typeof(ResolveConstructionException), e.GetType());
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
 using System.Reflection;
 using System.Windows;
 
