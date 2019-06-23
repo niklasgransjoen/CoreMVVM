@@ -1,0 +1,2 @@
+# CoreMVVM
+Core MVVM library.
