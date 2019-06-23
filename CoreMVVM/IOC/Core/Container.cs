@@ -12,6 +12,11 @@ namespace CoreMVVM.IOC.Core
     /// </summary>
     public class Container : IContainer
     {
+        /// <summary>
+        /// Gets the container of the application.
+        /// </summary>
+        public static IContainer Instance { get; private set; }
+
         private readonly IReadOnlyDictionary<Type, Registration> registeredTypes;
 
         /// <summary>
@@ -21,6 +26,7 @@ namespace CoreMVVM.IOC.Core
         internal Container(IReadOnlyDictionary<Type, Registration> registeredTypes)
         {
             this.registeredTypes = registeredTypes;
+            Instance = this;
         }
 
         #region Methods
@@ -29,6 +35,7 @@ namespace CoreMVVM.IOC.Core
         /// Returns an instance from the given type.
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public T Resolve<T>() => (T)Resolve(typeof(T));
 
@@ -36,6 +43,7 @@ namespace CoreMVVM.IOC.Core
         /// Returns an instance from the given type.
         /// </summary>
         /// <param name="type">The type to get an instance for.</param>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public object Resolve(Type type)
         {
@@ -51,7 +59,7 @@ namespace CoreMVVM.IOC.Core
             else outputType = type;
 
             if (outputType.IsInterface)
-                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{outputType}' instead.");
+                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{outputType}'.");
 
             object instance = ConstructType(outputType);
             if (isRegistered)

@@ -68,8 +68,15 @@ namespace CoreMVVM.Windows
             }
 
             object view = container.Resolve(viewType);
-            if (view is FrameworkElement frameworkElement)
-                frameworkElement.DataContext = viewModel;
+            logger.Debug($"Resolved to instance of '{view.GetType()}'.");
+
+            if (view is DependencyObject depObj)
+            {
+                ContainerPropertyExtention.SetServiceProvider(depObj, container);
+
+                if (view is FrameworkElement frameworkElement)
+                    frameworkElement.DataContext = viewModel;
+            }
 
             InitializeComponent(view);
 
