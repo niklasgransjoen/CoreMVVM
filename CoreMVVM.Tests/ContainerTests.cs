@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 
 namespace CoreMVVM.Tests
 {
@@ -124,6 +125,19 @@ namespace CoreMVVM.Tests
             Assert.AreEqual(c1, c2);
         }
 
+        [Test]
+        public void FailOnResolveUnregisteredInterface()
+        {
+            try
+            {
+                container.Resolve<IUnregistered>();
+                Assert.Fail();
+            } catch (Exception e)
+            {
+                Assert.AreEqual(typeof(ResolveUnregisteredInterfaceException), e.GetType());
+            }
+        }
+
         public class EmptyClass { }
 
         public class ClassWithConstructor
@@ -149,5 +163,7 @@ namespace CoreMVVM.Tests
                 invoked = true;
             }
         }
+
+        public interface IUnregistered { }
     }
 }

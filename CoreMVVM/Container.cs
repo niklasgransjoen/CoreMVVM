@@ -45,6 +45,9 @@ namespace CoreMVVM
             }
             else outputType = type;
 
+            if (outputType.IsInterface)
+                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{outputType}' instead.");
+
             var constructor = outputType.GetConstructors()
                 .OrderByDescending(c => c.GetParameters().Length)
                 .First();
@@ -61,5 +64,12 @@ namespace CoreMVVM
         }
 
         #endregion Methods
+    }
+
+    public class ResolveUnregisteredInterfaceException : Exception
+    {
+        public ResolveUnregisteredInterfaceException(string message) : base(message)
+        {
+        }
     }
 }
