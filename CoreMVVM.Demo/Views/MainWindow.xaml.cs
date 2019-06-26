@@ -5,38 +5,38 @@ namespace CoreMVVM.Demo.Views
 {
     public partial class MainWindow : Window
     {
-        private readonly ILogger _logger;
+        private readonly ScreenPrinter _screenPrinter;
 
-        public MainWindow(ILogger logger)
+        public MainWindow(ScreenPrinter screenPrinter)
         {
-            _logger = logger;
+            _screenPrinter = screenPrinter;
         }
 
         protected override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
 
-            ((ScreenPrinter)_logger).RegisterTextBox(textBox);
+            _screenPrinter.RegisterTextBox(textBox);
         }
 
         private void Debug_Click(object sender, RoutedEventArgs e)
         {
-            _logger.Debug("Debug action performed. Result: success.");
+            _screenPrinter.Debug("Debug action performed. Result: success.");
         }
 
         private void Log_Click(object sender, RoutedEventArgs e)
         {
-            _logger.Log("That button click was kind of important, and has been logged.");
+            _screenPrinter.Log("That button click was kind of important, and has been logged.");
         }
 
         private void Error_Click(object sender, RoutedEventArgs e)
         {
-            _logger.Error("Clicking that button sent me into a state I shouldn't have been in. That's called an error.");
+            _screenPrinter.Error("Clicking that button sent me into a state I shouldn't have been in. That's called an error.");
         }
 
         private void ExceptionClick(object sender, RoutedEventArgs e)
         {
-            _logger.Exception("An exception was thrown by clicking that button!", new Exception("Don't click the exception button, it will throw exceptions!"));
+            _screenPrinter.Exception("An exception was thrown by clicking that button!", new Exception("Don't click the exception button, it will throw exceptions!"));
         }
     }
 }

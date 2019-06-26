@@ -35,8 +35,8 @@ namespace CoreMVVM.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<IInterface, Implementation>();
-            builder.RegisterSingleton<ISingleton, Singleton>();
+            builder.Register<Implementation>().As<IInterface>();
+            builder.RegisterSingleton<Singleton>().As<ISingleton>();
         }
 
         [Test]
@@ -87,6 +87,11 @@ namespace CoreMVVM.Tests
     [TestFixture]
     public class Container_Resolve : ContainerTestBase
     {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.RegisterSingleton<Singleton>().As<ISingleton>().AsSelf();
+        }
+
         [Test]
         public void CreatesInstanceWithNoParams()
         {
@@ -129,6 +134,15 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
+        public void ResolveInterfaceAndImplementationToSamyType()
+        {
+            ISingleton s1 = container.Resolve<ISingleton>();
+            Singleton s2 = container.Resolve<Singleton>();
+
+            Assert.AreEqual(s1, s2);
+        }
+
+        [Test]
         public void FailOnResolveUnregisteredInterface()
         {
             try
@@ -143,7 +157,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void ResolveSomethingIDK()
+        public void ResolveIllegalType()
         {
             try
             {
@@ -182,5 +196,9 @@ namespace CoreMVVM.Tests
         }
 
         public interface IUnregistered { }
+
+        public interface ISingleton { }
+
+        public class Singleton : ISingleton { }
     }
 }

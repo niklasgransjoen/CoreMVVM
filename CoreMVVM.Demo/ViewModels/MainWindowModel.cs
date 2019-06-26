@@ -1,8 +1,4 @@
-﻿using CoreMVVM.Demo.Views;
-using CoreMVVM.IOC;
-using System.Threading.Tasks;
-
-namespace CoreMVVM.Demo.ViewModels
+﻿namespace CoreMVVM.Demo.ViewModels
 {
     internal class MainWindowModel : BaseModel
     {
