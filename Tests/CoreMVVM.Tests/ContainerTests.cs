@@ -8,7 +8,11 @@ namespace CoreMVVM.Tests
 {
     public abstract class ContainerTestBase
     {
-        protected IContainer container;
+        protected IContainer Container { get; set; }
+
+        protected virtual void RegisterComponents(ContainerBuilder builder)
+        {
+        }
 
         [SetUp]
         public void BeforeEach()
@@ -16,17 +20,13 @@ namespace CoreMVVM.Tests
             ContainerBuilder builder = new ContainerBuilder();
             RegisterComponents(builder);
 
-            container = builder.Build();
-        }
-
-        protected virtual void RegisterComponents(ContainerBuilder builder)
-        {
+            Container = builder.Build();
         }
 
         [TearDown]
         public void AfterEach()
         {
-            container = null;
+            Container = null;
         }
     }
 
@@ -42,46 +42,36 @@ namespace CoreMVVM.Tests
         [Test]
         public void RegisterTypeFromInterface()
         {
-            object subject = container.Resolve<IInterface>();
+            object subject = Container.Resolve<IInterface>();
 
             Assert.AreEqual(typeof(Implementation), subject.GetType());
         }
 
         [Test]
-        public void RegisterDoesNotReturnSingleton()
+        public void RegisterReturnsDifferentInstances()
         {
-            object subject1 = container.Resolve<IInterface>();
-            object subject2 = container.Resolve<IInterface>();
+            object subject1 = Container.Resolve<IInterface>();
+            object subject2 = Container.Resolve<IInterface>();
 
             Assert.AreNotEqual(subject1, subject2);
         }
 
         [Test]
-        public void RegisterSingleton()
+        public void RegisterSingletonReturnsSameInstance()
         {
-            object subject1 = container.Resolve<ISingleton>();
-            object subject2 = container.Resolve<ISingleton>();
+            object subject1 = Container.Resolve<ISingleton>();
+            object subject2 = Container.Resolve<ISingleton>();
 
             Assert.AreEqual(subject1, subject2);
         }
 
-        private interface IInterface
-        {
-            int Property { get; }
-        }
+        private interface IInterface { }
 
-        private class Implementation : IInterface
-        {
-            public int Property { get; }
-        }
+        private class Implementation : IInterface { }
 
-        private interface ISingleton
-        {
-        }
+        private interface ISingleton { }
 
-        private class Singleton : ISingleton
-        {
-        }
+        private class Singleton : ISingleton { }
     }
 
     [TestFixture]
@@ -95,40 +85,50 @@ namespace CoreMVVM.Tests
         [Test]
         public void CreatesInstanceWithNoParams()
         {
-            object subject = container.Resolve(typeof(EmptyClass));
-            Assert.AreEqual(typeof(EmptyClass), subject.GetType());
+            EmptyClass subject = Container.Resolve<EmptyClass>();
+            Assert.NotNull(subject);
         }
 
         [Test]
         public void CreateInstanceWithParams()
         {
-            object subject = container.Resolve(typeof(ClassWithConstructor));
+            ClassWithConstructor subject = Container.Resolve<ClassWithConstructor>();
 
-            Assert.IsTrue(subject.GetType() == typeof(ClassWithConstructor));
-            Assert.NotNull(((ClassWithConstructor)subject).a);
+            Assert.NotNull(subject);
+            Assert.NotNull(subject.a);
         }
 
         [Test]
         public void CreateInstanceWithParameterlessConstructor()
         {
-            object subject = container.Resolve(typeof(ClassWithEmptyConstructor));
+            ClassWithEmptyConstructor subject = Container.Resolve<ClassWithEmptyConstructor>();
 
-            Assert.IsTrue(subject.GetType() == typeof(ClassWithEmptyConstructor));
-            Assert.IsTrue(((ClassWithEmptyConstructor)subject).invoked);
+            Assert.NotNull(subject);
+            Assert.IsTrue(subject.constructorWasInvoked);
+        }
+
+        [Test]
+        public void UseConstructorWithMostParameters()
+        {
+            ClassWithManyConstructors subject = Container.Resolve<ClassWithManyConstructors>();
+
+            Assert.NotNull(subject);
+            Assert.NotNull(subject.Ec1);
+            Assert.NotNull(subject.Ec2);
         }
 
         [Test]
         public void AllowsGenericInitialization()
         {
-            EmptyClass subject = container.Resolve<EmptyClass>();
+            EmptyClass subject = Container.Resolve<EmptyClass>();
             Assert.NotNull(subject);
         }
 
         [Test]
         public void ResolveContainer()
         {
-            IContainer c1 = container.Resolve<IContainer>();
-            IContainer c2 = container.Resolve<IContainer>();
+            IContainer c1 = Container.Resolve<IContainer>();
+            IContainer c2 = Container.Resolve<IContainer>();
 
             Assert.AreEqual(c1, c2);
         }
@@ -136,8 +136,8 @@ namespace CoreMVVM.Tests
         [Test]
         public void ResolveInterfaceAndImplementationToSamyType()
         {
-            ISingleton s1 = container.Resolve<ISingleton>();
-            Singleton s2 = container.Resolve<Singleton>();
+            ISingleton s1 = Container.Resolve<ISingleton>();
+            Singleton s2 = Container.Resolve<Singleton>();
 
             Assert.AreEqual(s1, s2);
         }
@@ -147,7 +147,7 @@ namespace CoreMVVM.Tests
         {
             try
             {
-                container.Resolve<IUnregistered>();
+                Container.Resolve<IUnregistered>();
                 Assert.Fail();
             }
             catch (Exception e)
@@ -161,7 +161,7 @@ namespace CoreMVVM.Tests
         {
             try
             {
-                container.Resolve<string>();
+                Container.Resolve<string>();
             }
             catch (Exception e)
             {
@@ -187,12 +187,33 @@ namespace CoreMVVM.Tests
 
         public class ClassWithEmptyConstructor
         {
-            public bool invoked;
+            public bool constructorWasInvoked;
 
             public ClassWithEmptyConstructor()
             {
-                invoked = true;
+                constructorWasInvoked = true;
             }
+        }
+
+        public class ClassWithManyConstructors
+        {
+            public ClassWithManyConstructors()
+            {
+            }
+
+            public ClassWithManyConstructors(EmptyClass ec1)
+            {
+                Ec1 = ec1;
+            }
+
+            public ClassWithManyConstructors(EmptyClass ec1, EmptyClass ec2)
+            {
+                Ec1 = ec1;
+                Ec2 = ec2;
+            }
+
+            public EmptyClass Ec1 { get; }
+            public EmptyClass Ec2 { get; }
         }
 
         public interface IUnregistered { }
