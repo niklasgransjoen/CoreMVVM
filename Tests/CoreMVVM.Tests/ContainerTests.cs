@@ -31,66 +31,17 @@ namespace CoreMVVM.Tests
     }
 
     [TestFixture]
-    public class Container_Register : ContainerTestBase
-    {
-        protected override void RegisterComponents(ContainerBuilder builder)
-        {
-            builder.Register<Implementation>().As<IInterface>();
-            builder.RegisterSingleton<Singleton>().As<ISingleton>();
-        }
-
-        [Test]
-        public void RegisterTypeFromInterface()
-        {
-            object subject = Container.Resolve<IInterface>();
-
-            Assert.AreEqual(typeof(Implementation), subject.GetType());
-        }
-
-        [Test]
-        public void RegisterReturnsDifferentInstances()
-        {
-            object subject1 = Container.Resolve<IInterface>();
-            object subject2 = Container.Resolve<IInterface>();
-
-            Assert.AreNotEqual(subject1, subject2);
-        }
-
-        [Test]
-        public void RegisterSingletonReturnsSameInstance()
-        {
-            object subject1 = Container.Resolve<ISingleton>();
-            object subject2 = Container.Resolve<ISingleton>();
-
-            Assert.AreEqual(subject1, subject2);
-        }
-
-        private interface IInterface { }
-
-        private class Implementation : IInterface { }
-
-        private interface ISingleton { }
-
-        private class Singleton : ISingleton { }
-    }
-
-    [TestFixture]
     public class Container_Resolve : ContainerTestBase
     {
-        protected override void RegisterComponents(ContainerBuilder builder)
-        {
-            builder.RegisterSingleton<Singleton>().As<ISingleton>().AsSelf();
-        }
-
         [Test]
-        public void CreatesInstanceWithNoParams()
+        public void Container_CreatesInstance_NoParams()
         {
             EmptyClass subject = Container.Resolve<EmptyClass>();
             Assert.NotNull(subject);
         }
 
         [Test]
-        public void CreateInstanceWithParams()
+        public void Container_CreatesInstance_WithParams()
         {
             ClassWithConstructor subject = Container.Resolve<ClassWithConstructor>();
 
@@ -99,7 +50,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void CreateInstanceWithParameterlessConstructor()
+        public void Container_CreatesInstance_ParameterlessConstructor()
         {
             ClassWithEmptyConstructor subject = Container.Resolve<ClassWithEmptyConstructor>();
 
@@ -108,7 +59,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void UseConstructorWithMostParameters()
+        public void Container_Calls_ConstructorWithTheMostParams()
         {
             ClassWithManyConstructors subject = Container.Resolve<ClassWithManyConstructors>();
 
@@ -118,14 +69,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void AllowsGenericInitialization()
-        {
-            EmptyClass subject = Container.Resolve<EmptyClass>();
-            Assert.NotNull(subject);
-        }
-
-        [Test]
-        public void ResolveContainer()
+        public void Container_ResolvesContainer_ToSameInstance()
         {
             IContainer c1 = Container.Resolve<IContainer>();
             IContainer c2 = Container.Resolve<IContainer>();
@@ -134,16 +78,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void ResolveInterfaceAndImplementationToSamyType()
-        {
-            ISingleton s1 = Container.Resolve<ISingleton>();
-            Singleton s2 = Container.Resolve<Singleton>();
-
-            Assert.AreEqual(s1, s2);
-        }
-
-        [Test]
-        public void FailOnResolveUnregisteredInterface()
+        public void Container_Throws_ResolveUnregisteredInterface()
         {
             try
             {
@@ -157,7 +92,7 @@ namespace CoreMVVM.Tests
         }
 
         [Test]
-        public void ResolveIllegalType()
+        public void Container_Throws_ResolveIllegalTypes()
         {
             try
             {
@@ -217,9 +152,66 @@ namespace CoreMVVM.Tests
         }
 
         public interface IUnregistered { }
+    }
 
-        public interface ISingleton { }
+    [TestFixture]
+    public class Container_Register : ContainerTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<Implementation>().As<IInterface>();
+        }
 
-        public class Singleton : ISingleton { }
+        [Test]
+        public void Container_ResolvesInterface_ToRegistration()
+        {
+            IInterface subject = Container.Resolve<IInterface>();
+
+            Assert.AreEqual(typeof(Implementation), subject.GetType());
+        }
+
+        [Test]
+        public void Container_ResolvesRegistrations_ToUniqueInstances()
+        {
+            object subject1 = Container.Resolve<IInterface>();
+            object subject2 = Container.Resolve<IInterface>();
+
+            Assert.AreNotEqual(subject1, subject2);
+        }
+
+        private interface IInterface { }
+
+        private class Implementation : IInterface { }
+    }
+
+    [TestFixture]
+    public class Container_Register_Singleton : ContainerTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.RegisterSingleton<Singleton>().As<ISingleton>().AsSelf();
+        }
+
+        [Test]
+        public void Container_ResolvesSingleton_ToSingleInstance()
+        {
+            object subject1 = Container.Resolve<ISingleton>();
+            object subject2 = Container.Resolve<ISingleton>();
+
+            Assert.AreEqual(subject1, subject2);
+        }
+
+        [Test]
+        public void Container_Resolves_InterfaceAndImplementation_ToSameType()
+        {
+            ISingleton s1 = Container.Resolve<ISingleton>();
+            Singleton s2 = Container.Resolve<Singleton>();
+
+            Assert.AreEqual(s1, s2);
+        }
+
+        private interface ISingleton { }
+
+        private class Singleton : ISingleton { }
     }
 }
