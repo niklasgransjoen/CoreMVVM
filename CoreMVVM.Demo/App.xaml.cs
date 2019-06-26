@@ -22,6 +22,8 @@ namespace CoreMVVM.Demo
         {
             builder.RegisterSingleton<MainWindow>();
             builder.RegisterSingleton<MainWindowModel>();
+
+            builder.RegisterSingleton<ILogger, ScreenPrinter>();
         }
     }
 }

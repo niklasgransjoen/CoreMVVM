@@ -13,8 +13,10 @@ namespace CoreMVVM.IOC.Builder
 
         public ContainerBuilder()
         {
-            Register<ILogger, ConsoleLogger>();
+            RegisterSingleton<ILogger, ConsoleLogger>();
         }
+
+        public void Register<T>() => Register<T, T>();
 
         public void Register<TIn, TOut>() where TOut : TIn
         {

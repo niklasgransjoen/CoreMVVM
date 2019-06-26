@@ -1,4 +1,6 @@
 ﻿using CoreMVVM.Demo.Views;
+using CoreMVVM.IOC;
+using System.Threading.Tasks;
 
 namespace CoreMVVM.Demo.ViewModels
 {
@@ -9,12 +11,12 @@ namespace CoreMVVM.Demo.ViewModels
             Content = content;
         }
 
-        private object content;
+        private object _content;
 
         public object Content
         {
-            get => content;
-            set => SetProperty(ref content, value);
+            get => _content;
+            set => SetProperty(ref _content, value);
         }
     }
 }

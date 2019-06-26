@@ -7,9 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Windows", "CoreMVV
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Demo", "CoreMVVM.Demo\CoreMVVM.Demo.csproj", "{2A924409-DDDC-4ADE-BB77-29B8772E1F87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM", "CoreMVVM\CoreMVVM.csproj", "{9528F63C-66E9-474A-93FE-2BE693B75DDD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM", "CoreMVVM\CoreMVVM.csproj", "{9528F63C-66E9-474A-93FE-2BE693B75DDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Tests", "CoreMVVM.Tests\CoreMVVM.Tests.csproj", "{CA076C77-345A-4640-8ADC-C2F743420D4B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DFAF0354-4F12-462B-A888-6A5EC1CAB08D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Tests", "Tests\CoreMVVM.Tests\CoreMVVM.Tests.csproj", "{EA3E8E36-1928-4395-AFED-89FA0864AB4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,13 +31,16 @@ Global
 		{9528F63C-66E9-474A-93FE-2BE693B75DDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9528F63C-66E9-474A-93FE-2BE693B75DDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9528F63C-66E9-474A-93FE-2BE693B75DDD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CA076C77-345A-4640-8ADC-C2F743420D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA076C77-345A-4640-8ADC-C2F743420D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA076C77-345A-4640-8ADC-C2F743420D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA076C77-345A-4640-8ADC-C2F743420D4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EA3E8E36-1928-4395-AFED-89FA0864AB4A} = {DFAF0354-4F12-462B-A888-6A5EC1CAB08D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A2B0EAC-3B52-40DC-B12D-E8EA615C3864}
