@@ -54,12 +54,19 @@ namespace CoreMVVM.IOC.Builder
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
         /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
-        public RegistrationBuilder As(Type type)
+        public RegistrationBuilder As(Type type) => As(type, factory: null);
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of a given type.
+        /// </summary>
+        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
+        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
+        public RegistrationBuilder As(Type type, Func<object> factory)
         {
             if (!IsSingleton)
-                Register(type);
+                Register(type, factory);
             else
-                RegisterSingleton(type);
+                RegisterSingleton(type, factory);
 
             return this;
         }
@@ -67,12 +74,18 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers <see cref="Type"/> as a component of itself.
         /// </summary>
-        public RegistrationBuilder AsSelf()
+        public RegistrationBuilder AsSelf() => AsSelf(factory: null);
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of itself.
+        /// </summary>
+        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
+        public RegistrationBuilder AsSelf(Func<object> factory)
         {
             if (!IsSingleton)
-                Register(Type);
+                Register(Type, factory);
             else
-                RegisterSingleton(Type);
+                RegisterSingleton(Type, factory);
 
             return this;
         }
@@ -81,12 +94,15 @@ namespace CoreMVVM.IOC.Builder
 
         #region Private methods
 
-        private void Register(Type type)
+        private void Register(Type type, Func<object> factory = null)
         {
-            _registrations[type] = new Registration(Type);
+            _registrations[type] = new Registration(Type)
+            {
+                Factory = factory,
+            };
         }
 
-        private void RegisterSingleton(Type type)
+        private void RegisterSingleton(Type type, Func<object> factory = null)
         {
             // Check if type has been registered as a singleton already.
             // All Singleton registrations of a type must share registrations.
@@ -95,6 +111,10 @@ namespace CoreMVVM.IOC.Builder
             {
                 // Copy instance from previous registration.
                 _registrations[type] = registration;
+
+                // Only overwrite factory if not null.
+                if (factory != null)
+                    registration.Factory = factory;
             }
             else
             {
@@ -102,6 +122,7 @@ namespace CoreMVVM.IOC.Builder
                 _registrations[type] = new Registration(Type)
                 {
                     IsSingleton = true,
+                    Factory = factory,
                 };
             }
         }

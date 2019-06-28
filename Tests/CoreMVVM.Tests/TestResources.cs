@@ -5,4 +5,6 @@
     public class Class { }
 
     public struct Struct { }
+
+    public class Implementation : IInterface { }
 }

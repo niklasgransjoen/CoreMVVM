@@ -36,7 +36,7 @@ namespace CoreMVVM.Tests.IOC.Core
         [Test]
         public void Container_CreatesInstance_NoParams()
         {
-            EmptyClass subject = Container.Resolve<EmptyClass>();
+            Class subject = Container.Resolve<Class>();
             Assert.NotNull(subject);
         }
 
@@ -82,7 +82,7 @@ namespace CoreMVVM.Tests.IOC.Core
         {
             try
             {
-                Container.Resolve<IUnregistered>();
+                Container.Resolve<IInterface>();
                 Assert.Fail();
             }
             catch (Exception e)
@@ -104,17 +104,15 @@ namespace CoreMVVM.Tests.IOC.Core
             }
         }
 
-        public class EmptyClass { }
-
         public class ClassWithConstructor
         {
-            public EmptyClass a;
+            public Class a;
 
             public ClassWithConstructor()
             {
             }
 
-            public ClassWithConstructor(EmptyClass a)
+            public ClassWithConstructor(Class a)
             {
                 this.a = a;
             }
@@ -136,22 +134,20 @@ namespace CoreMVVM.Tests.IOC.Core
             {
             }
 
-            public ClassWithManyConstructors(EmptyClass ec1)
+            public ClassWithManyConstructors(Class ec1)
             {
                 Ec1 = ec1;
             }
 
-            public ClassWithManyConstructors(EmptyClass ec1, EmptyClass ec2)
+            public ClassWithManyConstructors(Class ec1, Class ec2)
             {
                 Ec1 = ec1;
                 Ec2 = ec2;
             }
 
-            public EmptyClass Ec1 { get; }
-            public EmptyClass Ec2 { get; }
+            public Class Ec1 { get; }
+            public Class Ec2 { get; }
         }
-
-        public interface IUnregistered { }
     }
 
     [TestFixture]
@@ -178,10 +174,6 @@ namespace CoreMVVM.Tests.IOC.Core
 
             Assert.AreNotEqual(subject1, subject2);
         }
-
-        private interface IInterface { }
-
-        private class Implementation : IInterface { }
     }
 
     [TestFixture]
@@ -189,29 +181,25 @@ namespace CoreMVVM.Tests.IOC.Core
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterSingleton<Singleton>().As<ISingleton>().AsSelf();
+            builder.RegisterSingleton<Implementation>().As<IInterface>().AsSelf();
         }
 
         [Test]
         public void Container_ResolvesSingleton_ToSingleInstance()
         {
-            object subject1 = Container.Resolve<ISingleton>();
-            object subject2 = Container.Resolve<ISingleton>();
+            object subject1 = Container.Resolve<IInterface>();
+            object subject2 = Container.Resolve<IInterface>();
 
             Assert.AreEqual(subject1, subject2);
         }
 
         [Test]
-        public void Container_Resolves_InterfaceAndImplementation_ToSameType()
+        public void Container_Resolves_InterfaceAndImplementation_ToSameInstance()
         {
-            ISingleton s1 = Container.Resolve<ISingleton>();
-            Singleton s2 = Container.Resolve<Singleton>();
+            IInterface s1 = Container.Resolve<IInterface>();
+            Implementation s2 = Container.Resolve<Implementation>();
 
             Assert.AreEqual(s1, s2);
         }
-
-        private interface ISingleton { }
-
-        private class Singleton : ISingleton { }
     }
 }

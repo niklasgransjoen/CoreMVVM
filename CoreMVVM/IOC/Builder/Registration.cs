@@ -26,5 +26,10 @@ namespace CoreMVVM.IOC.Builder
         /// Gets or sets the last created instance of this registration.
         /// </summary>
         public object LastCreatedInstance { get; set; }
+
+        /// <summary>
+        /// Gets or sets the factory to construct this registered component with. Can be null.
+        /// </summary>
+        public Func<object> Factory { get; set; }
     }
 }
