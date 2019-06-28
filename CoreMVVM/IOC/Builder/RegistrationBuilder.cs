@@ -53,6 +53,19 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
+        /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
+        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
+        public RegistrationBuilder As<T>(Func<T> factory)
+        {
+            if (factory == null)
+                return As(typeof(T));
+
+            return As(typeof(T), () => factory());
+        }
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of a given type.
+        /// </summary>
         /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
         public RegistrationBuilder As(Type type) => As(type, factory: null);
 

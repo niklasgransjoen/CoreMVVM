@@ -47,25 +47,23 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public object Resolve(Type type)
         {
-            Type outputType;
             bool isRegistered = registeredTypes.TryGetValue(type, out Registration registration);
             if (isRegistered)
             {
                 if (registration.IsSingleton && registration.LastCreatedInstance != null)
                     return registration.LastCreatedInstance;
 
-                outputType = registration.Type;
-            }
-            else outputType = type;
+                object instance;
+                if (registration.Factory != null)
+                    instance = registration.Factory();
+                else
+                    instance = ConstructType(registration.Type);
 
-            if (outputType.IsInterface)
-                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{outputType}'.");
-
-            object instance = ConstructType(outputType);
-            if (isRegistered)
                 registration.LastCreatedInstance = instance;
+                return instance;
+            }
 
-            return instance;
+            return ConstructType(type);
         }
 
         /// <summary>
@@ -74,6 +72,9 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type)
         {
+            if (type.IsInterface)
+                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{type}'.");
+
             try
             {
                 ConstructorInfo[] constructors = type.GetConstructors();

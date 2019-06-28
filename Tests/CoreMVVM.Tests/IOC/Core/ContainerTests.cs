@@ -31,7 +31,7 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class Container_Resolve : ContainerTestBase
+    public class Container_Resolve_Unregistered : ContainerTestBase
     {
         [Test]
         public void Container_CreatesInstance_NoParams()
@@ -151,7 +151,7 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class Container_Register : ContainerTestBase
+    public class Container_Resolve : ContainerTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
@@ -177,7 +177,7 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class Container_Register_Singleton : ContainerTestBase
+    public class Container_Resolve_Singleton : ContainerTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
@@ -200,6 +200,52 @@ namespace CoreMVVM.Tests.IOC.Core
             Implementation s2 = Container.Resolve<Implementation>();
 
             Assert.AreEqual(s1, s2);
+        }
+    }
+
+    [TestFixture]
+    public class Container_Resolve_Factory : ContainerTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<ClassWithProperties>().As<IInterface>(() => new ClassWithProperties
+            {
+                MyVal = 4,
+            });
+
+            builder.RegisterSingleton<SingletonWithProperties>().AsSelf(() => new SingletonWithProperties()
+            {
+                Str = "unique-string",
+            });
+        }
+
+        [Test]
+        public void Container_Resolves_Factory()
+        {
+            IInterface subject = Container.Resolve<IInterface>();
+
+            Assert.AreEqual(typeof(ClassWithProperties), subject.GetType());
+            Assert.AreEqual(4, ((ClassWithProperties)subject).MyVal);
+        }
+
+        [Test]
+        public void Container_Resolves_Singleton_FromFactory()
+        {
+            SingletonWithProperties subject1 = Container.Resolve<SingletonWithProperties>();
+            SingletonWithProperties subject2 = Container.Resolve<SingletonWithProperties>();
+
+            Assert.AreEqual(subject1, subject2);
+            Assert.AreEqual("unique-string", subject1.Str);
+        }
+
+        private class ClassWithProperties : IInterface
+        {
+            public int MyVal { get; set; }
+        }
+
+        private class SingletonWithProperties
+        {
+            public string Str { get; set; }
         }
     }
 }
