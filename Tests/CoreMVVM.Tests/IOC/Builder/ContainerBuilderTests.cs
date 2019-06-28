@@ -16,6 +16,12 @@ namespace CoreMVVM.Tests.IOC.Builder
             _builder = new ContainerBuilder(registerDefaults: false);
         }
 
+        [TearDown]
+        public void AfterEach()
+        {
+            _builder = null;
+        }
+
         [TestCaseSource(nameof(GetTypes))]
         public void Builder_Registers_Types(Type type)
         {
@@ -60,11 +66,5 @@ namespace CoreMVVM.Tests.IOC.Builder
             yield return typeof(Class);
             yield return typeof(Struct);
         }
-
-        private interface IInterface { }
-
-        private class Class { }
-
-        private struct Struct { }
     }
 }

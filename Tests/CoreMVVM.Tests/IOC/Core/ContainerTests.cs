@@ -4,7 +4,7 @@ using CoreMVVM.IOC.Core;
 using NUnit.Framework;
 using System;
 
-namespace CoreMVVM.Tests
+namespace CoreMVVM.Tests.IOC.Core
 {
     public abstract class ContainerTestBase
     {

@@ -22,7 +22,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="registerDefaults">Indicated if default registrations should be performed. See remarks.</param>
         /// <remarks>
-        /// Defauls registrations include: 
+        /// Defauls registrations include:
         /// - <see cref="ILogger"/> as <see cref="ConsoleLogger"/>. A logger is required to use the resulting container.
         /// </remarks>
         public ContainerBuilder(bool registerDefaults)
@@ -33,21 +33,41 @@ namespace CoreMVVM.IOC.Builder
             }
         }
 
+        /// <summary>
+        /// Registers a component.
+        /// </summary>
+        /// <typeparam name="T">The type of the component to register.</typeparam>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public RegistrationBuilder Register<T>()
         {
             return Register(typeof(T));
         }
 
+        /// <summary>
+        /// Registers a component.
+        /// </summary>
+        /// <param name="type">The type of the component to register.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public RegistrationBuilder Register(Type type)
         {
             return new RegistrationBuilder(_registrations, type);
         }
 
+        /// <summary>
+        /// Registers a component as a singleton.
+        /// </summary>
+        /// <typeparam name="T">The type of the component to register.</typeparam>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public RegistrationBuilder RegisterSingleton<T>()
         {
             return RegisterSingleton(typeof(T));
         }
 
+        /// <summary>
+        /// Registers a component as a singleton.
+        /// </summary>
+        /// <param name="type">The type of the component to register.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public RegistrationBuilder RegisterSingleton(Type type)
         {
             return new RegistrationBuilder(_registrations, type, isSingleton: true);

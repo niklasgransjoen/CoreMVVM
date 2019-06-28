@@ -45,20 +45,27 @@ namespace CoreMVVM.IOC.Builder
         #region Methods
 
         /// <summary>
-        /// Registers the current type as a component of T.
+        /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
-        public RegistrationBuilder As<T>()
+        /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
+        public RegistrationBuilder As<T>() => As(typeof(T));
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of a given type.
+        /// </summary>
+        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
+        public RegistrationBuilder As(Type type)
         {
             if (!IsSingleton)
-                Register(typeof(T));
+                Register(type);
             else
-                RegisterSingleton(typeof(T));
+                RegisterSingleton(type);
 
             return this;
         }
 
         /// <summary>
-        /// Registers the current type as a component of itself.
+        /// Registers <see cref="Type"/> as a component of itself.
         /// </summary>
         public RegistrationBuilder AsSelf()
         {
