@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace CoreMVVM.IOC.Builder
@@ -9,8 +10,6 @@ namespace CoreMVVM.IOC.Builder
     public class RegistrationBuilder
     {
         private readonly RegistrationCollection _registrations;
-        private readonly Type _type;
-        private readonly bool _isSingleton;
 
         internal RegistrationBuilder(RegistrationCollection registrations, Type type)
             : this(registrations, type, isSingleton: false)
@@ -20,9 +19,28 @@ namespace CoreMVVM.IOC.Builder
         internal RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton)
         {
             _registrations = registrations;
-            _type = type;
-            _isSingleton = isSingleton;
+            Type = type;
+            IsSingleton = isSingleton;
         }
+
+        #region Properties
+
+        /// <summary>
+        /// Gets a collection of the registrations of this registration builder.
+        /// </summary>
+        public ImmutableDictionary<Type, Registration> Registrations => _registrations.ToImmutableDictionary();
+
+        /// <summary>
+        /// Gets the type being registrated.
+        /// </summary>
+        public Type Type { get; }
+
+        /// <summary>
+        /// Gets a value indicating if the new registrations are a single singleton.
+        /// </summary>
+        public bool IsSingleton { get; }
+
+        #endregion Properties
 
         #region Methods
 
@@ -31,7 +49,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public RegistrationBuilder As<T>()
         {
-            if (!_isSingleton)
+            if (!IsSingleton)
                 Register(typeof(T));
             else
                 RegisterSingleton(typeof(T));
@@ -44,10 +62,10 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public RegistrationBuilder AsSelf()
         {
-            if (!_isSingleton)
-                Register(_type);
+            if (!IsSingleton)
+                Register(Type);
             else
-                RegisterSingleton(_type);
+                RegisterSingleton(Type);
 
             return this;
         }
@@ -58,7 +76,7 @@ namespace CoreMVVM.IOC.Builder
 
         private void Register(Type type)
         {
-            _registrations[type] = new Registration(_type);
+            _registrations[type] = new Registration(Type);
         }
 
         private void RegisterSingleton(Type type)
@@ -74,7 +92,7 @@ namespace CoreMVVM.IOC.Builder
             else
             {
                 // Not registered before: create new registration.
-                _registrations[type] = new Registration(_type)
+                _registrations[type] = new Registration(Type)
                 {
                     IsSingleton = true,
                 };
