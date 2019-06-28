@@ -30,6 +30,28 @@ namespace CoreMVVM.Tests.IOC.Builder
             Assert.IsEmpty(regBuilder.Registrations);
         }
 
+        [Test]
+        public void Builder_Registers_Generics()
+        {
+            ContainerBuilder builder = new ContainerBuilder(registerDefaults: false);
+            RegistrationBuilder regBuilder = builder.Register<IInterface>();
+
+            Assert.AreEqual(typeof(IInterface), regBuilder.Type);
+            Assert.IsFalse(regBuilder.IsSingleton);
+            Assert.IsEmpty(regBuilder.Registrations);
+        }
+
+        [Test]
+        public void Builder_Registers_Generics_AsSingleton()
+        {
+            ContainerBuilder builder = new ContainerBuilder(registerDefaults: false);
+            RegistrationBuilder regBuilder = builder.RegisterSingleton<Class>();
+
+            Assert.AreEqual(typeof(Class), regBuilder.Type);
+            Assert.IsTrue(regBuilder.IsSingleton);
+            Assert.IsEmpty(regBuilder.Registrations);
+        }
+
         private static IEnumerable<Type> GetTypes()
         {
             yield return typeof(IInterface);
@@ -38,7 +60,9 @@ namespace CoreMVVM.Tests.IOC.Builder
         }
 
         private interface IInterface { }
+
         private class Class { }
+
         private struct Struct { }
     }
 }
