@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="ContainerTests.cs" />
     <Compile Include="IOC\Builder\ContainerBuilderTests.cs" />
+    <Compile Include="IOC\Builder\RegistrationBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
