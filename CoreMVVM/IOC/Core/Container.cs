@@ -17,7 +17,7 @@ namespace CoreMVVM.IOC.Core
         /// </summary>
         public static IContainer Instance { get; private set; }
 
-        private readonly IReadOnlyDictionary<Type, Registration> registeredTypes;
+        private readonly IReadOnlyDictionary<Type, Registration> _registeredTypes;
 
         /// <summary>
         /// Creates a new container.
@@ -25,7 +25,7 @@ namespace CoreMVVM.IOC.Core
         /// <param name="registeredTypes">The registered types of this container.</param>
         internal Container(IReadOnlyDictionary<Type, Registration> registeredTypes)
         {
-            this.registeredTypes = registeredTypes;
+            _registeredTypes = registeredTypes;
             Instance = this;
         }
 
@@ -47,7 +47,7 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public object Resolve(Type type)
         {
-            bool isRegistered = registeredTypes.TryGetValue(type, out Registration registration);
+            bool isRegistered = _registeredTypes.TryGetValue(type, out Registration registration);
             if (isRegistered)
             {
                 if (registration.IsSingleton && registration.LastCreatedInstance != null)

@@ -7,12 +7,12 @@
             Text = "Hello World!";
         }
 
-        private string text;
+        private string _text;
 
         public string Text
         {
-            get => text;
-            set => SetProperty(ref text, value);
+            get => _text;
+            set => SetProperty(ref _text, value);
         }
     }
 }
