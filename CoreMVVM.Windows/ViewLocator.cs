@@ -10,8 +10,8 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewLocator : IViewLocator
     {
-        private readonly IContainer container;
-        private readonly ILogger logger;
+        private readonly IContainer _container;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Returns the type of a view based on the type of the view model.
@@ -25,8 +25,8 @@ namespace CoreMVVM.Windows
 
         public ViewLocator(IContainer container, ILogger logger)
         {
-            this.container = container;
-            this.logger = logger;
+            _container = container;
+            _logger = logger;
 
             GetViewTypeNameFromViewModelTypeName = (viewModelTypeName) =>
             {
@@ -47,7 +47,7 @@ namespace CoreMVVM.Windows
         /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
         public object GetView<TViewModel>()
         {
-            TViewModel viewModel = container.Resolve<TViewModel>();
+            TViewModel viewModel = _container.Resolve<TViewModel>();
             return GetView(viewModel);
         }
 
@@ -59,20 +59,20 @@ namespace CoreMVVM.Windows
             if (viewModel == null)
                 throw new ArgumentNullException(nameof(viewModel));
 
-            logger.Debug($"View for view model '{viewModel.GetType()} requested.");
+            _logger.Debug($"View for view model '{viewModel.GetType()} requested.");
             Type viewType = GetViewTypeFromViewModelType(viewModel.GetType());
             if (viewType == null)
             {
-                logger.Error($"Failed to find view for view model of type '{viewModel.GetType()}'.");
+                _logger.Error($"Failed to find view for view model of type '{viewModel.GetType()}'.");
                 throw new InvalidOperationException($"No view found for view model of type '{viewModel.GetType()}'.");
             }
 
-            object view = container.Resolve(viewType);
-            logger.Debug($"Resolved to instance of '{view.GetType()}'.");
+            object view = _container.Resolve(viewType);
+            _logger.Debug($"Resolved to instance of '{view.GetType()}'.");
 
             if (view is DependencyObject depObj)
             {
-                ContainerPropertyExtention.SetServiceProvider(depObj, container);
+                ContainerPropertyExtention.SetServiceProvider(depObj, _container);
 
                 if (view is FrameworkElement frameworkElement)
                     frameworkElement.DataContext = viewModel;

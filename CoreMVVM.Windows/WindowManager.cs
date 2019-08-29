@@ -4,11 +4,11 @@ namespace CoreMVVM.Windows
 {
     public class WindowManager : IWindowManager
     {
-        private readonly IViewLocator viewLocator;
+        private readonly IViewLocator _viewLocator;
 
         public WindowManager(IViewLocator viewLocator)
         {
-            this.viewLocator = viewLocator;
+            _viewLocator = viewLocator;
         }
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace CoreMVVM.Windows
         /// <param name="scope">The optional scope of the window.</param>
         public Window ShowWindow<TViewModel>(Window owner = null)
         {
-            Window window = (Window)viewLocator.GetView<TViewModel>();
+            Window window = (Window)_viewLocator.GetView<TViewModel>();
             window.Owner = owner;
             window.Show();
             return window;
@@ -33,7 +33,7 @@ namespace CoreMVVM.Windows
         /// <param name="scope">The optional scope of the window.</param>
         public Window ShowWindow(object viewModel, Window owner = null)
         {
-            var window = (Window)viewLocator.GetView(viewModel);
+            var window = (Window)_viewLocator.GetView(viewModel);
             window.Owner = owner;
             window.Show();
             return window;
