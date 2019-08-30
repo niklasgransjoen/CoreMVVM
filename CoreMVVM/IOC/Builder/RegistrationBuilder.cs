@@ -1,34 +1,94 @@
 ﻿using System;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace CoreMVVM.IOC.Builder
 {
+    public interface IRegistrationBuilder
+    {
+        /// <summary>
+        /// Gets the type being registrated.
+        /// </summary>
+        Type Type { get; }
+
+        /// <summary>
+        /// Gets a value indicating if the new registrations are a single singleton.
+        /// </summary>
+        bool IsSingleton { get; }
+
+        /// <summary>
+        /// Gets the factory being registered. May be null.
+        /// </summary>
+        Func<IContainer, object> Factory { get; }
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of a given type.
+        /// </summary>
+        /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
+        IRegistrationBuilder As<T>();
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of a given type.
+        /// </summary>
+        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
+        IRegistrationBuilder As(Type type);
+
+        /// <summary>
+        /// Registers <see cref="Type"/> as a component of itself.
+        /// </summary>
+        IRegistrationBuilder AsSelf();
+    }
+
     /// <summary>
     /// For performing component/service registration.
     /// </summary>
-    public class RegistrationBuilder
+    internal class RegistrationBuilder : IRegistrationBuilder
     {
         private readonly RegistrationCollection _registrations;
 
-        internal RegistrationBuilder(RegistrationCollection registrations, Type type)
-            : this(registrations, type, isSingleton: false)
-        {
-        }
+        #region Constructors
 
-        internal RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton)
+        private RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton, Func<IContainer, object> factory)
         {
             _registrations = registrations;
+
             Type = type;
             IsSingleton = isSingleton;
+            Factory = factory;
         }
 
-        #region Properties
+        internal static RegistrationBuilder Create<T>(RegistrationCollection registrations)
+        {
+            return new RegistrationBuilder(registrations, typeof(T), isSingleton: false, factory: null);
+        }
 
-        /// <summary>
-        /// Gets a collection of the registrations of this registration builder.
-        /// </summary>
-        public ImmutableDictionary<Type, Registration> Registrations => _registrations.ToImmutableDictionary();
+        internal static RegistrationBuilder Create(RegistrationCollection registrations, Type type)
+        {
+            return new RegistrationBuilder(registrations, type, isSingleton: false, factory: null);
+        }
+
+        internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations)
+        {
+            return new RegistrationBuilder(registrations, typeof(T), isSingleton: true, factory: null);
+        }
+
+        internal static RegistrationBuilder CreateSingleton(RegistrationCollection registrations, Type type)
+        {
+            return new RegistrationBuilder(registrations, type, isSingleton: true, factory: null);
+        }
+
+        internal static RegistrationBuilder CreateFactory<T>(RegistrationCollection registrations, Func<IContainer, T> factory)
+        {
+            return new RegistrationBuilder(registrations, typeof(T), isSingleton: false, c => factory(c));
+        }
+
+        internal static RegistrationBuilder CreateSingletonFactory<T>(RegistrationCollection registrations, Func<IContainer, T> factory)
+        {
+            return new RegistrationBuilder(registrations, typeof(T), isSingleton: true, c => factory(c));
+        }
+
+        #endregion Constructors
+
+        #region Properties
 
         /// <summary>
         /// Gets the type being registrated.
@@ -40,6 +100,11 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public bool IsSingleton { get; }
 
+        /// <summary>
+        /// Gets the factory being registered. May be null.
+        /// </summary>
+        public Func<IContainer, object> Factory { get; }
+
         #endregion Properties
 
         #region Methods
@@ -48,38 +113,18 @@ namespace CoreMVVM.IOC.Builder
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
         /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
-        public RegistrationBuilder As<T>() => As(typeof(T));
-
-        /// <summary>
-        /// Registers <see cref="Type"/> as a component of a given type.
-        /// </summary>
-        /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
-        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
-        public RegistrationBuilder As<T>(Func<T> factory)
-        {
-            if (factory == null)
-                return As(typeof(T));
-
-            return As(typeof(T), () => factory());
-        }
+        public IRegistrationBuilder As<T>() => As(typeof(T));
 
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
         /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
-        public RegistrationBuilder As(Type type) => As(type, factory: null);
-
-        /// <summary>
-        /// Registers <see cref="Type"/> as a component of a given type.
-        /// </summary>
-        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
-        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
-        public RegistrationBuilder As(Type type, Func<object> factory)
+        public IRegistrationBuilder As(Type type)
         {
             if (!IsSingleton)
-                Register(type, factory);
+                Register(type);
             else
-                RegisterSingleton(type, factory);
+                RegisterSingleton(type);
 
             return this;
         }
@@ -87,18 +132,12 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers <see cref="Type"/> as a component of itself.
         /// </summary>
-        public RegistrationBuilder AsSelf() => AsSelf(factory: null);
-
-        /// <summary>
-        /// Registers <see cref="Type"/> as a component of itself.
-        /// </summary>
-        /// <param name="factory">The factory to construct the component with on resolve. Can be null.</param>
-        public RegistrationBuilder AsSelf(Func<object> factory)
+        public IRegistrationBuilder AsSelf()
         {
             if (!IsSingleton)
-                Register(Type, factory);
+                Register(Type);
             else
-                RegisterSingleton(Type, factory);
+                RegisterSingleton(Type);
 
             return this;
         }
@@ -107,27 +146,26 @@ namespace CoreMVVM.IOC.Builder
 
         #region Private methods
 
-        private void Register(Type type, Func<object> factory = null)
+        private void Register(Type type)
         {
             _registrations[type] = new Registration(Type)
             {
-                Factory = factory,
+                Factory = Factory,
             };
         }
 
-        private void RegisterSingleton(Type type, Func<object> factory = null)
+        private void RegisterSingleton(Type type)
         {
             // Check if type has been registered as a singleton already.
             // All Singleton registrations of a type must share registrations.
-            Registration registration = _registrations.Values.FirstOrDefault(r => r.IsSingleton && r.Type == type);
+            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.IsSingleton && r.Type == Type);
             if (registration != null)
             {
                 // Copy instance from previous registration.
                 _registrations[type] = registration;
 
-                // Only overwrite factory if not null.
-                if (factory != null)
-                    registration.Factory = factory;
+                // Overwrite previous factory
+                _registrations[type].Factory = Factory;
             }
             else
             {
@@ -135,7 +173,7 @@ namespace CoreMVVM.IOC.Builder
                 _registrations[type] = new Registration(Type)
                 {
                     IsSingleton = true,
-                    Factory = factory,
+                    Factory = Factory,
                 };
             }
         }

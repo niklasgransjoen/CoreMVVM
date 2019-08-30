@@ -12,21 +12,15 @@ namespace CoreMVVM.IOC.Core
     /// </summary>
     public class Container : IContainer
     {
-        /// <summary>
-        /// Gets the container of the application.
-        /// </summary>
-        public static IContainer Instance { get; private set; }
-
-        private readonly IReadOnlyDictionary<Type, Registration> _registeredTypes;
+        private readonly IReadOnlyDictionary<Type, IRegistration> _registeredTypes;
 
         /// <summary>
         /// Creates a new container.
         /// </summary>
         /// <param name="registeredTypes">The registered types of this container.</param>
-        internal Container(IReadOnlyDictionary<Type, Registration> registeredTypes)
+        internal Container(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
         {
             _registeredTypes = registeredTypes;
-            Instance = this;
         }
 
         #region Methods
@@ -47,7 +41,7 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public object Resolve(Type type)
         {
-            bool isRegistered = _registeredTypes.TryGetValue(type, out Registration registration);
+            bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
             if (isRegistered)
             {
                 if (registration.IsSingleton && registration.LastCreatedInstance != null)
@@ -55,7 +49,7 @@ namespace CoreMVVM.IOC.Core
 
                 object instance;
                 if (registration.Factory != null)
-                    instance = registration.Factory();
+                    instance = registration.Factory(this);
                 else
                     instance = ConstructType(registration.Type);
 
@@ -86,8 +80,8 @@ namespace CoreMVVM.IOC.Core
                     .First();
 
                 object[] args = constructor.GetParameters()
-                    .Select(param => Resolve(param.ParameterType))
-                    .ToArray();
+                                           .Select(param => Resolve(param.ParameterType))
+                                           .ToArray();
 
                 return constructor.Invoke(args);
             }

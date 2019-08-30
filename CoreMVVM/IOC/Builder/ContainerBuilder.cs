@@ -38,9 +38,9 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public RegistrationBuilder Register<T>()
+        public IRegistrationBuilder Register<T>()
         {
-            return Register(typeof(T));
+            return RegistrationBuilder.Create<T>(_registrations);
         }
 
         /// <summary>
@@ -48,9 +48,20 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public RegistrationBuilder Register(Type type)
+        public IRegistrationBuilder Register(Type type)
         {
-            return new RegistrationBuilder(_registrations, type);
+            return RegistrationBuilder.Create(_registrations, type);
+        }
+
+        /// <summary>
+        /// Registers a factory.
+        /// </summary>
+        /// <typeparam name="T">The type of component to register.</typeparam>
+        /// <param name="factory">The factory.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        public IRegistrationBuilder Register<T>(Func<IContainer, T> factory)
+        {
+            return RegistrationBuilder.CreateFactory(_registrations, factory);
         }
 
         /// <summary>
@@ -58,9 +69,9 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public RegistrationBuilder RegisterSingleton<T>()
+        public IRegistrationBuilder RegisterSingleton<T>()
         {
-            return RegisterSingleton(typeof(T));
+            return RegistrationBuilder.CreateSingleton<T>(_registrations);
         }
 
         /// <summary>
@@ -68,9 +79,20 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public RegistrationBuilder RegisterSingleton(Type type)
+        public IRegistrationBuilder RegisterSingleton(Type type)
         {
-            return new RegistrationBuilder(_registrations, type, isSingleton: true);
+            return RegistrationBuilder.CreateSingleton(_registrations, type);
+        }
+
+        /// <summary>
+        /// Registers a factory as a singleton.
+        /// </summary>
+        /// <typeparam name="T">The type of component to register.</typeparam>
+        /// <param name="factory">The factory.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        public IRegistrationBuilder RegisterSingleton<T>(Func<IContainer, T> factory)
+        {
+            return RegistrationBuilder.CreateSingletonFactory(_registrations, factory);
         }
 
         /// <summary>

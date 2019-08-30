@@ -1,4 +1,5 @@
-﻿using CoreMVVM.IOC.Builder;
+﻿using CoreMVVM.IOC;
+using CoreMVVM.IOC.Builder;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace CoreMVVM.Tests.IOC.Builder
     [TestFixture]
     public class RegistrationBuilderTests
     {
-        private ContainerBuilder _builder;
+        /*private ContainerBuilder _builder;
 
         [SetUp]
         public void BeforeEach()
@@ -26,7 +27,7 @@ namespace CoreMVVM.Tests.IOC.Builder
         [TestCaseSource(nameof(GetTypes))]
         public void Builder_Registers_Types(Type type)
         {
-            RegistrationBuilder regBuilder = _builder.Register<Class>();
+            IRegistrationBuilder regBuilder = _builder.Register<Class>();
             regBuilder.As(type);
 
             Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
@@ -36,26 +37,26 @@ namespace CoreMVVM.Tests.IOC.Builder
         [TestCaseSource(nameof(GetTypes))]
         public void Builder_Registers_Types_AsSelf(Type type)
         {
-            RegistrationBuilder regBuilder = _builder.Register(type).AsSelf();
+            IRegistrationBuilder regBuilder = _builder.Register(type).AsSelf();
 
             Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
             Assert.AreEqual(type, regBuilder.Registrations[type].Type);
         }
 
         [TestCaseSource(nameof(GetFactoriesData))]
-        public void Builder_Registers_Types_WithFactory(Type type, Func<object> factory)
+        public void Builder_Registers_Types_WithFactory(Type type, Func<IContainer, object> factory)
         {
-            RegistrationBuilder regBuilder = _builder.Register<Class>();
-            regBuilder.As(type, factory);
+            IRegistrationBuilder regBuilder = _builder.Register(factory);
+            regBuilder.As(type);
 
             Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
             Assert.AreEqual(factory, regBuilder.Registrations[type].Factory);
         }
 
         [TestCaseSource(nameof(GetFactoriesData))]
-        public void Builder_Registers_Types_AsSelf_WithFactory(Type type, Func<object> factory)
+        public void Builder_Registers_Types_AsSelf_WithFactory(Type type, Func<IContainer, object> factory)
         {
-            RegistrationBuilder regBuilder = _builder.Register(type).AsSelf(factory);
+            IRegistrationBuilder regBuilder = _builder.Register(factory).AsSelf();
 
             Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
             Assert.AreEqual(factory, regBuilder.Registrations[type].Factory);
@@ -70,15 +71,15 @@ namespace CoreMVVM.Tests.IOC.Builder
 
         private static IEnumerable<object[]> GetFactoriesData()
         {
-            foreach ((Type type, Func<object> factory) in GetFactories())
+            foreach ((Type type, Func<IContainer, object> factory) in GetFactories())
                 yield return new object[] { type, factory };
         }
 
-        private static IEnumerable<(Type type, Func<object> factory)> GetFactories()
+        private static IEnumerable<(Type type, Func<IContainer, object> factory)> GetFactories()
         {
-            yield return (typeof(IInterface), () => new Implementation());
-            yield return (typeof(Class), () => new Class());
-            yield return (typeof(Struct), () => new Struct());
-        }
+            yield return (typeof(IInterface), c => new Implementation());
+            yield return (typeof(Class), c => new Class());
+            yield return (typeof(Struct), c => new Struct());
+        }*/
     }
 }

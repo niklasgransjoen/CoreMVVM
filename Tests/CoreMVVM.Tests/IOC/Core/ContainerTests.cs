@@ -208,15 +208,15 @@ namespace CoreMVVM.Tests.IOC.Core
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<ClassWithProperties>().As<IInterface>(() => new ClassWithProperties
+            builder.Register(c => new ClassWithProperties
             {
                 MyVal = 4,
-            });
+            }).As<IInterface>();
 
-            builder.RegisterSingleton<SingletonWithProperties>().AsSelf(() => new SingletonWithProperties()
+            builder.RegisterSingleton(c => new SingletonWithProperties()
             {
                 Str = "unique-string",
-            });
+            }).AsSelf();
         }
 
         [Test]
