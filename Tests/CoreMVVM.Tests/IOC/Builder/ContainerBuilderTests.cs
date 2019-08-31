@@ -38,7 +38,7 @@ namespace CoreMVVM.Tests.IOC.Builder
         }
 
         [TestCaseSource(nameof(GetFactories))]
-        public void Builder_Registers_Factories(Func<IContainer, object> factory)
+        public void Builder_Registers_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.Register(factory);
             ValidateRegistrationBuilder(regBuilder, typeof(object), isSingleton: false);
@@ -59,7 +59,7 @@ namespace CoreMVVM.Tests.IOC.Builder
         }
 
         [TestCaseSource(nameof(GetFactories))]
-        public void Builder_Registers_Singleton_Factories(Func<IContainer, object> factory)
+        public void Builder_Registers_Singleton_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton(factory);
             ValidateRegistrationBuilder(regBuilder, typeof(object), isSingleton: true);
@@ -81,7 +81,7 @@ namespace CoreMVVM.Tests.IOC.Builder
             yield return typeof(Struct);
         }
 
-        private static IEnumerable<Func<IContainer, object>> GetFactories()
+        private static IEnumerable<Func<ILifetimeScope, object>> GetFactories()
         {
             yield return c => new Class();
             yield return c => new Struct();

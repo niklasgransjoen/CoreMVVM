@@ -12,7 +12,7 @@ namespace CoreMVVM.IOC.Builder
 
         #region Constructors
 
-        private RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton, Func<IContainer, object> factory)
+        private RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton, Func<ILifetimeScope, object> factory)
         {
             _registrations = registrations;
 
@@ -41,12 +41,12 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(registrations, type, isSingleton: true, factory: null);
         }
 
-        internal static RegistrationBuilder CreateFactory<T>(RegistrationCollection registrations, Func<IContainer, T> factory)
+        internal static RegistrationBuilder CreateFactory<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
         {
             return new RegistrationBuilder(registrations, typeof(T), isSingleton: false, c => factory(c));
         }
 
-        internal static RegistrationBuilder CreateSingletonFactory<T>(RegistrationCollection registrations, Func<IContainer, T> factory)
+        internal static RegistrationBuilder CreateSingletonFactory<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
         {
             return new RegistrationBuilder(registrations, typeof(T), isSingleton: true, c => factory(c));
         }
@@ -68,7 +68,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets the factory being registered. May be null.
         /// </summary>
-        public Func<IContainer, object> Factory { get; }
+        public Func<ILifetimeScope, object> Factory { get; }
 
         #endregion Properties
 

@@ -59,7 +59,7 @@ namespace CoreMVVM.IOC.Builder
         /// <typeparam name="T">The type of component to register.</typeparam>
         /// <param name="factory">The factory.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public IRegistrationBuilder Register<T>(Func<IContainer, T> factory)
+        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory)
         {
             return RegistrationBuilder.CreateFactory(_registrations, factory);
         }
@@ -90,7 +90,7 @@ namespace CoreMVVM.IOC.Builder
         /// <typeparam name="T">The type of component to register.</typeparam>
         /// <param name="factory">The factory.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public IRegistrationBuilder RegisterSingleton<T>(Func<IContainer, T> factory)
+        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory)
         {
             return RegistrationBuilder.CreateSingletonFactory(_registrations, factory);
         }
@@ -106,7 +106,7 @@ namespace CoreMVVM.IOC.Builder
             IContainer container = new Container(_registrations);
 
             // And set this instance as the last created one, so this is the one that's returned upon a call to IContainer.Resolve().
-            _registrations[typeof(IContainer)].LastCreatedInstance = container;
+            _registrations[typeof(IContainer)].SingletonInstance = container;
 
             return container;
         }

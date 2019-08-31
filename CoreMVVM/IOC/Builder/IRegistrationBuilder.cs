@@ -17,7 +17,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets the factory being registered. May be null.
         /// </summary>
-        Func<IContainer, object> Factory { get; }
+        Func<ILifetimeScope, object> Factory { get; }
 
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.

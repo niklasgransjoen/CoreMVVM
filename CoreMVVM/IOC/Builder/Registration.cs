@@ -25,11 +25,11 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets or sets the last created instance of this registration.
         /// </summary>
-        public object LastCreatedInstance { get; set; }
+        public object SingletonInstance { get; set; }
 
         /// <summary>
         /// Gets or sets the factory of the registration.
         /// </summary>
-        public Func<IContainer, object> Factory { get; set; }
+        public Func<ILifetimeScope, object> Factory { get; set; }
     }
 }

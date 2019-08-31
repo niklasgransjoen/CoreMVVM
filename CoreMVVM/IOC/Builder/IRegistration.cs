@@ -15,13 +15,13 @@ namespace CoreMVVM.IOC.Builder
         bool IsSingleton { get; set; }
 
         /// <summary>
-        /// Gets or sets the last created instance of this registration.
+        /// Gets or sets the instance of this registration. Null if not created yet, or if not a singleton.
         /// </summary>
-        object LastCreatedInstance { get; set; }
+        object SingletonInstance { get; set; }
 
         /// <summary>
         /// Gets or sets the factory of the registration.
         /// </summary>
-        Func<IContainer, object> Factory { get; set; }
+        Func<ILifetimeScope, object> Factory { get; set; }
     }
 }
