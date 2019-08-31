@@ -1,9 +1,4 @@
-﻿using CoreMVVM.IOC;
-using CoreMVVM.IOC.Builder;
-using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using NUnit.Framework;
 
 namespace CoreMVVM.Tests.IOC.Builder
 {
