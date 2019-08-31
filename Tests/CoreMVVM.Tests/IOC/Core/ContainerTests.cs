@@ -3,6 +3,8 @@ using CoreMVVM.IOC.Builder;
 using CoreMVVM.IOC.Core;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CoreMVVM.Tests.IOC.Core
 {
@@ -200,6 +202,33 @@ namespace CoreMVVM.Tests.IOC.Core
             Implementation s2 = Container.Resolve<Implementation>();
 
             Assert.AreEqual(s1, s2);
+        }
+
+        [Test]
+        public async Task Container_ResolveSingleton_ThreadSafe()
+        {
+            List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
+            {
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+                Task.Run(() => Container.Resolve<IInterface>()),
+            };
+
+            List<IInterface> interfaces = new List<IInterface>();
+            foreach (var task in resolvingTasks)
+                interfaces.Add(await task);
+
+            while (interfaces.Count > 1)
+            {
+                for (int i = 1; i < interfaces.Count; i++)
+                    Assert.AreEqual(interfaces[0], interfaces[i]);
+
+                interfaces.RemoveAt(0);
+            }
         }
     }
 

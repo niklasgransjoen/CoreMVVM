@@ -44,20 +44,29 @@ namespace CoreMVVM.IOC.Core
             bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
             if (isRegistered)
             {
-                if (registration.IsSingleton && registration.LastCreatedInstance != null)
-                    return registration.LastCreatedInstance;
+                if (registration.IsSingleton)
+                {
+                    lock (registration)
+                    {
+                        if (registration.LastCreatedInstance == null)
+                            registration.LastCreatedInstance = ConstructFromRegistration(registration);
 
-                object instance;
-                if (registration.Factory != null)
-                    instance = registration.Factory(this);
-                else
-                    instance = ConstructType(registration.Type);
+                        return registration.LastCreatedInstance;
+                    }
+                }
 
-                registration.LastCreatedInstance = instance;
-                return instance;
+                return ConstructFromRegistration(registration);
             }
 
             return ConstructType(type);
+        }
+
+        private object ConstructFromRegistration(IRegistration registration)
+        {
+            if (registration.Factory != null)
+                return registration.Factory(this);
+
+            return ConstructType(registration.Type);
         }
 
         /// <summary>
