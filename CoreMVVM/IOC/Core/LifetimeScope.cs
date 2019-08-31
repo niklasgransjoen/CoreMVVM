@@ -33,7 +33,7 @@ namespace CoreMVVM.IOC.Core
         /// <typeparam name="T">The type to get an instance for.</typeparam>
         /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public T Resolve<T>() => (T)Resolve(typeof(T));
+        public T Resolve<T>() => (T)Resolve(typeof(T), registerDisposable: true);
 
         /// <summary>
         /// Returns an instance from the given type.
@@ -41,30 +41,7 @@ namespace CoreMVVM.IOC.Core
         /// <param name="type">The type to get an instance for.</param>
         /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public object Resolve(Type type)
-        {
-            if (IsDisposed)
-                throw new ObjectDisposedException(nameof(ILifetimeScope));
-
-            bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
-            if (isRegistered)
-            {
-                if (registration.IsSingleton)
-                {
-                    lock (registration)
-                    {
-                        if (registration.SingletonInstance == null)
-                            registration.SingletonInstance = ConstructFromRegistration(registration);
-
-                        return registration.SingletonInstance;
-                    }
-                }
-
-                return ConstructFromRegistration(registration);
-            }
-
-            return ConstructType(type);
-        }
+        public object Resolve(Type type) => Resolve(type, registerDisposable: true);
 
         /// <summary>
         /// Creates a new lifetime scope.
@@ -101,22 +78,63 @@ namespace CoreMVVM.IOC.Core
 
         #endregion Methods
 
+        #region Private resolve
+
+        private object Resolve(Type type, bool registerDisposable)
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(nameof(ILifetimeScope));
+
+            bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
+            if (isRegistered)
+            {
+                if (registration.IsSingleton)
+                {
+                    lock (registration)
+                    {
+                        if (registration.SingletonInstance == null)
+                            registration.SingletonInstance = ConstructFromRegistration(registration, registerDisposable);
+
+                        return registration.SingletonInstance;
+                    }
+                }
+
+                return ConstructFromRegistration(registration, registerDisposable);
+            }
+
+            return ConstructType(type, registerDisposable);
+        }
+
+        #endregion Private resolve
+
         #region Construct methods
 
-        private object ConstructFromRegistration(IRegistration registration)
+        private object ConstructFromRegistration(IRegistration registration, bool registerDisposable)
         {
             if (registration.Factory != null)
-                return registration.Factory(this);
+            {
+                object instance = registration.Factory(this);
 
-            return ConstructType(registration.Type);
+                if (registerDisposable)
+                    RegisterDisposable(instance);
+
+                return instance;
+            }
+            else
+                return ConstructType(registration.Type, registerDisposable);
         }
 
         /// <summary>
         /// Constructs an instance of the given type, using the constructor with the most parameters.
         /// </summary>
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
-        private object ConstructType(Type type)
+        private object ConstructType(Type type, bool registerDisposable)
         {
+            // Switch out any IOwned<> (or implementation) with Owned<>
+            bool isOwned = typeof(IOwned<>).IsAssignableFromGeneric(type);
+            if (isOwned)
+                type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
+
             if (type.IsInterface)
                 throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{type}'.");
 
@@ -131,12 +149,13 @@ namespace CoreMVVM.IOC.Core
                     .First();
 
                 object[] args = constructor.GetParameters()
-                                           .Select(param => Resolve(param.ParameterType))
+                                           .Select(param => Resolve(param.ParameterType, isOwned))
                                            .ToArray();
 
                 object instance = constructor.Invoke(args);
-                if (instance is IDisposable disposable)
-                    _disposables.Add(disposable);
+
+                if (registerDisposable)
+                    RegisterDisposable(instance);
 
                 return instance;
             }
@@ -147,6 +166,12 @@ namespace CoreMVVM.IOC.Core
                 Resolve<ILogger>().Exception(message, e);
                 throw new ResolveConstructionException(message, e);
             }
+        }
+
+        private void RegisterDisposable(object instance)
+        {
+            if (instance is IDisposable disposable)
+                _disposables.Add(disposable);
         }
 
         #endregion Construct methods

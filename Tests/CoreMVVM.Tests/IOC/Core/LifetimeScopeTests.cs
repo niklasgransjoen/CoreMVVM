@@ -336,4 +336,47 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.IsTrue(subscope.IsDisposed);
         }
     }
+
+    public class LifetimeScope_Resolve_Owned : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.RegisterSingleton<Implementation>().As<IInterface>();
+            builder.Register<Disposable>().As<IDisposableInterface>();
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_Owned()
+        {
+            IInterface instance = LifetimeScope.Resolve<IInterface>();
+            Owned<IInterface> ownedInstance = LifetimeScope.Resolve<Owned<IInterface>>();
+
+            Assert.NotNull(ownedInstance);
+            Assert.NotNull(ownedInstance.Value);
+            Assert.AreEqual(instance, ownedInstance.Value);
+        }
+
+        [Test]
+        public void LifetimeScope_DoesNotOwn_OwnedDisposable()
+        {
+            Owned<IDisposableInterface> disposable = LifetimeScope.Resolve<Owned<IDisposableInterface>>();
+
+            Assert.IsFalse(disposable.Value.IsDisposed);
+
+            LifetimeScope.Dispose();
+            Assert.IsFalse(disposable.Value.IsDisposed);
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_IOwned()
+        {
+            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+
+            Assert.NotNull(ownedInstance);
+            Assert.NotNull(ownedInstance.Value);
+
+            IInterface instance = LifetimeScope.Resolve<IInterface>();
+            Assert.AreEqual(instance, ownedInstance.Value);
+        }
+    }
 }
