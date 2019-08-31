@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace CoreMVVM.IOC.Core
+namespace CoreMVVM.IOC
 {
     /// <summary>
-    /// Thrown when construction fails during resolve.
+    /// Occurs when construction fails during resolve.
     /// </summary>
     public class ResolveConstructionException : Exception
     {

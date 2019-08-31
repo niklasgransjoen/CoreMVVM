@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.IOC.Core;
 using System;
+using System.Linq;
 
 namespace CoreMVVM.IOC.Builder
 {
@@ -40,6 +41,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder Register<T>() => Register(typeof(T));
 
         /// <summary>
@@ -47,10 +49,13 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
         public IRegistrationBuilder Register(Type type)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+
+            ThrowOnScopingConflict(type, InstanceScope.None);
 
             return RegistrationBuilder.Create(_registrations, type);
         }
@@ -61,10 +66,13 @@ namespace CoreMVVM.IOC.Builder
         /// <typeparam name="T">The type of component to register.</typeparam>
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory)
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
+
+            ThrowOnScopingConflict<T>(InstanceScope.None);
 
             return RegistrationBuilder.Create(_registrations, factory);
         }
@@ -78,6 +86,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterSingleton<T>() => RegisterSingleton(typeof(T));
 
         /// <summary>
@@ -85,10 +94,13 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterSingleton(Type type)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+
+            ThrowOnScopingConflict(type, InstanceScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, type);
         }
@@ -99,10 +111,13 @@ namespace CoreMVVM.IOC.Builder
         /// <typeparam name="T">The type of component to register.</typeparam>
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory)
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
+
+            ThrowOnScopingConflict<T>(InstanceScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, factory);
         }
@@ -116,6 +131,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterLifetimeScope<T>() => RegisterLifetimeScope(typeof(T));
 
         /// <summary>
@@ -123,10 +139,13 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterLifetimeScope(Type type)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
+
+            ThrowOnScopingConflict(type, InstanceScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, type);
         }
@@ -137,10 +156,13 @@ namespace CoreMVVM.IOC.Builder
         /// <typeparam name="T">The type of component to register.</typeparam>
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
         public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory)
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
+
+            ThrowOnScopingConflict<T>(InstanceScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, factory);
         }
@@ -163,5 +185,26 @@ namespace CoreMVVM.IOC.Builder
 
             return container;
         }
+
+        #region Helper
+
+        private void ThrowOnScopingConflict<T>(InstanceScope scope) => ThrowOnScopingConflict(typeof(T), scope);
+
+        private void ThrowOnScopingConflict(Type type, InstanceScope scope)
+        {
+            // Verify that all registrations have the same scope.
+            var previousRegs = _registrations.Where(r => r.Value.Type == type);
+            if (previousRegs.All(r => r.Value.Scope == scope))
+                return;
+
+            var previousReg = previousRegs.First();
+            string message =
+                $"Attempted to register type '{type}' with scope '{scope}', " +
+                $"which conflicts with earlier registration as a component of '{previousReg.Key}', with with scope '{previousReg.Value.Scope}'.";
+
+            throw new ScopingConflictException(message);
+        }
+
+        #endregion Helper
     }
 }

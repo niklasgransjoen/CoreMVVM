@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM.IOC.Core
+namespace CoreMVVM.IOC
 {
     /// <summary>
     /// Occurs when the attempting to resolve an interface with the resolver.

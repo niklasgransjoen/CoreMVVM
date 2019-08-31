@@ -43,7 +43,7 @@ namespace CoreMVVM.IOC.Core
         /// Returns an instance from the given type.
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
+        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public T Resolve<T>() => (T)Resolve(typeof(T), registerDisposable: true);
 
@@ -51,7 +51,7 @@ namespace CoreMVVM.IOC.Core
         /// Returns an instance from the given type.
         /// </summary>
         /// <param name="type">The type to get an instance for.</param>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type of the registration of type is an interface.</exception>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
         public object Resolve(Type type) => Resolve(type, registerDisposable: true);
 
@@ -142,6 +142,7 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Constructs an instance of the given type, using the constructor with the most parameters.
         /// </summary>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type, bool registerDisposable)
         {
