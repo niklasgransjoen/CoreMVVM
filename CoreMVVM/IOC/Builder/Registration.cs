@@ -18,14 +18,10 @@ namespace CoreMVVM.IOC.Builder
         public Type Type { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating if this registration should only be created once.
+        /// Gets or sets the scope of this registration.
         /// </summary>
-        public bool IsSingleton { get; set; }
-
-        /// <summary>
-        /// Gets or sets the last created instance of this registration.
-        /// </summary>
-        public object SingletonInstance { get; set; }
+        /// <value>Default is <see cref="InstanceScope.None"/>.</value>
+        public InstanceScope Scope { get; set; } = InstanceScope.None;
 
         /// <summary>
         /// Gets or sets the factory of the registration.

@@ -11,6 +11,7 @@ namespace CoreMVVM.IOC.Core
     {
         private readonly IReadOnlyDictionary<Type, IRegistration> _registeredTypes;
         private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
+        private readonly LifetimeScope _parent;
 
         private readonly object _disposeLock = new object();
 
@@ -19,9 +20,20 @@ namespace CoreMVVM.IOC.Core
             _registeredTypes = registeredTypes;
         }
 
+        public LifetimeScope(IReadOnlyDictionary<Type, IRegistration> registeredTypes, LifetimeScope parent)
+        {
+            _registeredTypes = registeredTypes;
+            _parent = parent;
+        }
+
         #region Properties
 
         public bool IsDisposed { get; private set; }
+
+        /// <summary>
+        /// Gets a collection of resolved instances with limited scoping.
+        /// </summary>
+        public Dictionary<IRegistration, object> ResolvedInstances { get; } = new Dictionary<IRegistration, object>();
 
         #endregion Properties
 
@@ -52,7 +64,7 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            ILifetimeScope childScope = new LifetimeScope(_registeredTypes);
+            ILifetimeScope childScope = new LifetimeScope(_registeredTypes, this);
             _disposables.Add(childScope);
 
             return childScope;
@@ -88,18 +100,21 @@ namespace CoreMVVM.IOC.Core
             bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
             if (isRegistered)
             {
-                if (registration.IsSingleton)
+                if (registration.Scope == InstanceScope.None)
+                    return ConstructFromRegistration(registration, registerDisposable);
+
+                // Singletons should only be resolved by root.
+                if (registration.Scope == InstanceScope.Singleton && _parent != null)
+                    return _parent.Resolve(type, registerDisposable);
+
+                // Result from scoped components are saved for future resolves.
+                lock (registration)
                 {
-                    lock (registration)
-                    {
-                        if (registration.SingletonInstance == null)
-                            registration.SingletonInstance = ConstructFromRegistration(registration, registerDisposable);
+                    if (!ResolvedInstances.ContainsKey(registration))
+                        ResolvedInstances[registration] = ConstructFromRegistration(registration, registerDisposable);
 
-                        return registration.SingletonInstance;
-                    }
+                    return ResolvedInstances[registration];
                 }
-
-                return ConstructFromRegistration(registration, registerDisposable);
             }
 
             return ConstructType(type, registerDisposable);

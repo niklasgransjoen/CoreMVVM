@@ -70,7 +70,7 @@ namespace CoreMVVM.Tests.IOC.Builder
             Assert.Multiple(() =>
             {
                 Assert.AreEqual(expectedType, regBuilder.Type);
-                Assert.AreEqual(isSingleton, regBuilder.IsSingleton);
+                Assert.AreEqual(isSingleton, regBuilder.Scope == InstanceScope.Singleton);
             });
         }
 

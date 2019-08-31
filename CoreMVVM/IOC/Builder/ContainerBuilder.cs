@@ -33,15 +33,14 @@ namespace CoreMVVM.IOC.Builder
             }
         }
 
+        #region No scope
+
         /// <summary>
         /// Registers a component.
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public IRegistrationBuilder Register<T>()
-        {
-            return RegistrationBuilder.Create<T>(_registrations);
-        }
+        public IRegistrationBuilder Register<T>() => Register(typeof(T));
 
         /// <summary>
         /// Registers a component.
@@ -54,25 +53,26 @@ namespace CoreMVVM.IOC.Builder
         }
 
         /// <summary>
-        /// Registers a factory.
+        /// Registers a component.
         /// </summary>
         /// <typeparam name="T">The type of component to register.</typeparam>
-        /// <param name="factory">The factory.</param>
+        /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory)
         {
-            return RegistrationBuilder.CreateFactory(_registrations, factory);
+            return RegistrationBuilder.Create(_registrations, factory);
         }
+
+        #endregion No scope
+
+        #region Singleton
 
         /// <summary>
         /// Registers a component as a singleton.
         /// </summary>
         /// <typeparam name="T">The type of the component to register.</typeparam>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        public IRegistrationBuilder RegisterSingleton<T>()
-        {
-            return RegistrationBuilder.CreateSingleton<T>(_registrations);
-        }
+        public IRegistrationBuilder RegisterSingleton<T>() => RegisterSingleton(typeof(T));
 
         /// <summary>
         /// Registers a component as a singleton.
@@ -85,15 +85,49 @@ namespace CoreMVVM.IOC.Builder
         }
 
         /// <summary>
-        /// Registers a factory as a singleton.
+        /// Registers a component as a singleton.
         /// </summary>
         /// <typeparam name="T">The type of component to register.</typeparam>
-        /// <param name="factory">The factory.</param>
+        /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory)
         {
-            return RegistrationBuilder.CreateSingletonFactory(_registrations, factory);
+            return RegistrationBuilder.CreateSingleton(_registrations, factory);
         }
+
+        #endregion Singleton
+
+        #region Lifetime scope
+
+        /// <summary>
+        /// Registers a component with a lifetime scope.
+        /// </summary>
+        /// <typeparam name="T">The type of the component to register.</typeparam>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        public IRegistrationBuilder RegisterLifetimeScope<T>() => RegisterLifetimeScope(typeof(T));
+
+        /// <summary>
+        /// Registers a component with a lifetime scope.
+        /// </summary>
+        /// <param name="type">The type of the component to register.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        public IRegistrationBuilder RegisterLifetimeScope(Type type)
+        {
+            return RegistrationBuilder.CreateLifetimeScope(_registrations, type);
+        }
+
+        /// <summary>
+        /// Registers a component with a lifetime scope.
+        /// </summary>
+        /// <typeparam name="T">The type of component to register.</typeparam>
+        /// <param name="factory">A factory to use for constructing this component.</param>
+        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
+        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory)
+        {
+            return RegistrationBuilder.CreateLifetimeScope(_registrations, factory);
+        }
+
+        #endregion Lifetime scope
 
         /// <summary>
         /// Constructs a container with all the registered components and services.
@@ -103,10 +137,11 @@ namespace CoreMVVM.IOC.Builder
             // Registers the container as a singleton, so it always resolves to this instance.
             RegisterSingleton<Container>().As<IContainer>().AsSelf();
 
-            IContainer container = new Container(_registrations);
+            Container container = new Container(_registrations);
 
             // And set this instance as the last created one, so this is the one that's returned upon a call to IContainer.Resolve().
-            _registrations[typeof(IContainer)].SingletonInstance = container;
+            IRegistration registration = _registrations[typeof(IContainer)];
+            container.ResolvedInstances[registration] = container;
 
             return container;
         }

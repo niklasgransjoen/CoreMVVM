@@ -10,9 +10,9 @@ namespace CoreMVVM.IOC.Builder
         Type Type { get; }
 
         /// <summary>
-        /// Gets a value indicating if the new registrations are a single singleton.
+        /// Gets the scope <see cref="Type"/> is being registered in.
         /// </summary>
-        bool IsSingleton { get; }
+        InstanceScope Scope { get; }
 
         /// <summary>
         /// Gets the factory being registered. May be null.

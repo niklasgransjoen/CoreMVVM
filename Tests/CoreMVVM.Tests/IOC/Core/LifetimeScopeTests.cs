@@ -28,6 +28,7 @@ namespace CoreMVVM.Tests.IOC.Core
         [TearDown]
         public void AfterEach()
         {
+            LifetimeScope.Dispose();
             LifetimeScope = null;
         }
     }
@@ -96,14 +97,10 @@ namespace CoreMVVM.Tests.IOC.Core
         [Test]
         public void LifetimeScope_Throws_ResolveIllegalTypes()
         {
-            try
+            Assert.Throws(typeof(ResolveConstructionException), () =>
             {
                 LifetimeScope.Resolve<string>();
-            }
-            catch (Exception e)
-            {
-                Assert.AreEqual(typeof(ResolveConstructionException), e.GetType());
-            }
+            });
         }
 
         public class ClassWithConstructor
@@ -205,6 +202,15 @@ namespace CoreMVVM.Tests.IOC.Core
         }
 
         [Test]
+        public void LifetimeScope_ResolvesSingleton_FromLifetimeScope()
+        {
+            IInterface instance1 = LifetimeScope.Resolve<IInterface>();
+            IInterface instance2 = LifetimeScope.BeginLifetimeScope().Resolve<IInterface>();
+
+            Assert.AreEqual(instance1, instance2);
+        }
+
+        [Test]
         public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
         {
             List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
@@ -216,6 +222,74 @@ namespace CoreMVVM.Tests.IOC.Core
                 Task.Run(() => LifetimeScope.Resolve<IInterface>()),
                 Task.Run(() => LifetimeScope.Resolve<IInterface>()),
                 Task.Run(() => LifetimeScope.Resolve<IInterface>()),
+            };
+
+            List<IInterface> interfaces = new List<IInterface>();
+            foreach (var task in resolvingTasks)
+                interfaces.Add(await task);
+
+            while (interfaces.Count > 1)
+            {
+                for (int i = 1; i < interfaces.Count; i++)
+                    Assert.AreEqual(interfaces[0], interfaces[i]);
+
+                interfaces.RemoveAt(0);
+            }
+        }
+    }
+
+    public class LifetimeScope_Resolves_LifetimeScope : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.RegisterLifetimeScope<Implementation>().As<IInterface>().AsSelf();
+        }
+
+        [Test]
+        public void LifetimeScope_ResolvesFromRoot_ToSingleInstance()
+        {
+            object subject1 = LifetimeScope.Resolve<IInterface>();
+            object subject2 = LifetimeScope.Resolve<IInterface>();
+
+            Assert.AreEqual(subject1, subject2);
+        }
+
+        [Test]
+        public void LifetimeScope_ResolvesFromSubscope_ToSingleInstance()
+        {
+            using (ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope())
+            {
+                object subject1 = subscope.Resolve<IInterface>();
+                object subject2 = subscope.Resolve<IInterface>();
+
+                Assert.AreEqual(subject1, subject2); 
+            }
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_UniqueInstance_FromDifferentScopes()
+        {
+            ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
+
+            object subject1 = LifetimeScope.Resolve<IInterface>();
+            object subject2 = subscope.Resolve<IInterface>();
+
+            Assert.AreNotEqual(subject1, subject2);
+        }
+
+        [Test]
+        public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
+        {
+            ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
+            List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
+            {
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.Resolve<IInterface>()),
             };
 
             List<IInterface> interfaces = new List<IInterface>();
@@ -279,21 +353,11 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class LifetimeScope_BeginLifetimeScope : LifetimeScopeTestBase
+    public class LifetimeScope_Disposables : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterSingleton<Implementation>().As<IInterface>();
             builder.Register<Disposable>().As<IDisposableInterface>();
-        }
-
-        [Test]
-        public void LifetimeScope_Resolves_Singleton_FromLifetimeScope()
-        {
-            IInterface instance1 = LifetimeScope.Resolve<IInterface>();
-            IInterface instance2 = LifetimeScope.BeginLifetimeScope().Resolve<IInterface>();
-
-            Assert.AreEqual(instance1, instance2);
         }
 
         [Test]

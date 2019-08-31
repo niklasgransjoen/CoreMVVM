@@ -12,44 +12,92 @@ namespace CoreMVVM.IOC.Builder
 
         #region Constructors
 
-        private RegistrationBuilder(RegistrationCollection registrations, Type type, bool isSingleton, Func<ILifetimeScope, object> factory)
+        private RegistrationBuilder(
+            RegistrationCollection registrations,
+            Type type,
+            InstanceScope scope)
         {
             _registrations = registrations;
 
             Type = type;
-            IsSingleton = isSingleton;
+            Scope = scope;
+        }
+
+        private RegistrationBuilder(
+            RegistrationCollection registrations,
+            Type type,
+            InstanceScope scope,
+            Func<ILifetimeScope, object> factory)
+        {
+            _registrations = registrations;
+
+            Type = type;
+            Scope = scope;
             Factory = factory;
         }
 
-        internal static RegistrationBuilder Create<T>(RegistrationCollection registrations)
-        {
-            return new RegistrationBuilder(registrations, typeof(T), isSingleton: false, factory: null);
-        }
+        #region No scope
 
         internal static RegistrationBuilder Create(RegistrationCollection registrations, Type type)
         {
-            return new RegistrationBuilder(registrations, type, isSingleton: false, factory: null);
+            return new RegistrationBuilder(
+                registrations,
+                type,
+                InstanceScope.None);
         }
 
-        internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations)
+        internal static RegistrationBuilder Create<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
         {
-            return new RegistrationBuilder(registrations, typeof(T), isSingleton: true, factory: null);
+            return new RegistrationBuilder(
+                registrations,
+                typeof(T),
+                InstanceScope.None,
+                c => factory(c));
         }
+
+        #endregion No scope
+
+        #region Singleton
 
         internal static RegistrationBuilder CreateSingleton(RegistrationCollection registrations, Type type)
         {
-            return new RegistrationBuilder(registrations, type, isSingleton: true, factory: null);
+            return new RegistrationBuilder(
+                registrations,
+                type,
+                InstanceScope.Singleton);
         }
 
-        internal static RegistrationBuilder CreateFactory<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
         {
-            return new RegistrationBuilder(registrations, typeof(T), isSingleton: false, c => factory(c));
+            return new RegistrationBuilder(
+                registrations,
+                typeof(T),
+                InstanceScope.Singleton,
+                c => factory(c));
         }
 
-        internal static RegistrationBuilder CreateSingletonFactory<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        #endregion Singleton
+
+        #region Lifetime scope
+
+        internal static RegistrationBuilder CreateLifetimeScope(RegistrationCollection registrations, Type type)
         {
-            return new RegistrationBuilder(registrations, typeof(T), isSingleton: true, c => factory(c));
+            return new RegistrationBuilder(
+                registrations,
+                type,
+                InstanceScope.LifetimeScope);
         }
+
+        internal static RegistrationBuilder CreateLifetimeScope<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        {
+            return new RegistrationBuilder(
+                registrations,
+                typeof(T),
+                InstanceScope.LifetimeScope,
+                c => factory(c));
+        }
+
+        #endregion Lifetime scope
 
         #endregion Constructors
 
@@ -61,9 +109,9 @@ namespace CoreMVVM.IOC.Builder
         public Type Type { get; }
 
         /// <summary>
-        /// Gets a value indicating if the new registrations are a single singleton.
+        /// Gets the scope <see cref="Type"/> is being registered in.
         /// </summary>
-        public bool IsSingleton { get; }
+        public InstanceScope Scope { get; }
 
         /// <summary>
         /// Gets the factory being registered. May be null.
@@ -86,10 +134,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
         public IRegistrationBuilder As(Type type)
         {
-            if (!IsSingleton)
-                Register(type);
-            else
-                RegisterSingleton(type);
+            Register(type);
 
             return this;
         }
@@ -99,10 +144,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public IRegistrationBuilder AsSelf()
         {
-            if (!IsSingleton)
-                Register(Type);
-            else
-                RegisterSingleton(Type);
+            Register(Type);
 
             return this;
         }
@@ -113,34 +155,37 @@ namespace CoreMVVM.IOC.Builder
 
         private void Register(Type type)
         {
+            // If scope is limited, try copying the registration of an earlier registration of Type.
+            if (Scope != InstanceScope.None)
+            {
+                bool result = TryCopyRegistration(type);
+                if (result)
+                    return;
+            }
+
+            // Default to creating a new registration.
             _registrations[type] = new Registration(Type)
             {
+                Scope = Scope,
                 Factory = Factory,
             };
         }
 
-        private void RegisterSingleton(Type type)
+        private bool TryCopyRegistration(Type type)
         {
-            // Check if type has been registered as a singleton already.
-            // All Singleton registrations of a type must share registrations.
-            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.IsSingleton && r.Type == Type);
-            if (registration != null)
-            {
-                // Copy instance from previous registration.
-                _registrations[type] = registration;
+            // Check if type has been registered already.
+            // All registrations of a type with scope limitations must share a registration.
+            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.Type == Type);
+            if (registration == null)
+                return false;
 
-                // Overwrite previous factory
-                _registrations[type].Factory = Factory;
-            }
-            else
-            {
-                // Not registered before: create new registration.
-                _registrations[type] = new Registration(Type)
-                {
-                    IsSingleton = true,
-                    Factory = Factory,
-                };
-            }
+            // Copy instance from previous registration.
+            _registrations[type] = registration;
+
+            // Overwrite previous factory
+            _registrations[type].Factory = Factory;
+
+            return true;
         }
 
         #endregion Private methods
