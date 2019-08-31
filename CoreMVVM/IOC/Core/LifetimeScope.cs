@@ -70,6 +70,10 @@ namespace CoreMVVM.IOC.Core
             return childScope;
         }
 
+        /// <summary>
+        /// Disposes this LifetimeScope, along with all of its subscopes,
+        /// as well as all instances resolved by it.
+        /// </summary>
         public void Dispose()
         {
             if (IsDisposed)
@@ -105,7 +109,7 @@ namespace CoreMVVM.IOC.Core
 
                 // Singletons should only be resolved by root.
                 if (registration.Scope == InstanceScope.Singleton && _parent != null)
-                    return _parent.Resolve(type, registerDisposable);
+                    return _parent.Resolve(type, registerDisposable: false);
 
                 // Result from scoped components are saved for future resolves.
                 lock (registration)
@@ -147,7 +151,7 @@ namespace CoreMVVM.IOC.Core
         private object ConstructType(Type type, bool registerDisposable)
         {
             // Switch out any IOwned<> (or implementation) with Owned<>
-            bool isOwned = typeof(IOwned<>).IsAssignableFromGeneric(type);
+            bool isOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
             if (isOwned)
                 type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
 
@@ -165,7 +169,7 @@ namespace CoreMVVM.IOC.Core
                     .First();
 
                 object[] args = constructor.GetParameters()
-                                           .Select(param => Resolve(param.ParameterType, isOwned))
+                                           .Select(param => Resolve(param.ParameterType, !isOwned))
                                            .ToArray();
 
                 object instance = constructor.Invoke(args);
