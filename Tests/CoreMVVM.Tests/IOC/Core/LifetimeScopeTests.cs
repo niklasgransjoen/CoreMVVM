@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.IOC.Builder;
-using CoreMVVM.IOC.Core;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -103,7 +102,7 @@ namespace CoreMVVM.Tests.IOC.Core
             });
         }
 
-        public class ClassWithConstructor
+        internal class ClassWithConstructor
         {
             public Class a;
 
@@ -117,7 +116,7 @@ namespace CoreMVVM.Tests.IOC.Core
             }
         }
 
-        public class ClassWithEmptyConstructor
+        internal class ClassWithEmptyConstructor
         {
             public bool constructorWasInvoked;
 
@@ -127,7 +126,7 @@ namespace CoreMVVM.Tests.IOC.Core
             }
         }
 
-        public class ClassWithManyConstructors
+        internal class ClassWithManyConstructors
         {
             public ClassWithManyConstructors()
             {
@@ -262,7 +261,7 @@ namespace CoreMVVM.Tests.IOC.Core
                 object subject1 = subscope.Resolve<IInterface>();
                 object subject2 = subscope.Resolve<IInterface>();
 
-                Assert.AreEqual(subject1, subject2); 
+                Assert.AreEqual(subject1, subject2);
             }
         }
 
@@ -358,6 +357,8 @@ namespace CoreMVVM.Tests.IOC.Core
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterSingleton<DisposableSingleton>().AsSelf();
+            builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
         }
 
         [Test]
@@ -399,29 +400,61 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.IsTrue(LifetimeScope.IsDisposed);
             Assert.IsTrue(subscope.IsDisposed);
         }
+
+        [Test]
+        public void LifetimeScope_Disposes_Singleton()
+        {
+            var disposable = LifetimeScope.Resolve<DisposableSingleton>();
+
+            Assert.IsFalse(disposable.IsDisposed);
+            LifetimeScope.Dispose();
+
+            Assert.IsTrue(disposable.IsDisposed);
+        }
+
+        [Test]
+        public void LifetimeScope_Disposes_LifetimeScope()
+        {
+            var disposable = LifetimeScope.Resolve<DisposableLifetimeScopedResource>();
+
+            Assert.IsFalse(disposable.IsDisposed);
+            LifetimeScope.Dispose();
+
+            Assert.IsTrue(disposable.IsDisposed);
+        }
     }
 
     public class LifetimeScope_Resolve_Owned : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterSingleton<Implementation>().As<IInterface>();
+            builder.Register<Implementation>().As<IInterface>();
+
             builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterSingleton<DisposableSingleton>().AsSelf();
+            builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
         }
 
         [Test]
         public void LifetimeScope_Resolves_Owned()
         {
-            IInterface instance = LifetimeScope.Resolve<IInterface>();
             Owned<IInterface> ownedInstance = LifetimeScope.Resolve<Owned<IInterface>>();
 
             Assert.NotNull(ownedInstance);
             Assert.NotNull(ownedInstance.Value);
-            Assert.AreEqual(instance, ownedInstance.Value);
         }
 
         [Test]
-        public void LifetimeScope_DoesNotOwn_OwnedDisposable()
+        public void LifetimeScope_Resolves_IOwned()
+        {
+            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+
+            Assert.NotNull(ownedInstance);
+            Assert.NotNull(ownedInstance.Value);
+        }
+
+        [Test]
+        public void LifetimeScope_DoesNotDisposed_OwnedComponent()
         {
             Owned<IDisposableInterface> disposable = LifetimeScope.Resolve<Owned<IDisposableInterface>>();
 
@@ -432,15 +465,21 @@ namespace CoreMVVM.Tests.IOC.Core
         }
 
         [Test]
-        public void LifetimeScope_Resolves_IOwned()
+        public void LifetimeScope_ThrowsOnAttemptToOwn_Singleton()
         {
-            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+            Assert.Throws<OwnedScopedComponentException>(() =>
+            {
+                LifetimeScope.Resolve<IOwned<DisposableSingleton>>();
+            });
+        }
 
-            Assert.NotNull(ownedInstance);
-            Assert.NotNull(ownedInstance.Value);
-
-            IInterface instance = LifetimeScope.Resolve<IInterface>();
-            Assert.AreEqual(instance, ownedInstance.Value);
+        [Test]
+        public void LifetimeScope_ThrowsOnAttemptToOwn_LifetimeScopedComponent()
+        {
+            Assert.Throws<OwnedScopedComponentException>(() =>
+            {
+                LifetimeScope.Resolve<IOwned<DisposableLifetimeScopedResource>>();
+            });
         }
     }
 }

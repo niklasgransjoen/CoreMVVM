@@ -45,7 +45,7 @@ namespace CoreMVVM.IOC.Core
         /// <typeparam name="T">The type to get an instance for.</typeparam>
         /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public T Resolve<T>() => (T)Resolve(typeof(T), registerDisposable: true);
+        public T Resolve<T>() => (T)Resolve(typeof(T), isOwned: false);
 
         /// <summary>
         /// Returns an instance from the given type.
@@ -53,7 +53,7 @@ namespace CoreMVVM.IOC.Core
         /// <param name="type">The type to get an instance for.</param>
         /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public object Resolve(Type type) => Resolve(type, registerDisposable: true);
+        public object Resolve(Type type) => Resolve(type, isOwned: false);
 
         /// <summary>
         /// Creates a new lifetime scope.
@@ -96,7 +96,7 @@ namespace CoreMVVM.IOC.Core
 
         #region Private resolve
 
-        private object Resolve(Type type, bool registerDisposable)
+        private object Resolve(Type type, bool isOwned)
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
@@ -105,42 +105,50 @@ namespace CoreMVVM.IOC.Core
             if (isRegistered)
             {
                 if (registration.Scope == InstanceScope.None)
-                    return ConstructFromRegistration(registration, registerDisposable);
+                    return ConstructFromRegistration(registration, isOwned);
 
-                // Singletons should only be resolved by root.
-                if (registration.Scope == InstanceScope.Singleton && _parent != null)
-                    return _parent.Resolve(type, registerDisposable: false);
+                if (isOwned)
+                    throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
 
-                // Result from scoped components are saved for future resolves.
-                lock (registration)
-                {
-                    if (!ResolvedInstances.ContainsKey(registration))
-                        ResolvedInstances[registration] = ConstructFromRegistration(registration, registerDisposable);
-
-                    return ResolvedInstances[registration];
-                }
+                return ResolveScopedComponent(registration, type);
             }
 
-            return ConstructType(type, registerDisposable);
+            return ConstructType(type, isOwned);
+        }
+
+        private object ResolveScopedComponent(IRegistration registration, Type type)
+        {
+            // Singletons should only be resolved by root.
+            if (registration.Scope == InstanceScope.Singleton && _parent != null)
+                return _parent.ResolveScopedComponent(registration, type);
+
+            // Result from scoped components are saved for future resolves.
+            lock (registration)
+            {
+                if (!ResolvedInstances.ContainsKey(registration))
+                    ResolvedInstances[registration] = ConstructFromRegistration(registration, isOwned: false);
+
+                return ResolvedInstances[registration];
+            }
         }
 
         #endregion Private resolve
 
         #region Construct methods
 
-        private object ConstructFromRegistration(IRegistration registration, bool registerDisposable)
+        private object ConstructFromRegistration(IRegistration registration, bool isOwned)
         {
             if (registration.Factory != null)
             {
                 object instance = registration.Factory(this);
 
-                if (registerDisposable)
+                if (!isOwned)
                     RegisterDisposable(instance);
 
                 return instance;
             }
             else
-                return ConstructType(registration.Type, registerDisposable);
+                return ConstructType(registration.Type, isOwned);
         }
 
         /// <summary>
@@ -148,11 +156,11 @@ namespace CoreMVVM.IOC.Core
         /// </summary>
         /// <exception cref="ResolveUnregisteredInterfaceException">type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
-        private object ConstructType(Type type, bool registerDisposable)
+        private object ConstructType(Type type, bool isOwned)
         {
             // Switch out any IOwned<> (or implementation) with Owned<>
-            bool isOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
-            if (isOwned)
+            bool implementsIOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
+            if (implementsIOwned)
                 type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
 
             if (type.IsInterface)
@@ -169,15 +177,19 @@ namespace CoreMVVM.IOC.Core
                     .First();
 
                 object[] args = constructor.GetParameters()
-                                           .Select(param => Resolve(param.ParameterType, !isOwned))
+                                           .Select(param => Resolve(param.ParameterType, implementsIOwned))
                                            .ToArray();
 
                 object instance = constructor.Invoke(args);
 
-                if (registerDisposable)
+                if (!isOwned)
                     RegisterDisposable(instance);
 
                 return instance;
+            }
+            catch (OwnedScopedComponentException)
+            {
+                throw;
             }
             catch (Exception e)
             {
