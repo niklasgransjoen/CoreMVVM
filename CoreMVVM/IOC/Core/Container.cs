@@ -10,7 +10,7 @@ namespace CoreMVVM.IOC.Core
     /// <summary>
     /// Implementation of <see cref="IContainer"/>.
     /// </summary>
-    public class Container : IContainer
+    internal class Container : IContainer
     {
         private readonly IReadOnlyDictionary<Type, IRegistration> _registeredTypes;
 
@@ -18,7 +18,7 @@ namespace CoreMVVM.IOC.Core
         /// Creates a new container.
         /// </summary>
         /// <param name="registeredTypes">The registered types of this container.</param>
-        internal Container(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
+        public Container(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
         {
             _registeredTypes = registeredTypes;
         }
