@@ -11,6 +11,9 @@ namespace CoreMVVM
     {
         #region Events
 
+        /// <summary>
+        /// Occurs when the value of a property changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         #endregion Events
