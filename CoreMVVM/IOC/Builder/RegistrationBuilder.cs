@@ -46,13 +46,13 @@ namespace CoreMVVM.IOC.Builder
                 InstanceScope.None);
         }
 
-        internal static RegistrationBuilder Create<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        internal static RegistrationBuilder Create<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
         {
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
                 InstanceScope.None,
-                c => factory(c));
+                factory);
         }
 
         #endregion No scope
@@ -67,13 +67,13 @@ namespace CoreMVVM.IOC.Builder
                 InstanceScope.Singleton);
         }
 
-        internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
         {
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
                 InstanceScope.Singleton,
-                c => factory(c));
+                factory);
         }
 
         #endregion Singleton
@@ -88,13 +88,13 @@ namespace CoreMVVM.IOC.Builder
                 InstanceScope.LifetimeScope);
         }
 
-        internal static RegistrationBuilder CreateLifetimeScope<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory)
+        internal static RegistrationBuilder CreateLifetimeScope<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
         {
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
                 InstanceScope.LifetimeScope,
-                c => factory(c));
+                factory);
         }
 
         #endregion Lifetime scope

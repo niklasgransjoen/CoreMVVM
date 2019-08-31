@@ -67,7 +67,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
@@ -112,7 +112,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
@@ -157,7 +157,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
