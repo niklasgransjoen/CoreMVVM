@@ -11,6 +11,8 @@ namespace CoreMVVM.IOC.Builder
     {
         private readonly RegistrationCollection _registrations = new RegistrationCollection();
 
+        #region Constructors
+
         /// <summary>
         /// Creates a new container builder with default registrations.
         /// </summary>
@@ -33,6 +35,19 @@ namespace CoreMVVM.IOC.Builder
                 RegisterSingleton<ConsoleLogger>().As<ILogger>();
             }
         }
+
+        #endregion Constructors
+
+        #region Events
+
+        /// <summary>
+        /// Occurs when the container is built.
+        /// </summary>
+        public event Action<IContainer> OnBuild;
+
+        #endregion Events
+
+        #region Methods
 
         #region No scope
 
@@ -183,8 +198,12 @@ namespace CoreMVVM.IOC.Builder
             IRegistration registration = _registrations[typeof(IContainer)];
             container.ResolvedInstances[registration] = container;
 
+            OnBuild?.Invoke(container);
+
             return container;
         }
+
+        #endregion Methods
 
         #region Helper
 
