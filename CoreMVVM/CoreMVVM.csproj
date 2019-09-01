@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Niklas Gransjøen</Authors>
+    <Description>A simple, lightweight MVVM library for .NET Standard made with Inversion of Control (IoC) in mind, with no external dependencies.</Description>
+    <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/niklasgransjoen/CoreMVVM</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
