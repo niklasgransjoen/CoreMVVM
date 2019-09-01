@@ -2,20 +2,40 @@
 
 namespace CoreMVVM.Tests
 {
-    public interface IInterface { }
+    internal interface IInterface { }
 
-    public class Class { }
+    internal class Class { }
 
-    public struct Struct { }
+    internal struct Struct { }
 
-    public class Implementation : IInterface { }
+    internal class Implementation : IInterface { }
 
-    public interface IDisposableInterface : IDisposable
+    internal interface IDisposableInterface : IDisposable
     {
         bool IsDisposed { get; }
     }
 
-    public class Disposable : IDisposableInterface
+    internal class Disposable : IDisposableInterface
+    {
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
+    }
+
+    internal class DisposableSingleton : IDisposableInterface
+    {
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
+    }
+
+    internal class DisposableLifetimeScopedResource : IDisposableInterface
     {
         public bool IsDisposed { get; private set; }
 

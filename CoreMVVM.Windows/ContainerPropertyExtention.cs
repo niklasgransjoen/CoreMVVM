@@ -12,12 +12,12 @@ namespace CoreMVVM.Windows
         public static readonly DependencyProperty ServiceProviderProperty = DependencyProperty.RegisterAttached(
             "ServiceProvider", typeof(IContainer), typeof(ContainerPropertyExtention));
 
-        public static void SetServiceProvider(DependencyObject element, IContainer value)
+        public static void SetContainer(DependencyObject element, IContainer value)
         {
             element.SetValue(ServiceProviderProperty, value);
         }
 
-        public static IContainer GetServiceProvider(DependencyObject element)
+        public static IContainer GetContainer(DependencyObject element)
         {
             return (IContainer)element.GetValue(ServiceProviderProperty);
         }
@@ -25,20 +25,34 @@ namespace CoreMVVM.Windows
         /// <summary>
         /// Gets the container from the given dependency object or one of its parents.
         /// </summary>
-        public static IContainer GetContainer(DependencyObject o)
+        /// <exception cref="Exception">container was not found in the visual tree of the given component.</exception>
+        public static IContainer FindContainer(DependencyObject o)
+        {
+            bool result = TryFindContainer(o, out IContainer container);
+            if (result)
+                return container;
+            
+            throw new Exception($"Could not locate {nameof(IContainer)} in visual tree.");
+        }
+
+        /// <summary>
+        /// Attempts to get the container from the given dependency object or one of its parents.
+        /// </summary>
+        public static bool TryFindContainer(DependencyObject o, out IContainer container)
         {
             DependencyObject current = o;
             do
             {
-                IContainer container = GetServiceProvider(current);
+                container = GetContainer(current);
                 if (container != null)
-                    return container;
+                    return true;
 
                 current = LogicalTreeHelper.GetParent(current);
             }
             while (current != null);
 
-            throw new Exception($"Could not locate {nameof(IContainer)} in visual tree.");
+            container = null;
+            return false;
         }
     }
 }

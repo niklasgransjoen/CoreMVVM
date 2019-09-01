@@ -1,85 +1,28 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.IOC.Builder;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CoreMVVM.Tests.IOC.Builder
 {
     [TestFixture]
     public class RegistrationBuilderTests
     {
-        /*private ContainerBuilder _builder;
-
-        [SetUp]
-        public void BeforeEach()
+        [Test]
+        public void RegistrationBuilder_OverridesOnDuplicate()
         {
-            _builder = new ContainerBuilder(registerDefaults: false);
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.Register<Impl1>().As<ISimple>();
+            builder.Register<Impl2>().As<ISimple>();
+            IContainer container = builder.Build();
+
+            var instance = container.Resolve<ISimple>();
+            Assert.AreEqual(typeof(Impl2), instance.GetType());
         }
 
-        [TearDown]
-        public void AfterEach()
-        {
-            _builder = null;
-        }
+        private interface ISimple { }
 
-        [TestCaseSource(nameof(GetTypes))]
-        public void Builder_Registers_Types(Type type)
-        {
-            IRegistrationBuilder regBuilder = _builder.Register<Class>();
-            regBuilder.As(type);
+        private class Impl1 : ISimple { }
 
-            Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
-            Assert.AreEqual(typeof(Class), regBuilder.Registrations[type].Type);
-        }
-
-        [TestCaseSource(nameof(GetTypes))]
-        public void Builder_Registers_Types_AsSelf(Type type)
-        {
-            IRegistrationBuilder regBuilder = _builder.Register(type).AsSelf();
-
-            Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
-            Assert.AreEqual(type, regBuilder.Registrations[type].Type);
-        }
-
-        [TestCaseSource(nameof(GetFactoriesData))]
-        public void Builder_Registers_Types_WithFactory(Type type, Func<IContainer, object> factory)
-        {
-            IRegistrationBuilder regBuilder = _builder.Register(factory);
-            regBuilder.As(type);
-
-            Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
-            Assert.AreEqual(factory, regBuilder.Registrations[type].Factory);
-        }
-
-        [TestCaseSource(nameof(GetFactoriesData))]
-        public void Builder_Registers_Types_AsSelf_WithFactory(Type type, Func<IContainer, object> factory)
-        {
-            IRegistrationBuilder regBuilder = _builder.Register(factory).AsSelf();
-
-            Assert.AreEqual(type, regBuilder.Registrations.Keys.First());
-            Assert.AreEqual(factory, regBuilder.Registrations[type].Factory);
-        }
-
-        private static IEnumerable<Type> GetTypes()
-        {
-            yield return typeof(IInterface);
-            yield return typeof(Class);
-            yield return typeof(Struct);
-        }
-
-        private static IEnumerable<object[]> GetFactoriesData()
-        {
-            foreach ((Type type, Func<IContainer, object> factory) in GetFactories())
-                yield return new object[] { type, factory };
-        }
-
-        private static IEnumerable<(Type type, Func<IContainer, object> factory)> GetFactories()
-        {
-            yield return (typeof(IInterface), c => new Implementation());
-            yield return (typeof(Class), c => new Class());
-            yield return (typeof(Struct), c => new Struct());
-        }*/
+        private class Impl2 : ISimple { }
     }
 }

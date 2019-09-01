@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.IOC.Builder;
-using CoreMVVM.IOC.Core;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -30,122 +29,6 @@ namespace CoreMVVM.Tests.IOC.Core
         {
             LifetimeScope.Dispose();
             LifetimeScope = null;
-        }
-    }
-
-    [TestFixture]
-    public class LifetimeScope_Resolve_Unregistered : LifetimeScopeTestBase
-    {
-        [Test]
-        public void LifetimeScope_CreatesInstance_NoParams()
-        {
-            Class subject = LifetimeScope.Resolve<Class>();
-            Assert.NotNull(subject);
-        }
-
-        [Test]
-        public void LifetimeScope_CreatesInstance_WithParams()
-        {
-            ClassWithConstructor subject = LifetimeScope.Resolve<ClassWithConstructor>();
-
-            Assert.NotNull(subject);
-            Assert.NotNull(subject.a);
-        }
-
-        [Test]
-        public void LifetimeScope_CreatesInstance_ParameterlessConstructor()
-        {
-            ClassWithEmptyConstructor subject = LifetimeScope.Resolve<ClassWithEmptyConstructor>();
-
-            Assert.NotNull(subject);
-            Assert.IsTrue(subject.constructorWasInvoked);
-        }
-
-        [Test]
-        public void LifetimeScope_Calls_ConstructorWithTheMostParams()
-        {
-            ClassWithManyConstructors subject = LifetimeScope.Resolve<ClassWithManyConstructors>();
-
-            Assert.NotNull(subject);
-            Assert.NotNull(subject.Ec1);
-            Assert.NotNull(subject.Ec2);
-        }
-
-        [Test]
-        public void LifetimeScope_ResolvesContainer_ToSameInstance()
-        {
-            IContainer c1 = LifetimeScope.Resolve<IContainer>();
-            IContainer c2 = LifetimeScope.Resolve<IContainer>();
-
-            Assert.AreEqual(c1, c2);
-        }
-
-        [Test]
-        public void LifetimeScope_Throws_ResolveUnregisteredInterface()
-        {
-            try
-            {
-                LifetimeScope.Resolve<IInterface>();
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.AreEqual(typeof(ResolveUnregisteredInterfaceException), e.GetType());
-            }
-        }
-
-        [Test]
-        public void LifetimeScope_Throws_ResolveIllegalTypes()
-        {
-            Assert.Throws(typeof(ResolveConstructionException), () =>
-            {
-                LifetimeScope.Resolve<string>();
-            });
-        }
-
-        public class ClassWithConstructor
-        {
-            public Class a;
-
-            public ClassWithConstructor()
-            {
-            }
-
-            public ClassWithConstructor(Class a)
-            {
-                this.a = a;
-            }
-        }
-
-        public class ClassWithEmptyConstructor
-        {
-            public bool constructorWasInvoked;
-
-            public ClassWithEmptyConstructor()
-            {
-                constructorWasInvoked = true;
-            }
-        }
-
-        public class ClassWithManyConstructors
-        {
-            public ClassWithManyConstructors()
-            {
-            }
-
-            public ClassWithManyConstructors(Class ec1)
-            {
-                Ec1 = ec1;
-            }
-
-            public ClassWithManyConstructors(Class ec1, Class ec2)
-            {
-                Ec1 = ec1;
-                Ec2 = ec2;
-            }
-
-            public Class Ec1 { get; }
-            public Class Ec2 { get; }
         }
     }
 
@@ -238,6 +121,7 @@ namespace CoreMVVM.Tests.IOC.Core
         }
     }
 
+    [TestFixture]
     public class LifetimeScope_Resolves_LifetimeScope : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
@@ -262,7 +146,7 @@ namespace CoreMVVM.Tests.IOC.Core
                 object subject1 = subscope.Resolve<IInterface>();
                 object subject2 = subscope.Resolve<IInterface>();
 
-                Assert.AreEqual(subject1, subject2); 
+                Assert.AreEqual(subject1, subject2);
             }
         }
 
@@ -353,11 +237,234 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class LifetimeScope_Disposables : LifetimeScopeTestBase
+    public class LifetimeScope_Resolve_Func : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<Implementation>().As<IInterface>();
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_Func()
+        {
+            Func<IInterface> factory = LifetimeScope.Resolve<Func<IInterface>>();
+
+            Assert.NotNull(factory);
+            Assert.AreEqual(typeof(Func<IInterface>), factory.GetType());
+
+            object instance = factory();
+            Assert.AreEqual(typeof(Implementation), instance.GetType());
+        }
+    }
+
+    [TestFixture]
+    public class LifetimeScope_Resolve_Owned : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<Implementation>().As<IInterface>();
+
+            builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterSingleton<DisposableSingleton>().AsSelf();
+            builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_Owned()
+        {
+            Owned<IInterface> ownedInstance = LifetimeScope.Resolve<Owned<IInterface>>();
+
+            Assert.NotNull(ownedInstance);
+            Assert.NotNull(ownedInstance.Value);
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_IOwned()
+        {
+            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+
+            Assert.NotNull(ownedInstance);
+            Assert.NotNull(ownedInstance.Value);
+        }
+
+        [Test]
+        public void LifetimeScope_DoesNotDisposed_OwnedComponent()
+        {
+            Owned<IDisposableInterface> disposable = LifetimeScope.Resolve<Owned<IDisposableInterface>>();
+
+            Assert.IsFalse(disposable.Value.IsDisposed);
+
+            LifetimeScope.Dispose();
+            Assert.IsFalse(disposable.Value.IsDisposed);
+        }
+
+        [Test]
+        public void LifetimeScope_DoesNotOwn_FuncResult()
+        {
+            Func<IDisposableInterface> factory = LifetimeScope.Resolve<Func<IDisposableInterface>>();
+            IDisposableInterface instance = factory();
+
+            Assert.IsFalse(instance.IsDisposed);
+            LifetimeScope.Dispose();
+
+            Assert.IsTrue(instance.IsDisposed);
+        }
+
+        [Test]
+        public void LifetimeScope_Owns_FuncResult()
+        {
+            var factory = LifetimeScope.Resolve<IOwned<Func<IDisposableInterface>>>();
+            IDisposableInterface instance = factory.Value();
+
+            Assert.IsFalse(instance.IsDisposed);
+            LifetimeScope.Dispose();
+
+            Assert.IsFalse(instance.IsDisposed);
+        }
+
+        [Test]
+        public void LifetimeScope_ThrowsOnAttemptToOwn_Singleton()
+        {
+            Assert.Throws<OwnedScopedComponentException>(() =>
+            {
+                LifetimeScope.Resolve<IOwned<DisposableSingleton>>();
+            });
+        }
+
+        [Test]
+        public void LifetimeScope_ThrowsOnAttemptToOwn_LifetimeScopedComponent()
+        {
+            Assert.Throws<OwnedScopedComponentException>(() =>
+            {
+                LifetimeScope.Resolve<IOwned<DisposableLifetimeScopedResource>>();
+            });
+        }
+    }
+
+    [TestFixture]
+    public class LifetimeScope_Resolve_Unregistered : LifetimeScopeTestBase
+    {
+        [Test]
+        public void LifetimeScope_CreatesInstance_NoParams()
+        {
+            Class subject = LifetimeScope.Resolve<Class>();
+            Assert.NotNull(subject);
+        }
+
+        [Test]
+        public void LifetimeScope_CreatesInstance_WithParams()
+        {
+            ClassWithConstructor subject = LifetimeScope.Resolve<ClassWithConstructor>();
+
+            Assert.NotNull(subject);
+            Assert.NotNull(subject.a);
+        }
+
+        [Test]
+        public void LifetimeScope_CreatesInstance_ParameterlessConstructor()
+        {
+            ClassWithEmptyConstructor subject = LifetimeScope.Resolve<ClassWithEmptyConstructor>();
+
+            Assert.NotNull(subject);
+            Assert.IsTrue(subject.constructorWasInvoked);
+        }
+
+        [Test]
+        public void LifetimeScope_Calls_ConstructorWithTheMostParams()
+        {
+            ClassWithManyConstructors subject = LifetimeScope.Resolve<ClassWithManyConstructors>();
+
+            Assert.NotNull(subject);
+            Assert.NotNull(subject.Ec1);
+            Assert.NotNull(subject.Ec2);
+        }
+
+        [Test]
+        public void LifetimeScope_ResolvesContainer_ToSameInstance()
+        {
+            IContainer c1 = LifetimeScope.Resolve<IContainer>();
+            IContainer c2 = LifetimeScope.Resolve<IContainer>();
+
+            Assert.AreEqual(c1, c2);
+        }
+
+        [Test]
+        public void LifetimeScope_Throws_ResolveUnregisteredInterface()
+        {
+            try
+            {
+                LifetimeScope.Resolve<IInterface>();
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual(typeof(ResolveUnregisteredInterfaceException), e.GetType());
+            }
+        }
+
+        [Test]
+        public void LifetimeScope_Throws_ResolveIllegalTypes()
+        {
+            Assert.Throws(typeof(ResolveConstructionException), () =>
+            {
+                LifetimeScope.Resolve<string>();
+            });
+        }
+
+        internal class ClassWithConstructor
+        {
+            public Class a;
+
+            public ClassWithConstructor()
+            {
+            }
+
+            public ClassWithConstructor(Class a)
+            {
+                this.a = a;
+            }
+        }
+
+        internal class ClassWithEmptyConstructor
+        {
+            public bool constructorWasInvoked;
+
+            public ClassWithEmptyConstructor()
+            {
+                constructorWasInvoked = true;
+            }
+        }
+
+        internal class ClassWithManyConstructors
+        {
+            public ClassWithManyConstructors()
+            {
+            }
+
+            public ClassWithManyConstructors(Class ec1)
+            {
+                Ec1 = ec1;
+            }
+
+            public ClassWithManyConstructors(Class ec1, Class ec2)
+            {
+                Ec1 = ec1;
+                Ec2 = ec2;
+            }
+
+            public Class Ec1 { get; }
+            public Class Ec2 { get; }
+        }
+    }
+
+    [TestFixture]
+    public class LifetimeScope_Dispose_Component : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterSingleton<DisposableSingleton>().AsSelf();
+            builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
         }
 
         [Test]
@@ -399,48 +506,27 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.IsTrue(LifetimeScope.IsDisposed);
             Assert.IsTrue(subscope.IsDisposed);
         }
-    }
-
-    public class LifetimeScope_Resolve_Owned : LifetimeScopeTestBase
-    {
-        protected override void RegisterComponents(ContainerBuilder builder)
-        {
-            builder.RegisterSingleton<Implementation>().As<IInterface>();
-            builder.Register<Disposable>().As<IDisposableInterface>();
-        }
 
         [Test]
-        public void LifetimeScope_Resolves_Owned()
+        public void LifetimeScope_Disposes_Singleton()
         {
-            IInterface instance = LifetimeScope.Resolve<IInterface>();
-            Owned<IInterface> ownedInstance = LifetimeScope.Resolve<Owned<IInterface>>();
+            var disposable = LifetimeScope.Resolve<DisposableSingleton>();
 
-            Assert.NotNull(ownedInstance);
-            Assert.NotNull(ownedInstance.Value);
-            Assert.AreEqual(instance, ownedInstance.Value);
-        }
-
-        [Test]
-        public void LifetimeScope_DoesNotOwn_OwnedDisposable()
-        {
-            Owned<IDisposableInterface> disposable = LifetimeScope.Resolve<Owned<IDisposableInterface>>();
-
-            Assert.IsFalse(disposable.Value.IsDisposed);
-
+            Assert.IsFalse(disposable.IsDisposed);
             LifetimeScope.Dispose();
-            Assert.IsFalse(disposable.Value.IsDisposed);
+
+            Assert.IsTrue(disposable.IsDisposed);
         }
 
         [Test]
-        public void LifetimeScope_Resolves_IOwned()
+        public void LifetimeScope_Disposes_LifetimeScope()
         {
-            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+            var disposable = LifetimeScope.Resolve<DisposableLifetimeScopedResource>();
 
-            Assert.NotNull(ownedInstance);
-            Assert.NotNull(ownedInstance.Value);
+            Assert.IsFalse(disposable.IsDisposed);
+            LifetimeScope.Dispose();
 
-            IInterface instance = LifetimeScope.Resolve<IInterface>();
-            Assert.AreEqual(instance, ownedInstance.Value);
+            Assert.IsTrue(disposable.IsDisposed);
         }
     }
 }

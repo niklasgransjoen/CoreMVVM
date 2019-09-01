@@ -15,5 +15,12 @@
         /// Gets the view for the given view model.
         /// </summary>
         object GetView(object viewModel);
+
+        /// <summary>
+        /// Registers a view to a view model.
+        /// </summary>
+        /// <typeparam name="TViewModel">The view model to register.</typeparam>
+        /// <typeparam name="TView">The view to register.</typeparam>
+        void RegisterView<TViewModel, TView>();
     }
 }

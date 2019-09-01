@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace CoreMVVM
 {
     /// <summary>
-    /// A base class for models and viewmodels.
+    /// A base class for ViewModels.
     /// </summary>
     public abstract class BaseModel : INotifyPropertyChanged
     {
@@ -21,13 +21,15 @@ namespace CoreMVVM
         #region Protected methods
 
         /// <summary>
-        /// Sets the given property, and invokes <see cref="RaisePropertyChanged(string)"/> on it if it's changed.
-        /// <para>Returns true if the property was changed.</para>
+        /// Compares a variable to a value. If different, the reference variable is assigned the value.
+        /// Invokes <see cref="PropertyChanged"/> if the value was different.
         /// </summary>
         /// <typeparam name="T">The type of the property.</typeparam>
-        /// <param name="property">A reference to the property to set.</param>
+        /// <param name="property">A reference to the field of the property.</param>
         /// <param name="value">The new value of the property.</param>
-        /// <param name="propertyName">The name of the property.</param>
+        /// <param name="propertyName">The name of the property. Leave as null when calling from the property's setter.</param>
+        /// <returns>True if the property changed.</returns>
+        /// <remarks>Uses the default EqualityComparer of the type of the property.</remarks>
         protected virtual bool SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(property, value))
@@ -39,33 +41,9 @@ namespace CoreMVVM
         }
 
         /// <summary>
-        /// Sets the given property, and invokes <see cref="RaisePropertyChanged(string)"/> on it if it's changed.
-        /// <para>Returns true if the property was changed.</para>
-        /// </summary>
-        /// <typeparam name="T">The type of the property.</typeparam>
-        /// <param name="property">A reference to the property to set.</param>
-        /// <param name="value">The new value of the property.</param>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <param name="additionalProperties">The names of additional properties to call <see cref="RaisePropertyChanged(string)"/> on.</param>
-        /// <remarks>
-        /// This method calls <see cref="SetProperty{T}(ref T, T, string)"/>, so any overrides to it will take effect even if properties call this one instead.
-        /// </remarks>
-        protected bool SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null, params string[] additionalProperties)
-        {
-            bool result = SetProperty(ref property, value, propertyName);
-            if (result)
-            {
-                foreach (string name in additionalProperties)
-                    RaisePropertyChanged(name);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on a property.
         /// </summary>
-        /// <param name="name">The name of the property to raise the event on.</param>
+        /// <param name="name">The name of the property to invoke the event on.</param>
         protected void RaisePropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         /// <summary>

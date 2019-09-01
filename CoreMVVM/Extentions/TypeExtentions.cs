@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace CoreMVVM.Extentions
 {
@@ -20,26 +21,51 @@ namespace CoreMVVM.Extentions
         }
 
         /// <summary>
-        /// Gets a value indicating if a generic type definition is assignable from a generic type.
+        /// Gets a value indicating if a type implements a certain interface.
         /// </summary>
-        /// <param name="genericParentDef">The generic type definition.</param>
-        /// <param name="child">The generic child to check.</param>
-        /// <returns>True is the given generic type definition is assignable from the generic type.</returns>
-        /// <exception cref="ArgumentNullException">genericParentDef or child is null.</exception>
-        /// <exception cref="ArgumentException">genericParentDef is not a generic type definition.</exception>
-        public static bool IsAssignableFromGeneric(this Type genericParentDef, Type child)
+        /// <param name="type">The type to check on.</param>
+        /// <param name="interface">The omterface to check for.</param>
+        /// <returns>True is the given type is or implements the interface.</returns>
+        /// <exception cref="ArgumentNullException">type or interface is null.</exception>
+        /// <exception cref="ArgumentException">interface is not a interface.</exception>
+        public static bool ImplementsInterface(this Type type, Type @interface)
         {
-            if (genericParentDef is null) throw new ArgumentNullException(nameof(genericParentDef));
-            if (child is null) throw new ArgumentNullException(nameof(child));
+            if (type is null) throw new ArgumentNullException(nameof(type));
+            if (@interface is null) throw new ArgumentNullException(nameof(@interface));
 
-            if (!genericParentDef.IsGenericTypeDefinition)
-                throw new ArgumentException("parameter must be generic type definition", nameof(genericParentDef));
+            if (!@interface.IsInterface)
+                throw new ArgumentException("parameter must be interface", nameof(@interface));
 
-            if (!child.IsGenericType)
-                return false;
+            return type == @interface ||
+                   type.GetInterfaces()
+                       .Any(i => i == @interface);
+        }
 
-            Type genericChildDef = child.GetGenericTypeDefinition();
-            return genericParentDef.IsAssignableFrom(genericChildDef);
+        /// <summary>
+        /// Gets a value indicating if a type implements a certain generic interface.
+        /// </summary>
+        /// <param name="type">The type to check on.</param>
+        /// <param name="genericInterface">The interface to check for.</param>
+        /// <returns>True is the given type is or implements the generic interface.</returns>
+        /// <exception cref="ArgumentNullException">type or genericInterface is null.</exception>
+        /// <exception cref="ArgumentException">genericInterface is not a interface or generic type definition.</exception>
+        public static bool ImplementsGenericInterface(this Type type, Type genericInterface)
+        {
+            if (type is null) throw new ArgumentNullException(nameof(type));
+            if (genericInterface is null) throw new ArgumentNullException(nameof(genericInterface));
+
+            if (!genericInterface.IsInterface) throw new ArgumentException("parameter must be interface", nameof(genericInterface));
+            if (!genericInterface.IsGenericTypeDefinition) throw new ArgumentException("parameter must be generic type definition", nameof(genericInterface));
+
+            if (type.IsInterface &&
+                type.IsGenericType &&
+                type.GetGenericTypeDefinition() == genericInterface)
+            {
+                return true;
+            }
+
+            return type.GetInterfaces()
+                       .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericInterface);
         }
     }
 }

@@ -22,10 +22,11 @@
                 </Style>
             </StackPanel.Resources>
             <TextBlock Text="Control Panel" />
-            <Button Content="Debug" Click="Debug_Click" />
-            <Button Content="Log" Click="Log_Click" />
-            <Button Content="Error" Click="Error_Click" />
-            <Button Content="Exception" Click="ExceptionClick" />
+            <Button Content="Debug" Command="{Binding DebugCommand}" />
+            <Button Content="Log" Command="{Binding LogCommand}" />
+            <Button Content="Error" Command="{Binding ErrorCommand}" />
+            <Button Content="Exception" Command="{Binding ExceptionCommand}" />
+            <Button Content="Show dialog" Command="{Binding ShowDialogCommand}" />
         </StackPanel>
 
         <!--Log-->

@@ -11,6 +11,8 @@ namespace CoreMVVM.IOC.Builder
     {
         private readonly RegistrationCollection _registrations = new RegistrationCollection();
 
+        #region Constructors
+
         /// <summary>
         /// Creates a new container builder with default registrations.
         /// </summary>
@@ -33,6 +35,19 @@ namespace CoreMVVM.IOC.Builder
                 RegisterSingleton<ConsoleLogger>().As<ILogger>();
             }
         }
+
+        #endregion Constructors
+
+        #region Events
+
+        /// <summary>
+        /// Occurs when the container is built.
+        /// </summary>
+        public event Action<IContainer> OnBuild;
+
+        #endregion Events
+
+        #region Methods
 
         #region No scope
 
@@ -67,7 +82,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
@@ -112,7 +127,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
@@ -157,7 +172,7 @@ namespace CoreMVVM.IOC.Builder
         /// <param name="factory">A factory to use for constructing this component.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory)
+        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory) where T : class
         {
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
@@ -183,8 +198,12 @@ namespace CoreMVVM.IOC.Builder
             IRegistration registration = _registrations[typeof(IContainer)];
             container.ResolvedInstances[registration] = container;
 
+            OnBuild?.Invoke(container);
+
             return container;
         }
+
+        #endregion Methods
 
         #region Helper
 

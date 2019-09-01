@@ -4,6 +4,8 @@ namespace CoreMVVM.IOC.Builder
 {
     public interface IRegistrationBuilder
     {
+        #region Properties
+
         /// <summary>
         /// Gets the type being registrated.
         /// </summary>
@@ -18,6 +20,10 @@ namespace CoreMVVM.IOC.Builder
         /// Gets the factory being registered. May be null.
         /// </summary>
         Func<ILifetimeScope, object> Factory { get; }
+
+        #endregion Properties
+
+        #region Methods
 
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.
@@ -35,5 +41,7 @@ namespace CoreMVVM.IOC.Builder
         /// Registers <see cref="Type"/> as a component of itself.
         /// </summary>
         IRegistrationBuilder AsSelf();
+
+        #endregion Methods
     }
 }
