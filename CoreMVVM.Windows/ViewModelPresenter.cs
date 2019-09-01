@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using IContainer = CoreMVVM.IOC.IContainer;
 
 namespace CoreMVVM.Windows
 {
@@ -9,6 +10,16 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewModelPresenter : ContentControl
     {
+        static ViewModelPresenter()
+        {
+            FocusableProperty.OverrideMetadata(typeof(ViewModelPresenter),
+                new FrameworkPropertyMetadata(defaultValue: false));
+        }
+
+        #region Dependency properties
+
+        #region ViewModel
+
         /// <summary>
         /// The dependency property for the bindable view model.
         /// </summary>
@@ -17,7 +28,7 @@ namespace CoreMVVM.Windows
                 new PropertyMetadata(default, OnViewModelChanged));
 
         /// <summary>
-        /// The view model for which this control should display the corresponding view.
+        /// Gets or sets the view model for which this control should display the corresponding view.
         /// </summary>
         public object ViewModel
         {
@@ -31,14 +42,38 @@ namespace CoreMVVM.Windows
                 return;
 
             ViewModelPresenter presenter = (ViewModelPresenter)o;
-            if (e.NewValue != null)
-            {
-                IOC.IContainer container = ContainerPropertyExtention.GetContainer(o);
-                var view = container.Resolve<IViewLocator>().GetView(e.NewValue);
-                presenter.Content = view;
-            }
-            else
-                presenter.Content = null;
+            presenter.UpdateView();
         }
+
+        #endregion ViewModel
+
+        #endregion Dependency properties
+
+        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        {
+            base.OnVisualParentChanged(oldParent);
+
+            UpdateView();
+        }
+
+        private void UpdateView()
+        {
+            IContainer container = GetContainer();
+            if (container != null)
+                Content = container.Resolve<IViewLocator>().GetView(ViewModel);
+            else
+                Content = ViewModel;
+        }
+
+        private IContainer GetContainer()
+        {
+            if (ViewModel == null)
+                return null;
+
+            ContainerPropertyExtention.TryFindContainer(this, out IContainer container);
+            return container;
+        }
+
+ 
     }
 }

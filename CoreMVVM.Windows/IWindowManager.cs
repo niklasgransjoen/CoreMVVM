@@ -12,7 +12,6 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        /// <param name="scope">The optional scope of the window.</param>
         Window ShowWindow<TViewModel>(Window owner = null);
 
         /// <summary>
@@ -20,7 +19,6 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <param name="viewModel">The view model.</param>
         /// <param name="owner">The owner of the returned window.</param>
-        /// <param name="scope">The optional scope of the window.</param>
         Window ShowWindow(object viewModel, Window owner = null);
     }
 }
