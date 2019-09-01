@@ -3,6 +3,7 @@ using CoreMVVM.IOC.Builder;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace CoreMVVM.IOC.Core
@@ -158,6 +159,10 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
+            // Transform Func<T> into a factory.
+            if (TryConstructFactory(type, isOwned, out Func<object> factory))
+                return factory;
+
             // Switch out any IOwned<> (or implementation) with Owned<>
             bool implementsIOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
             if (implementsIOwned)
@@ -198,6 +203,24 @@ namespace CoreMVVM.IOC.Core
                 Resolve<ILogger>().Exception(message, e);
                 throw new ResolveConstructionException(message, e);
             }
+        }
+
+        private bool TryConstructFactory(Type type, bool isOwned, out Func<object> factory)
+        {
+            bool isFactory = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>);
+            if (!isFactory)
+            {
+                factory = null;
+                return false;
+            }
+
+            Type resultType = type.GenericTypeArguments[0];
+            Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
+            Expression factoryBody = Expression.Invoke(factoryExpression);
+            Expression convertedResult = Expression.Convert(factoryBody, resultType);
+
+            factory = (Func<object>)Expression.Lambda(type, convertedResult).Compile();
+            return true;
         }
 
         private void RegisterDisposable(object instance)
