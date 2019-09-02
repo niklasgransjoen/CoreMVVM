@@ -20,8 +20,6 @@ namespace CoreMVVM.Windows
 
         protected sealed override void OnStartup(StartupEventArgs e)
         {
-            OnStartupOverride(e);
-
             base.OnStartup(e);
 
             ContainerBuilder builder = new ContainerBuilder();
@@ -31,6 +29,8 @@ namespace CoreMVVM.Windows
 
             RegisterComponents(builder);
             Container = builder.Build();
+
+            OnStartupOverride(e);
         }
 
         protected sealed override void OnExit(ExitEventArgs e)
