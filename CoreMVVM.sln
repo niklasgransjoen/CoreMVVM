@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DFAF0354
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Tests", "Tests\CoreMVVM.Tests\CoreMVVM.Tests.csproj", "{EA3E8E36-1928-4395-AFED-89FA0864AB4A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Windows.Tests", "Tests\CoreMVVM.Windows.Tests\CoreMVVM.Windows.Tests.csproj", "{BE8F5239-0EB0-4195-A6A7-E30C8244B400}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,12 +37,17 @@ Global
 		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA3E8E36-1928-4395-AFED-89FA0864AB4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE8F5239-0EB0-4195-A6A7-E30C8244B400}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE8F5239-0EB0-4195-A6A7-E30C8244B400}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE8F5239-0EB0-4195-A6A7-E30C8244B400}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE8F5239-0EB0-4195-A6A7-E30C8244B400}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EA3E8E36-1928-4395-AFED-89FA0864AB4A} = {DFAF0354-4F12-462B-A888-6A5EC1CAB08D}
+		{BE8F5239-0EB0-4195-A6A7-E30C8244B400} = {DFAF0354-4F12-462B-A888-6A5EC1CAB08D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A2B0EAC-3B52-40DC-B12D-E8EA615C3864}
