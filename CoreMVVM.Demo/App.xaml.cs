@@ -12,11 +12,11 @@ namespace CoreMVVM.Demo
     /// </summary>
     public partial class App : WindowsApplication
     {
-        protected override void OnStartup(StartupEventArgs e)
+        protected override void OnStartupOverride(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            container.Resolve<IWindowManager>().ShowWindow<MainWindowModel>();
+            Container.Resolve<IWindowManager>().ShowWindow<MainWindowModel>();
         }
 
         protected override void RegisterComponents(ContainerBuilder builder)
