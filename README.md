@@ -10,4 +10,4 @@ There are countless IoC and MVVM libraries out there, yet I decided to make my o
 
 This project was inspired by Thomas Freudenberg's [TinyLittleMVVM](https://github.com/thoemmi/TinyLittleMvvm), which is based on the same idea of a lightweight MVVM library.
 
-<sup>1. Excluding libraries from Microsoft that have not yet found their way into the .NET Standard. These include, but may not be limited to: Systems.Collections.Immutable</sub>
+<sup>1. Excluding libraries from Microsoft that have not yet found their way into the .NET Standard. These include, but may not be limited to: Systems.Collections.Immutable</sup>
