@@ -49,7 +49,7 @@ namespace CoreMVVM
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on the calling member (should be a property).
         /// </summary>
-        protected void RasieThisPropertyChanged([CallerMemberName] string propertyName = null) => RaisePropertyChanged(propertyName);
+        protected void RaiseThisPropertyChanged([CallerMemberName] string propertyName = null) => RaisePropertyChanged(propertyName);
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on all properties.
