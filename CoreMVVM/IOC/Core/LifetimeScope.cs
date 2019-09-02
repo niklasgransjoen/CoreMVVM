@@ -143,6 +143,9 @@ namespace CoreMVVM.IOC.Core
             {
                 object instance = registration.Factory(this);
 
+                if (instance != null)
+                    InitializeComponent(instance);
+
                 if (!isOwned)
                     RegisterDisposable(instance);
 
@@ -186,6 +189,7 @@ namespace CoreMVVM.IOC.Core
                                            .ToArray();
 
                 object instance = constructor.Invoke(args);
+                InitializeComponent(instance);
 
                 if (!isOwned)
                     RegisterDisposable(instance);
@@ -227,6 +231,18 @@ namespace CoreMVVM.IOC.Core
         {
             if (instance is IDisposable disposable)
                 _disposables.Add(disposable);
+        }
+
+        /// <summary>
+        /// Invokes the "InitializedComponent" method on the given component, if such a method exists.
+        /// </summary>
+        /// <param name="component">The component to initialize. Not null.</param>
+        private void InitializeComponent(object component)
+        {
+            MethodInfo method = component.GetType()
+                                         .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
+
+            method?.Invoke(component, null);
         }
 
         #endregion Construct methods
