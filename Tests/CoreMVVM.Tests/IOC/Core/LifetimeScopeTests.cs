@@ -529,4 +529,49 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.IsTrue(disposable.IsDisposed);
         }
     }
+
+    [TestFixture]
+    public class LifetimeScope_Initialization : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<InitClass>().AsSelf();
+            builder.Register(c => new InitClass()).As<IInterface>();
+        }
+
+        [Test]
+        public void LifetimeScope_Initializes_Resolved_Component()
+        {
+            var instance = LifetimeScope.Resolve<InitClass>();
+
+            Assert.IsTrue(instance.IsInitialized);
+        }
+
+        [Test]
+        public void LifetimeScope_Initilizes_FuncResult()
+        {
+            var factory = LifetimeScope.Resolve<Func<InitClass>>();
+            var instance = factory();
+
+            Assert.IsTrue(instance.IsInitialized);
+        }
+
+        [Test]
+        public void LifetimeScope_Initializes_FactoryResult()
+        {
+            var instance = (InitClass)LifetimeScope.Resolve<IInterface>();
+
+            Assert.IsTrue(instance.IsInitialized);
+        }
+
+        public class InitClass : IInterface
+        {
+            public void InitializeComponent()
+            {
+                IsInitialized = true;
+            }
+
+            public bool IsInitialized { get; set; }
+        }
+    }
 }
