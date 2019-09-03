@@ -14,15 +14,13 @@ namespace CoreMVVM.Demo
     {
         protected override void OnStartupOverride(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
             Container.Resolve<IWindowManager>().ShowWindow<MainWindowModel>();
         }
 
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterSingleton<MainWindow>();
-            builder.RegisterSingleton<MainWindowModel>();
+            builder.RegisterSingleton<MainWindow>().AsSelf();
+            builder.RegisterSingleton<MainWindowModel>().AsSelf();
 
             builder.RegisterSingleton<ScreenPrinter>().As<ILogger>().AsSelf();
 
