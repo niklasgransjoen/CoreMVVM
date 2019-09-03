@@ -242,6 +242,7 @@ namespace CoreMVVM.Tests.IOC.Core
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.Register<Implementation>().As<IInterface>();
+            builder.Register(c => (Class)null).AsSelf();
         }
 
         [Test]
@@ -254,6 +255,13 @@ namespace CoreMVVM.Tests.IOC.Core
 
             object instance = factory();
             Assert.AreEqual(typeof(Implementation), instance.GetType());
+        }
+
+        [Test]
+        public void LifetimeScope_Handles_NullReturningFunc()
+        {
+            var instance = LifetimeScope.Resolve<Class>();
+            Assert.IsNull(instance);
         }
     }
 
@@ -537,6 +545,8 @@ namespace CoreMVVM.Tests.IOC.Core
         {
             builder.Register<InitClass>().AsSelf();
             builder.Register(c => new InitClass()).As<IInterface>();
+
+            builder.RegisterSingleton<InitClass2>().As<IInit>();
         }
 
         [Test]
@@ -564,14 +574,57 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.IsTrue(instance.IsInitialized);
         }
 
-        public class InitClass : IInterface
+        [Test]
+        public void LifetimeScope_RegistersSingleton_Before_Initializing()
+        {
+            LifetimeScope.Resolve<IInit>();
+        }
+
+        [Test]
+        public void LifetimeScope_Initializes_NestedTypes_Once()
+        {
+            InitClass2 instance = (InitClass2)LifetimeScope.Resolve<IInit>();
+
+            Assert.AreEqual(1, instance.InitClass.InitializationCount);
+        }
+
+        public interface IInit
+        {
+            bool IsInitialized { get; }
+
+            void InitializeComponent();
+        }
+
+        public class InitClass : IInit, IInterface
         {
             public void InitializeComponent()
             {
                 IsInitialized = true;
+                InitializationCount++;
             }
 
             public bool IsInitialized { get; set; }
+            public int InitializationCount { get; private set; }
+        }
+
+        public class InitClass2 : IInit
+        {
+            private readonly IContainer _container;
+
+            public InitClass2(IContainer container, InitClass initClass)
+            {
+                _container = container;
+                InitClass = initClass;
+            }
+
+            public void InitializeComponent()
+            {
+                _container.Resolve<IInit>();
+                IsInitialized = true;
+            }
+
+            public bool IsInitialized { get; set; }
+            public InitClass InitClass { get; }
         }
     }
 }
