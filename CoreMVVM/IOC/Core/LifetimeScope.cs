@@ -106,7 +106,13 @@ namespace CoreMVVM.IOC.Core
             if (isRegistered)
             {
                 if (registration.Scope == InstanceScope.None)
-                    return ConstructFromRegistration(registration, isOwned);
+                {
+                    object instance = ConstructFromRegistration(registration, isOwned);
+                    if (instance != null)
+                        InitializeComponent(instance);
+
+                    return instance;
+                }
 
                 if (isOwned)
                     throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
@@ -127,7 +133,13 @@ namespace CoreMVVM.IOC.Core
             lock (registration)
             {
                 if (!ResolvedInstances.ContainsKey(registration))
-                    ResolvedInstances[registration] = ConstructFromRegistration(registration, isOwned: false);
+                {
+                    object instance = ConstructFromRegistration(registration, isOwned: false);
+                    ResolvedInstances[registration] = instance;
+
+                    if (instance != null)
+                        InitializeComponent(instance);
+                }
 
                 return ResolvedInstances[registration];
             }
@@ -142,9 +154,6 @@ namespace CoreMVVM.IOC.Core
             if (registration.Factory != null)
             {
                 object instance = registration.Factory(this);
-
-                if (instance != null)
-                    InitializeComponent(instance);
 
                 if (!isOwned)
                     RegisterDisposable(instance);
