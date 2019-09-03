@@ -119,8 +119,14 @@ namespace CoreMVVM.IOC.Core
 
                 return ResolveScopedComponent(registration, type);
             }
+            else
+            {
+                object instance = ConstructType(type, isOwned);
+                if (instance != null)
+                    InitializeComponent(instance);
 
-            return ConstructType(type, isOwned);
+                return instance;
+            }
         }
 
         private object ResolveScopedComponent(IRegistration registration, Type type)
@@ -132,16 +138,16 @@ namespace CoreMVVM.IOC.Core
             // Result from scoped components are saved for future resolves.
             lock (registration)
             {
-                if (!ResolvedInstances.ContainsKey(registration))
+                if (!ResolvedInstances.TryGetValue(registration, out object instance))
                 {
-                    object instance = ConstructFromRegistration(registration, isOwned: false);
+                    instance = ConstructFromRegistration(registration, isOwned: false);
                     ResolvedInstances[registration] = instance;
 
                     if (instance != null)
                         InitializeComponent(instance);
                 }
 
-                return ResolvedInstances[registration];
+                return instance;
             }
         }
 
@@ -160,13 +166,16 @@ namespace CoreMVVM.IOC.Core
 
                 return instance;
             }
-            else
-                return ConstructType(registration.Type, isOwned);
+
+            return ConstructType(registration.Type, isOwned);
         }
 
         /// <summary>
         /// Constructs an instance of the given type, using the constructor with the most parameters.
         /// </summary>
+        /// <param name="type">The type of component to construct.</param>
+        /// <param name="isOwned">Indicates if the caller to resolve should own the constructed component,
+        /// instead of this lifetimescope.</param>
         /// <exception cref="ResolveUnregisteredInterfaceException">type is an interface.</exception>
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type, bool isOwned)
@@ -198,7 +207,6 @@ namespace CoreMVVM.IOC.Core
                                            .ToArray();
 
                 object instance = constructor.Invoke(args);
-                InitializeComponent(instance);
 
                 if (!isOwned)
                     RegisterDisposable(instance);
