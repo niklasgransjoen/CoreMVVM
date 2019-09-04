@@ -180,10 +180,15 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
-            // Transform Func<T> into a factory.
+            // Resolve ILifetimeScope
+            if (TryConstructILifetimeScope(type, out ILifetimeScope lifetimeScope))
+                return lifetimeScope;
+
+            // Resolve Func<T> to factory.
             if (TryConstructFactory(type, isOwned, out Func<object> factory))
                 return factory;
 
+            // Resolve Lazy<T>
             if (TryConstructLazy(type, isOwned, out object lazyInstance))
                 return lazyInstance;
 
@@ -227,6 +232,18 @@ namespace CoreMVVM.IOC.Core
                 Resolve<ILogger>().Exception(message, e);
                 throw new ResolveConstructionException(message, e);
             }
+        }
+
+        private bool TryConstructILifetimeScope(Type type, out ILifetimeScope lifetimeScope)
+        {
+            if (type != typeof(ILifetimeScope))
+            {
+                lifetimeScope = null;
+                return false;
+            }
+
+            lifetimeScope = this;
+            return true;
         }
 
         private bool TryConstructFactory(Type factoryType, bool isOwned, out Func<object> factory)

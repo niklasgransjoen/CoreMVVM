@@ -32,6 +32,8 @@ namespace CoreMVVM.Tests.IOC.Core
         }
     }
 
+    #region Scope
+
     [TestFixture]
     public class LifetimeScope_Resolve : LifetimeScopeTestBase
     {
@@ -122,7 +124,7 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
-    public class LifetimeScope_Resolves_LifetimeScope : LifetimeScopeTestBase
+    public class LifetimeScope_Resolve_LifetimeScope : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
@@ -190,6 +192,8 @@ namespace CoreMVVM.Tests.IOC.Core
         }
     }
 
+    #endregion Scope
+
     [TestFixture]
     public class LifetimeScope_Resolve_Factory : LifetimeScopeTestBase
     {
@@ -235,6 +239,23 @@ namespace CoreMVVM.Tests.IOC.Core
             public string Str { get; set; }
         }
     }
+
+    [TestFixture]
+    public class LifetimeScope_Resolve_Self : LifetimeScopeTestBase
+    {
+        [Test]
+        public void LifetimeScope_Resolves_Self()
+        {
+            ILifetimeScope res1 = LifetimeScope.Resolve<ILifetimeScope>();
+            Assert.AreEqual(LifetimeScope, res1);
+
+            ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
+            ILifetimeScope res2 = subscope.Resolve<ILifetimeScope>();
+            Assert.AreEqual(subscope, res2);
+        }
+    }
+
+    #region Generic result
 
     [TestFixture]
     public class LifetimeScope_Resolve_Func : LifetimeScopeTestBase
@@ -384,6 +405,8 @@ namespace CoreMVVM.Tests.IOC.Core
             });
         }
     }
+
+    #endregion Generic result
 
     [TestFixture]
     public class LifetimeScope_Resolve_Unregistered : LifetimeScopeTestBase
