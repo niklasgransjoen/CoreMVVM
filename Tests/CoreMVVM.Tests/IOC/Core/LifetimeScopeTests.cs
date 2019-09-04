@@ -588,11 +588,9 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.AreEqual(1, instance.InitClass.InitializationCount);
         }
 
-        public interface IInit
+        public interface IInit : IComponent
         {
             bool IsInitialized { get; }
-
-            void InitializeComponent();
         }
 
         public class InitClass : IInit, IInterface

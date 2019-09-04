@@ -254,12 +254,10 @@ namespace CoreMVVM.IOC.Core
         /// Invokes the "InitializedComponent" method on the given component, if such a method exists.
         /// </summary>
         /// <param name="component">The component to initialize. Not null.</param>
-        private void InitializeComponent(object component)
+        private void InitializeComponent(object element)
         {
-            MethodInfo method = component.GetType()
-                                         .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
-
-            method?.Invoke(component, null);
+            if (element is IComponent component)
+                component.InitializeComponent();
         }
 
         #endregion Construct methods
