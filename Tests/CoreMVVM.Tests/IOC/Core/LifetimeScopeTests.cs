@@ -266,6 +266,42 @@ namespace CoreMVVM.Tests.IOC.Core
     }
 
     [TestFixture]
+    public class LifetimeScope_Resolve_Lazy : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+            builder.Register<Implementation>().As<IInterface>();
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_Lazy()
+        {
+            Lazy<IInterface> lazyInstance = LifetimeScope.Resolve<Lazy<IInterface>>();
+
+            Assert.IsFalse(lazyInstance.IsValueCreated);
+
+            IInterface instance = lazyInstance.Value;
+
+            Assert.AreEqual(typeof(Implementation), instance.GetType());
+            Assert.IsTrue(lazyInstance.IsValueCreated);
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_LazyFunc()
+        {
+            Lazy<Func<IInterface>> lazyFactory = LifetimeScope.Resolve<Lazy<Func<IInterface>>>();
+
+            Assert.IsFalse(lazyFactory.IsValueCreated);
+
+            Func<IInterface> factory = lazyFactory.Value;
+            Assert.IsTrue(lazyFactory.IsValueCreated);
+
+            IInterface instance = factory();
+            Assert.NotNull(instance);
+        }
+    }
+
+    [TestFixture]
     public class LifetimeScope_Resolve_Owned : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)

@@ -184,6 +184,9 @@ namespace CoreMVVM.IOC.Core
             if (TryConstructFactory(type, isOwned, out Func<object> factory))
                 return factory;
 
+            if (TryConstructLazy(type, isOwned, out object lazyInstance))
+                return lazyInstance;
+
             // Switch out any IOwned<> (or implementation) with Owned<>
             bool implementsIOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
             if (implementsIOwned)
@@ -226,21 +229,57 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        private bool TryConstructFactory(Type type, bool isOwned, out Func<object> factory)
+        private bool TryConstructFactory(Type factoryType, bool isOwned, out Func<object> factory)
         {
-            bool isFactory = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>);
+            bool isFactory = factoryType.IsGenericType && factoryType.GetGenericTypeDefinition() == typeof(Func<>);
             if (!isFactory)
             {
                 factory = null;
                 return false;
             }
 
-            Type resultType = type.GenericTypeArguments[0];
+            Type resultType = factoryType.GenericTypeArguments[0];
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);
             Expression convertedResult = Expression.Convert(factoryBody, resultType);
 
-            factory = (Func<object>)Expression.Lambda(type, convertedResult).Compile();
+            factory = (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
+            return true;
+        }
+
+        private bool TryConstructLazy(Type type, bool isOwned, out object lazyInstance)
+        {
+            bool isLazy = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Lazy<>);
+            if (!isLazy)
+            {
+                lazyInstance = null;
+                return false;
+            }
+
+            ConstructorInfo[] constructors = type.GetConstructors();
+
+            ConstructorInfo constructor = null;
+            ParameterInfo parameter = null;
+            foreach (ConstructorInfo c in constructors)
+            {
+                ParameterInfo[] parameters = c.GetParameters();
+                if (parameters.Length == 1)
+                {
+                    Type paramType = parameters[0].ParameterType;
+                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>))
+                    {
+                        constructor = c;
+                        parameter = parameters[0];
+
+                        break;
+                    }
+                }
+            }
+
+            TryConstructFactory(parameter.ParameterType, isOwned, out Func<object> factory);
+            object[] args = new object[] { factory };
+
+            lazyInstance = constructor.Invoke(args);
             return true;
         }
 
