@@ -134,7 +134,7 @@ namespace CoreMVVM
 
         public void RaiseCanExecute()
         {
-            _canExecuteChanged?.Invoke(this, new EventArgs());
+            _canExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -269,7 +269,7 @@ namespace CoreMVVM
 
         public void RaiseCanExecute()
         {
-            _canExecuteChanged?.Invoke(this, new EventArgs());
+            _canExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
