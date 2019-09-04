@@ -124,7 +124,7 @@ namespace CoreMVVM.Windows
 
             if (view is DependencyObject depObj)
             {
-                ContainerPropertyExtention.SetContainer(depObj, _container);
+                LifetimeScopePropertyExtention.SetLifetimeScope(depObj, _container);
 
                 if (view is FrameworkElement frameworkElement)
                     frameworkElement.DataContext = viewModel;
