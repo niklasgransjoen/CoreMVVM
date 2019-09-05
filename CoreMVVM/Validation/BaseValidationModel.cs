@@ -2,11 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace CoreMVVM.Windows
+namespace CoreMVVM.Validation
 {
     /// <summary>
     /// A base class for ViewModels that require validation. Use <see cref="BaseModel"/> instead if no validation is required.
@@ -15,7 +14,7 @@ namespace CoreMVVM.Windows
     {
         #region Fields
 
-        private readonly Dictionary<string, List<string>> _errors = new Dictionary<string, List<string>>();
+        private readonly Dictionary<string, IEnumerable<string>> _errors = new Dictionary<string, IEnumerable<string>>();
 
         #endregion Fields
 
@@ -38,7 +37,7 @@ namespace CoreMVVM.Windows
         /// <summary>
         /// Gets a value indicating if this validation model has any validation errors.
         /// </summary>
-        public bool HasErrors => _errors.Any();
+        public bool HasErrors => _errors.Count > 0;
 
         #endregion Public properties
 
@@ -51,10 +50,14 @@ namespace CoreMVVM.Windows
         /// to retrieve entity-level errors.</param>
         public IEnumerable GetErrors(string propertyName)
         {
-            if (propertyName == null)
+            if (string.IsNullOrEmpty(propertyName))
                 return _errors.SelectMany(e => e.Value);
-            else
-                return _errors.ContainsKey(propertyName) ? _errors[propertyName] : new List<string>();
+
+            bool result = _errors.TryGetValue(propertyName, out IEnumerable<string> errors);
+            if (result)
+                return errors;
+
+            return Enumerable.Empty<string>();
         }
 
         #endregion Public methods
@@ -78,30 +81,32 @@ namespace CoreMVVM.Windows
 
             property = value;
             RaisePropertyChanged(propertyName);
-            ValidateProperty(propertyName, value);
+            ValidateProperty(propertyName);
             return true;
         }
 
         /// <summary>
         /// Validates a property.
         /// </summary>
-        /// <typeparam name="T">The type of the property.</typeparam>
         /// <param name="propertyName">The name of the property to validate.</param>
-        /// <param name="value">The value of the property.</param>
-        protected virtual void ValidateProperty<T>(string propertyName, T value)
+        protected void ValidateProperty(string propertyName)
         {
-            List<ValidationResult> results = new List<ValidationResult>();
+            ValidationContext context = new ValidationContext(this, propertyName);
+            ValidationResult[] results = Validator.Validate(context);
 
-            ValidationContext context = new ValidationContext(this) { MemberName = propertyName };
-            Validator.TryValidateProperty(value, context, results);
+            var groupedResult = results.GroupBy(r => r.PropertyName);
+            foreach (var result in groupedResult)
+            {
+                _errors[result.Key] = result.Where(r => !r.IsSuccess).Select(r => r.ErrorMessage);
 
-            if (results.Count > 0)
-                _errors[propertyName] = results.Select(c => c.ErrorMessage).ToList();
-            else
-                _errors.Remove(propertyName);
-
-            RaiseErrorsChanged(propertyName);
+                RaiseErrorsChanged(result.Key);
+            }
         }
+
+        /// <summary>
+        /// Validates all properties.
+        /// </summary>
+        protected void ValidateAllProperties() => ValidateProperty(null);
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on a property.

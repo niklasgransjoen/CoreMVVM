@@ -98,10 +98,19 @@ namespace CoreMVVM.Tests.IOC.Builder
 
         #endregion Lifetime scope
 
+        [Test]
+        public void Builder_ThrowsOn_ConflictingTypes()
+        {
+            IRegistrationBuilder regBuilder = _builder.Register<Class>();
+
+            Assert.Throws<IncompatibleTypeException>(() => regBuilder.As<IInterface>());
+        }
+
         [TestCaseSource(nameof(GetConflictingBuilders))]
-        public void Builder_ThrowsOnConflictingScope((Action reg1, Action reg2) data)
+        public void Builder_ThrowsOn_ConflictingScope((Action reg1, Action reg2) data)
         {
             data.reg1();
+
             Assert.Throws<ScopingConflictException>(() => data.reg2());
         }
 

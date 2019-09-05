@@ -180,9 +180,17 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
-            // Transform Func<T> into a factory.
+            // Resolve ILifetimeScope
+            if (TryConstructILifetimeScope(type, out ILifetimeScope lifetimeScope))
+                return lifetimeScope;
+
+            // Resolve Func<T> to factory.
             if (TryConstructFactory(type, isOwned, out Func<object> factory))
                 return factory;
+
+            // Resolve Lazy<T>
+            if (TryConstructLazy(type, isOwned, out object lazyInstance))
+                return lazyInstance;
 
             // Switch out any IOwned<> (or implementation) with Owned<>
             bool implementsIOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
@@ -226,21 +234,69 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        private bool TryConstructFactory(Type type, bool isOwned, out Func<object> factory)
+        private bool TryConstructILifetimeScope(Type type, out ILifetimeScope lifetimeScope)
         {
-            bool isFactory = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Func<>);
+            if (type != typeof(ILifetimeScope))
+            {
+                lifetimeScope = null;
+                return false;
+            }
+
+            lifetimeScope = this;
+            return true;
+        }
+
+        private bool TryConstructFactory(Type factoryType, bool isOwned, out Func<object> factory)
+        {
+            bool isFactory = factoryType.IsGenericType && factoryType.GetGenericTypeDefinition() == typeof(Func<>);
             if (!isFactory)
             {
                 factory = null;
                 return false;
             }
 
-            Type resultType = type.GenericTypeArguments[0];
+            Type resultType = factoryType.GenericTypeArguments[0];
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);
             Expression convertedResult = Expression.Convert(factoryBody, resultType);
 
-            factory = (Func<object>)Expression.Lambda(type, convertedResult).Compile();
+            factory = (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
+            return true;
+        }
+
+        private bool TryConstructLazy(Type type, bool isOwned, out object lazyInstance)
+        {
+            bool isLazy = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Lazy<>);
+            if (!isLazy)
+            {
+                lazyInstance = null;
+                return false;
+            }
+
+            ConstructorInfo[] constructors = type.GetConstructors();
+
+            ConstructorInfo constructor = null;
+            ParameterInfo parameter = null;
+            foreach (ConstructorInfo c in constructors)
+            {
+                ParameterInfo[] parameters = c.GetParameters();
+                if (parameters.Length == 1)
+                {
+                    Type paramType = parameters[0].ParameterType;
+                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>))
+                    {
+                        constructor = c;
+                        parameter = parameters[0];
+
+                        break;
+                    }
+                }
+            }
+
+            TryConstructFactory(parameter.ParameterType, isOwned, out Func<object> factory);
+            object[] args = new object[] { factory };
+
+            lazyInstance = constructor.Invoke(args);
             return true;
         }
 
@@ -254,12 +310,10 @@ namespace CoreMVVM.IOC.Core
         /// Invokes the "InitializedComponent" method on the given component, if such a method exists.
         /// </summary>
         /// <param name="component">The component to initialize. Not null.</param>
-        private void InitializeComponent(object component)
+        private void InitializeComponent(object element)
         {
-            MethodInfo method = component.GetType()
-                                         .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
-
-            method?.Invoke(component, null);
+            if (element is IComponent component)
+                component.InitializeComponent();
         }
 
         #endregion Construct methods

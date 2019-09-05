@@ -1,7 +1,7 @@
-﻿using System.ComponentModel;
+﻿using CoreMVVM.IOC;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using IContainer = CoreMVVM.IOC.IContainer;
 
 namespace CoreMVVM.Windows
 {
@@ -58,22 +58,18 @@ namespace CoreMVVM.Windows
 
         private void UpdateView()
         {
-            IContainer container = GetContainer();
-            if (container != null)
-                Content = container.Resolve<IViewLocator>().GetView(ViewModel);
+            if (ViewModel != null)
+            {
+                LifetimeScopePropertyExtention.TryFindLifetimeScope(this, out ILifetimeScope lifetimeScope);
+                if (lifetimeScope != null)
+                    Content = lifetimeScope.Resolve<IViewLocator>().GetView(ViewModel);
+                else
+                    Content = ViewModel;
+            }
             else
-                Content = ViewModel;
+            {
+                Content = null;
+            }
         }
-
-        private IContainer GetContainer()
-        {
-            if (ViewModel == null)
-                return null;
-
-            ContainerPropertyExtention.TryFindContainer(this, out IContainer container);
-            return container;
-        }
-
- 
     }
 }
