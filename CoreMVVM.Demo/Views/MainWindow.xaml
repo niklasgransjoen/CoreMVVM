@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CoreMVVM.Demo"
         xmlns:windows="clr-namespace:CoreMVVM.Windows;assembly=CoreMVVM.Windows"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
@@ -26,7 +25,8 @@
             <Button Content="Log" Command="{Binding LogCommand}" />
             <Button Content="Error" Command="{Binding ErrorCommand}" />
             <Button Content="Exception" Command="{Binding ExceptionCommand}" />
-            <Button Content="Show dialog" Command="{Binding ShowDialogCommand}" />
+            <Button Content="Show dialog 1" Command="{Binding ShowDialog1Command}" />
+            <Button Content="Show dialog 2" Command="{Binding ShowDialog2Command}" />
         </StackPanel>
 
         <!--Log-->

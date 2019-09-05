@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseValidationModel.cs" />
+    <Compile Include="DialogBase.cs" />
     <Compile Include="LifetimeScopePropertyExtention.cs" />
     <Compile Include="IWindowManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
