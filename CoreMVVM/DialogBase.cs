@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CoreMVVM.Validation;
+using System;
 using System.Threading.Tasks;
 
-namespace CoreMVVM.Windows
+namespace CoreMVVM
 {
     /// <summary>
     /// Base for dialog view models.

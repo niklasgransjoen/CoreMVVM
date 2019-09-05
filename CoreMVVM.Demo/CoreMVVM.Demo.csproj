@@ -57,6 +57,7 @@
     </ApplicationDefinition>
     <Compile Include="ScreenPrinter.cs" />
     <Compile Include="DialogWindowModel.cs" />
+    <Compile Include="Validation\UsernameValidationAttribute.cs" />
     <Compile Include="ViewModels\DemoDialogViewModel.cs" />
     <Compile Include="ViewModels\MainWindowModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
