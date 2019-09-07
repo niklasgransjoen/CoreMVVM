@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using CoreMVVM.Windows;
+using System.Windows.Input;
 
 namespace CoreMVVM.Demo
 {
