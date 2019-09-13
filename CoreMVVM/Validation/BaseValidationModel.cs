@@ -97,7 +97,11 @@ namespace CoreMVVM.Validation
             var groupedResult = results.GroupBy(r => r.PropertyName);
             foreach (var result in groupedResult)
             {
-                _errors[result.Key] = result.Where(r => !r.IsSuccess).Select(r => r.ErrorMessage);
+                var validationErrors = result.Where(r => !r.IsSuccess);
+                if (validationErrors.Any())
+                    _errors[result.Key] = validationErrors.Select(r => r.ErrorMessage);
+                else
+                    _errors.Remove(result.Key);
 
                 RaiseErrorsChanged(result.Key);
             }
