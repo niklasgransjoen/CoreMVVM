@@ -2,13 +2,17 @@
 
 root = true
 
+[*.cs]
 # Naming styles
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 
 dotnet_naming_style.underscore_camel_case_style.capitalization = camel_case
 dotnet_naming_style.underscore_camel_case_style.required_prefix = _
 
-[*.cs]
+dotnet_naming_style.interface_pascal_case.capitalization = pascal_case
+dotnet_naming_style.interface_pascal_case.required_prefix = I
+
+
 # Constants are to be styles as PascalCase
 dotnet_naming_rule.constants_pascal_cased.symbols = constant_symbols
 
@@ -43,5 +47,5 @@ dotnet_naming_rule.interfaces_begins_with_i.symbols = interface_symbols
 dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
 dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
 
-dotnet_naming_rule.interfaces_begins_with_i.style = pascal_case_style
+dotnet_naming_rule.interfaces_begins_with_i.style = interface_pascal_case
 dotnet_naming_rule.interfaces_begins_with_i.severity = suggestion
