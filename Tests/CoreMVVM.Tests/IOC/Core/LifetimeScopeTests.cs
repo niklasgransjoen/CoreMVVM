@@ -654,7 +654,7 @@ namespace CoreMVVM.Tests.IOC.Core
 
         public class InitClass : IInit, IInterface
         {
-            public void InitializeComponent()
+            public void InitializeComponent(ILifetimeScope lifetimeScope)
             {
                 IsInitialized = true;
                 InitializationCount++;
@@ -666,17 +666,14 @@ namespace CoreMVVM.Tests.IOC.Core
 
         public class InitClass2 : IInit
         {
-            private readonly IContainer _container;
-
-            public InitClass2(IContainer container, InitClass initClass)
+            public InitClass2(InitClass initClass)
             {
-                _container = container;
                 InitClass = initClass;
             }
 
-            public void InitializeComponent()
+            public void InitializeComponent(ILifetimeScope lifetimeScope)
             {
-                _container.Resolve<IInit>();
+                lifetimeScope.Resolve<IInit>();
                 IsInitialized = true;
             }
 

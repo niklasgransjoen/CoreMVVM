@@ -117,7 +117,7 @@ namespace CoreMVVM.IOC.Core
                 if (isOwned)
                     throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
 
-                return ResolveScopedComponent(registration, type);
+                return ResolveScopedComponent(registration);
             }
             else
             {
@@ -129,11 +129,11 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        private object ResolveScopedComponent(IRegistration registration, Type type)
+        private object ResolveScopedComponent(IRegistration registration)
         {
             // Singletons should only be resolved by root.
             if (registration.Scope == InstanceScope.Singleton && _parent != null)
-                return _parent.ResolveScopedComponent(registration, type);
+                return _parent.ResolveScopedComponent(registration);
 
             // Result from scoped components are saved for future resolves.
             lock (registration)
@@ -309,11 +309,11 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Invokes the "InitializedComponent" method on the given component, if such a method exists.
         /// </summary>
-        /// <param name="component">The component to initialize. Not null.</param>
+        /// <param name="element">The component to initialize. Not null.</param>
         private void InitializeComponent(object element)
         {
             if (element is IComponent component)
-                component.InitializeComponent();
+                component.InitializeComponent(this);
         }
 
         #endregion Construct methods
