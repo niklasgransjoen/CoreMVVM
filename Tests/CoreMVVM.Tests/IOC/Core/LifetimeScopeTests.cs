@@ -303,7 +303,34 @@ namespace CoreMVVM.Tests.IOC.Core
 
             IInterface instance = lazyInstance.Value;
 
-            Assert.AreEqual(typeof(Implementation), instance.GetType());
+            Assert.IsInstanceOf(typeof(Implementation), instance);
+            Assert.IsTrue(lazyInstance.IsValueCreated);
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_UnregistratedLazy()
+        {
+            Lazy<Class> lazyInstance = LifetimeScope.Resolve<Lazy<Class>>();
+
+            Assert.IsFalse(lazyInstance.IsValueCreated);
+
+            Class instance = lazyInstance.Value;
+
+            Assert.IsInstanceOf(typeof(Class), instance);
+            Assert.IsTrue(lazyInstance.IsValueCreated);
+        }
+
+        [Test]
+        public void LifetimeScope_Resolves_UnregistratedLazyWithParameters()
+        {
+            Lazy<MyClass> lazyInstance = LifetimeScope.Resolve<Lazy<MyClass>>();
+
+            Assert.IsFalse(lazyInstance.IsValueCreated);
+
+            MyClass instance = lazyInstance.Value;
+
+            Assert.IsInstanceOf(typeof(MyClass), instance);
+            Assert.NotNull(instance.C);
             Assert.IsTrue(lazyInstance.IsValueCreated);
         }
 
@@ -319,6 +346,16 @@ namespace CoreMVVM.Tests.IOC.Core
 
             IInterface instance = factory();
             Assert.NotNull(instance);
+        }
+
+        private sealed class MyClass
+        {
+            public MyClass(Class c)
+            {
+                C = c;
+            }
+
+            public Class C { get; }
         }
     }
 
@@ -458,15 +495,7 @@ namespace CoreMVVM.Tests.IOC.Core
         [Test]
         public void LifetimeScope_Throws_ResolveUnregisteredInterface()
         {
-            try
-            {
-                LifetimeScope.Resolve<IInterface>();
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.AreEqual(typeof(ResolveUnregisteredInterfaceException), e.GetType());
-            }
+            Assert.Throws<ResolveUnregisteredInterfaceException>(() => LifetimeScope.Resolve<IInterface>());
         }
 
         [Test]
@@ -647,12 +676,12 @@ namespace CoreMVVM.Tests.IOC.Core
             Assert.AreEqual(1, instance.InitClass.InitializationCount);
         }
 
-        public interface IInit : IComponent
+        private interface IInit : IComponent
         {
             bool IsInitialized { get; }
         }
 
-        public class InitClass : IInit, IInterface
+        private class InitClass : IInit, IInterface
         {
             public void InitializeComponent(ILifetimeScope lifetimeScope)
             {
@@ -664,7 +693,7 @@ namespace CoreMVVM.Tests.IOC.Core
             public int InitializationCount { get; private set; }
         }
 
-        public class InitClass2 : IInit
+        private class InitClass2 : IInit
         {
             public InitClass2(InitClass initClass)
             {
