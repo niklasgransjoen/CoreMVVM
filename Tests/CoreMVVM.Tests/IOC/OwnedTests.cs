@@ -1,13 +1,13 @@
-﻿using CoreMVVM.IOC;
-using CoreMVVM.IOC.Builder;
-using NUnit.Framework;
+﻿using CoreMVVM.IOC.Builder;
+using CoreMVVM.Tests;
+using System;
+using Xunit;
 
-namespace CoreMVVM.Tests.IOC
+namespace CoreMVVM.IOC.Tests
 {
-    [TestFixture]
     public class OwnedTests
     {
-        [Test]
+        [Fact]
         public void Owned_Downcasts()
         {
             ContainerBuilder builder = new ContainerBuilder();
@@ -15,10 +15,11 @@ namespace CoreMVVM.Tests.IOC
             IContainer container = builder.Build();
 
             IOwned<IInterface> instance = container.Resolve<IOwned<IInterface>>();
-            Assert.DoesNotThrow(() =>
+            Exception e = Record.Exception(() =>
             {
                 IOwned<object> downcastOwned = instance;
             });
+            Assert.Null(e);
         }
     }
 }

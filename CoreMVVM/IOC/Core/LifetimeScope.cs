@@ -255,13 +255,18 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
+            factory = ConstructFactory(factoryType, isOwned);
+            return true;
+        }
+
+        private Func<object> ConstructFactory(Type factoryType, bool isOwned)
+        {
             Type resultType = factoryType.GenericTypeArguments[0];
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);
             Expression convertedResult = Expression.Convert(factoryBody, resultType);
 
-            factory = (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
-            return true;
+            return (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
         }
 
         private bool TryConstructLazy(Type type, bool isOwned, out object lazyInstance)
@@ -273,6 +278,12 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
+            lazyInstance = ConstructLazy(type, isOwned);
+            return true;
+        }
+
+        private object ConstructLazy(Type type, bool isOwned)
+        {
             ConstructorInfo[] constructors = type.GetConstructors();
 
             ConstructorInfo constructor = null;
@@ -283,7 +294,8 @@ namespace CoreMVVM.IOC.Core
                 if (parameters.Length == 1)
                 {
                     Type paramType = parameters[0].ParameterType;
-                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>))
+                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>) &&
+                        paramType.GenericTypeArguments[0] == type.GenericTypeArguments[0])
                     {
                         constructor = c;
                         parameter = parameters[0];
@@ -293,11 +305,10 @@ namespace CoreMVVM.IOC.Core
                 }
             }
 
-            TryConstructFactory(parameter.ParameterType, isOwned, out Func<object> factory);
+            Func<object> factory = ConstructFactory(parameter.ParameterType, isOwned);
             object[] args = new object[] { factory };
 
-            lazyInstance = constructor.Invoke(args);
-            return true;
+            return constructor.Invoke(args);
         }
 
         private void RegisterDisposable(object instance)

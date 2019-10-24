@@ -1,13 +1,10 @@
-﻿using CoreMVVM.IOC;
-using CoreMVVM.IOC.Builder;
-using NUnit.Framework;
+﻿using Xunit;
 
-namespace CoreMVVM.Tests.IOC.Builder
+namespace CoreMVVM.IOC.Builder.Tests
 {
-    [TestFixture]
     public class RegistrationBuilderTests
     {
-        [Test]
+        [Fact]
         public void RegistrationBuilder_OverridesOnDuplicate()
         {
             ContainerBuilder builder = new ContainerBuilder();
@@ -16,7 +13,7 @@ namespace CoreMVVM.Tests.IOC.Builder
             IContainer container = builder.Build();
 
             var instance = container.Resolve<ISimple>();
-            Assert.AreEqual(typeof(Impl2), instance.GetType());
+            Assert.IsType<Impl2>(instance);
         }
 
         private interface ISimple { }
