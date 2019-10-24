@@ -1,15 +1,13 @@
-﻿using CoreMVVM.Windows.Threading;
-using NUnit.Framework;
-using System.Security.Permissions;
+﻿using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Xunit;
 
-namespace CoreMVVM.Windows.Tests
+namespace CoreMVVM.Windows.Threading.Tests
 {
-    [TestFixture]
     public sealed class TaskMasterTests
     {
-        [Test]
+        [Fact]
         public async Task SwitchesThread()
         {
             Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
@@ -41,7 +39,7 @@ namespace CoreMVVM.Windows.Tests
         /// <summary>
         /// Utility for executing the dispatcher queue.
         /// </summary>
-        public static class DispatcherUtil
+        private static class DispatcherUtil
         {
             [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
             public static void DoEvents()

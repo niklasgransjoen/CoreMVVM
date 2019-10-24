@@ -11,10 +11,10 @@ namespace CoreMVVM.Windows
     {
         protected IContainer Container { get; private set; }
 
-        public WindowsApplication()
+        protected WindowsApplication()
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-            Application.Current.DispatcherUnhandledException += OnDispatcherUnhandledException;
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         }
 

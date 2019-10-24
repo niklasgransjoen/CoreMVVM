@@ -1,20 +1,19 @@
 ﻿using CoreMVVM.IOC.Builder;
-using NUnit.Framework;
 using System.Windows;
+using Xunit;
 
 namespace CoreMVVM.Windows.Tests
 {
-    [TestFixture]
     public class WindowsApplicationTests
     {
-        [Test]
+        [Fact]
         public void WindowsApplication_Disposes_Container()
         {
             TestApp app = new TestApp();
 
-            Assert.IsFalse(app.ContainerIsDisposed);
+            Assert.False(app.ContainerIsDisposed);
             app.Run();
-            Assert.IsTrue(app.ContainerIsDisposed);
+            Assert.True(app.ContainerIsDisposed);
         }
 
         private class TestApp : WindowsApplication
