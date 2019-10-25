@@ -15,6 +15,8 @@ namespace CoreMVVM.Threading
 
         #region Constructors
 
+        public static RebelTask CompletedTask => new RebelTask(Task.CompletedTask);
+
         public RebelTask(Task task)
         {
             _task = task;

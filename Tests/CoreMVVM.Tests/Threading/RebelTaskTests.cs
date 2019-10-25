@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace CoreMVVM.Threading.Tests
@@ -18,6 +19,18 @@ namespace CoreMVVM.Threading.Tests
             Assert.Equal("WHAT'S UP DANGER", res2);
         }
 
+        [Fact]
+        public async Task RebelTask_Awaits_CompleteTask()
+        {
+            int threadID = Thread.CurrentThread.ManagedThreadId;
+
+            await RebelTask.CompletedTask;
+
+            int currentThreadID = Thread.CurrentThread.ManagedThreadId;
+            Assert.Equal(threadID, currentThreadID);
+        }
+
+        #region Tools
         private RebelTask Await1()
         {
             return Task.Delay(1);
@@ -37,6 +50,7 @@ namespace CoreMVVM.Threading.Tests
         {
             await Task.Yield();
             return "WHAT'S UP DANGER";
-        }
+        } 
+        #endregion
     }
 }
