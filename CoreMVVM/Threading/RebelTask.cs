@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.CompilerServices;
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace CoreMVVM.Threading
@@ -178,6 +179,13 @@ namespace CoreMVVM.Threading
         {
             if (_task is null)
                 return _result;
+
+            if (_task.Exception != null)
+            {
+                Exception taskException = _task.Exception.InnerException;
+                ExceptionDispatchInfo.Capture(taskException).Throw();
+                throw taskException; // Is never called.
+            }
 
             return _task.Result;
         }
