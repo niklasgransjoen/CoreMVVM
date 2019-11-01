@@ -9,7 +9,7 @@ namespace CoreMVVM.Threading
     /// A task that does not continue on the captured context as default.
     /// </summary>
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder))]
-    public readonly struct RebelTask
+    public readonly struct RebelTask : IEquatable<RebelTask>
     {
         private readonly Task _task;
 
@@ -56,16 +56,21 @@ namespace CoreMVVM.Threading
 
         public override bool Equals(object obj)
         {
-            if (!(obj is RebelTask task))
+            if (!(obj is RebelTask other))
                 return false;
 
-            return _task == task._task;
+            return Equals(other);
+        }
+
+        public bool Equals(RebelTask other)
+        {
+            return _task == other._task;
         }
 
         public override int GetHashCode()
         {
             int hash = 17;
-            hash = (hash * 7) + _task?.GetHashCode() ?? 13;
+            hash = (hash * 7) + GetTaskOrComplete().GetHashCode();
 
             return hash;
         }
@@ -92,7 +97,7 @@ namespace CoreMVVM.Threading
     /// A task that does not continue on the captured context as default.
     /// </summary>
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder<>))]
-    public readonly struct RebelTask<TResult> : INotifyCompletion
+    public readonly struct RebelTask<TResult> : INotifyCompletion, IEquatable<RebelTask<TResult>>
     {
         private readonly Task<TResult> _task;
         private readonly TResult _result;
@@ -171,7 +176,7 @@ namespace CoreMVVM.Threading
         /// </summary>
         public TResult GetResult()
         {
-            if (_task == null)
+            if (_task is null)
                 return _result;
 
             return _task.Result;
@@ -183,18 +188,27 @@ namespace CoreMVVM.Threading
 
         public override bool Equals(object obj)
         {
-            if (!(obj is RebelTask<TResult> task))
+            if (!(obj is RebelTask<TResult> other))
                 return false;
 
-            if (_result == null && task._result == null)
-            {
-                return _task == task._task;
-            }
+            return Equals(other);
+        }
 
-            if (_result == null ^ _result == null)
+        public bool Equals(RebelTask<TResult> other)
+        {
+            if (_task != null && other._task != null)
+                return _task == other._task;
+
+            if (_task == null ^ other._task == null)
                 return false;
 
-            return _result.Equals(_result);
+            if (_result == null && other._result == null)
+                return true;
+
+            if (_result == null ^ other._result == null)
+                return false;
+
+            return _result.Equals(other._result);
         }
 
         public override int GetHashCode()
