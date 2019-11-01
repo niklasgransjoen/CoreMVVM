@@ -171,7 +171,7 @@ namespace CoreMVVM.Threading
         /// </summary>
         public TResult GetResult()
         {
-            if (_result != null)
+            if (_task == null)
                 return _result;
 
             return _task.Result;

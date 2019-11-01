@@ -30,7 +30,36 @@ namespace CoreMVVM.Threading.Tests
             Assert.Equal(threadID, currentThreadID);
         }
 
+        [Fact]
+        public async Task RebelTask_Returns_WrappedResult()
+        {
+            string strExp = "JOIN THE ASCENDENCY!";
+            string strRes = await RebelTask.FromResult(strExp);
+
+            Assert.Equal(strExp, strRes);
+
+            bool boolExp = true;
+            bool boolRes = await RebelTask.FromResult(boolExp);
+
+            Assert.Equal(boolExp, boolRes);
+        }
+
+        [Fact]
+        public async Task RebelTask_Returns_Result()
+        {
+            string strExp = "JOIN THE ASCENDENCY!";
+            string strRes = await new RebelTask<string>(Task.Run(() => strExp));
+
+            Assert.Equal(strExp, strRes);
+
+            bool boolExp = true;
+            bool boolRes = await new RebelTask<bool>(Task.Run(() => boolExp));
+
+            Assert.Equal(boolExp, boolRes);
+        }
+
         #region Tools
+
         private RebelTask Await1()
         {
             return Task.Delay(1);
@@ -50,7 +79,8 @@ namespace CoreMVVM.Threading.Tests
         {
             await Task.Yield();
             return "WHAT'S UP DANGER";
-        } 
-        #endregion
+        }
+
+        #endregion Tools
     }
 }
