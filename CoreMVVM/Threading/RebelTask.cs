@@ -1,5 +1,8 @@
 ﻿using CoreMVVM.CompilerServices;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
@@ -16,7 +19,7 @@ namespace CoreMVVM.Threading
 
         #region Constructors
 
-        public static RebelTask CompletedTask => new RebelTask(Task.CompletedTask);
+        public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
 
         public RebelTask(Task task)
         {
@@ -26,6 +29,36 @@ namespace CoreMVVM.Threading
         public static RebelTask<TResult> FromResult<TResult>(TResult result)
         {
             return new RebelTask<TResult>(result);
+        }
+
+        [DebuggerStepThrough]
+        public static RebelTask Run(Func<Task> task)
+        {
+            return task();
+        }
+
+        [DebuggerStepThrough]
+        public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> task)
+        {
+            return task();
+        }
+
+        [DebuggerStepThrough]
+        public static RebelTask Delay(int millisecondsDelay)
+        {
+            Task result = Task.Delay(millisecondsDelay);
+
+            return new RebelTask(result);
+        }
+
+        [DebuggerStepThrough]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Throw single aggregate exception")]
+        public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
+        {
+            IEnumerable<Task> wrappedTasks = tasks.Select(t => t._task);
+            Task result = Task.WhenAll(wrappedTasks);
+
+            return new RebelTask(result);
         }
 
         #endregion Constructors
@@ -107,27 +140,14 @@ namespace CoreMVVM.Threading
 
         public RebelTask(Task<TResult> task)
         {
-            if (task.IsCompleted)
-            {
-                _task = null;
-                _result = task.Result;
-            }
-            else
-            {
-                _task = task;
-                _result = default;
-            }
+            _task = task;
+            _result = default;
         }
 
         public RebelTask(TResult result)
         {
             _task = null;
             _result = result;
-        }
-
-        public static RebelTask<T> FromResult<T>(T result)
-        {
-            return new RebelTask<T>(result);
         }
 
         #endregion Constructors
@@ -157,7 +177,7 @@ namespace CoreMVVM.Threading
         {
             get
             {
-                if (_result != null)
+                if (_task is null)
                     return true;
 
                 return _task.IsCompleted;
@@ -166,7 +186,7 @@ namespace CoreMVVM.Threading
 
         public void OnCompleted(Action continuation)
         {
-            if (_result != null)
+            if (IsCompleted)
                 continuation();
             else
                 _task.ConfigureAwait(false).GetAwaiter().OnCompleted(continuation);
