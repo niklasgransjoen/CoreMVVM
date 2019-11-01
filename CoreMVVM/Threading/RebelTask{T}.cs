@@ -142,6 +142,14 @@ namespace CoreMVVM.Threading
             return new RebelTask<TResult>(task);
         }
 
+        public static implicit operator RebelTask(RebelTask<TResult> rebelTask)
+        {
+            if (rebelTask._task is null)
+                return new RebelTask(Task.FromResult(rebelTask._result));
+
+            return new RebelTask(rebelTask._task);
+        }
+
         #endregion Operators
     }
 }
