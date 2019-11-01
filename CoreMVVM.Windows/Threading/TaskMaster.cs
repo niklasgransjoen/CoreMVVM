@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -37,5 +39,10 @@ namespace CoreMVVM.Windows.Threading
         {
             return new ThreadPoolThreadSwitcher();
         }
+
+        /// <summary>
+        /// Yields back to the current context.
+        /// </summary>
+        public static YieldAwaitable Yield() => Task.Yield();
     }
 }
