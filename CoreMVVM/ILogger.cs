@@ -1,10 +1,13 @@
-﻿using System;
+﻿using CoreMVVM.Implementations;
+using CoreMVVM.IOC;
+using System;
 
 namespace CoreMVVM
 {
     /// <summary>
     /// Implements logic for logging events and exceptions.
     /// </summary>
+    [FallbackImplementation(typeof(ConsoleLogger))]
     public interface ILogger
     {
         /// <summary>

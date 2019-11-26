@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreMVVM.IOC.Core;
+using System;
 using System.Linq;
 
 namespace CoreMVVM.IOC.Builder

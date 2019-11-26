@@ -1,7 +1,8 @@
 ﻿using CoreMVVM.Extentions;
-using CoreMVVM.IOC.Builder;
+using CoreMVVM.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,20 +11,22 @@ namespace CoreMVVM.IOC.Core
 {
     internal class LifetimeScope : ILifetimeScope
     {
-        private readonly IReadOnlyDictionary<Type, IRegistration> _registeredTypes;
+        private readonly ToolBox _toolBox;
         private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
         private readonly LifetimeScope _parent;
+        private readonly IResolveUnregisteredInterfaceService _resolveUnregisteredInterfaceService;
 
         private readonly object _disposeLock = new object();
 
-        public LifetimeScope(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
+        public LifetimeScope(ToolBox toolBox)
         {
-            _registeredTypes = registeredTypes;
+            _toolBox = toolBox;
+            _resolveUnregisteredInterfaceService = Resolve<IResolveUnregisteredInterfaceService>();
         }
 
-        public LifetimeScope(IReadOnlyDictionary<Type, IRegistration> registeredTypes, LifetimeScope parent)
+        public LifetimeScope(ToolBox toolBox, LifetimeScope parent)
+            : this(toolBox)
         {
-            _registeredTypes = registeredTypes;
             _parent = parent;
         }
 
@@ -65,7 +68,7 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            ILifetimeScope childScope = new LifetimeScope(_registeredTypes, this);
+            ILifetimeScope childScope = new LifetimeScope(_toolBox, this);
             _disposables.Add(childScope);
 
             return childScope;
@@ -102,7 +105,7 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
+            bool isRegistered = _toolBox.TryGetRegistration(type, out IRegistration registration);
             if (isRegistered)
             {
                 if (registration.Scope == InstanceScope.None)
@@ -197,22 +200,43 @@ namespace CoreMVVM.IOC.Core
             if (implementsIOwned)
                 type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
 
+            // Check if type is unregistered interface.
             if (type.IsInterface)
-                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{type}'.");
+            {
+                var context = new ResolveUnregisteredInterfaceContext(type);
+                _resolveUnregisteredInterfaceService.Handle(context);
 
+                if (context.InterfaceImplementationType is null)
+                    throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
+
+                if (context.CacheImplementation)
+                    _toolBox.AddRegistration(type, new Registration(context.InterfaceImplementationType));
+
+                return ConstructType(context.InterfaceImplementationType, isOwned);
+            }
+
+            // Construct type.
             try
             {
-                ConstructorInfo[] constructors = type.GetConstructors();
-                if (constructors.Length == 0)
-                    return type.GetDefault();
+                if (!_toolBox.TryGetConstructor(type, out ConstructorInfo constructor))
+                {
+                    ConstructorInfo[] constructors = type.GetConstructors();
+                    if (constructors.Length == 0)
+                        return type.GetDefault();
 
-                ConstructorInfo constructor = constructors
-                    .OrderByDescending(c => c.GetParameters().Length)
-                    .First();
+                    constructor = constructors
+                        .OrderByDescending(c => c.GetParameters().Length)
+                        .First();
 
-                object[] args = constructor.GetParameters()
-                                           .Select(param => Resolve(param.ParameterType, implementsIOwned))
-                                           .ToArray();
+                    _toolBox.AddConstructor(type, constructor);
+                    _toolBox.AddParameterInfo(constructor);
+                }
+
+                _toolBox.TryGetParameterInfo(constructor, out ParameterInfo[] parameters);
+                Debug.Assert(parameters != null);
+
+                object[] args = parameters.Select(param => Resolve(param.ParameterType, implementsIOwned))
+                                          .ToArray();
 
                 object instance = constructor.Invoke(args);
 

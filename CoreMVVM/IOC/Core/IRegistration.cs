@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM.IOC.Builder
+namespace CoreMVVM.IOC.Core
 {
     internal interface IRegistration
     {

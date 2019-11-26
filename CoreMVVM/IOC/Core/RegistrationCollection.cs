@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CoreMVVM.IOC.Builder;
+using System;
 using System.Collections.Generic;
 
-namespace CoreMVVM.IOC.Builder
+namespace CoreMVVM.IOC.Core
 {
     /// <summary>
     /// A collection of registrations mapped to types.

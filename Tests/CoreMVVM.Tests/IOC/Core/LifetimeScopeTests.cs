@@ -1,4 +1,6 @@
-﻿using CoreMVVM.IOC.Builder;
+﻿using CoreMVVM.Implementations;
+using CoreMVVM.IOC.Builder;
+using CoreMVVM.Services;
 using CoreMVVM.Tests;
 using System;
 using System.Collections.Generic;
@@ -193,6 +195,8 @@ namespace CoreMVVM.IOC.Core.Tests
 
     #endregion Scope
 
+    #region Resolve Factory
+
     public class LifetimeScope_Resolve_Factory : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
@@ -238,6 +242,10 @@ namespace CoreMVVM.IOC.Core.Tests
         }
     }
 
+    #endregion Resolve Factory
+
+    #region Resolve self
+
     public class LifetimeScope_Resolve_Self : LifetimeScopeTestBase
     {
         [Fact]
@@ -251,6 +259,8 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.Equal(subscope, res2);
         }
     }
+
+    #endregion Resolve self
 
     #region Generic result
 
@@ -439,6 +449,8 @@ namespace CoreMVVM.IOC.Core.Tests
 
     #endregion Generic result
 
+    #region Resolve Unregistered
+
     public class LifetimeScope_Resolve_Unregistered : LifetimeScopeTestBase
     {
         [Fact]
@@ -546,6 +558,10 @@ namespace CoreMVVM.IOC.Core.Tests
         }
     }
 
+    #endregion Resolve Unregistered
+
+    #region Dispose
+
     public class LifetimeScope_Dispose_Component : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
@@ -617,6 +633,10 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.True(disposable.IsDisposed);
         }
     }
+
+    #endregion Dispose
+
+    #region Initializes Component
 
     public class LifetimeScope_Initialization : LifetimeScopeTestBase
     {
@@ -701,4 +721,79 @@ namespace CoreMVVM.IOC.Core.Tests
             public InitClass InitClass { get; }
         }
     }
+
+    #endregion Initializes Component
+
+    #region Fallback Implementation
+
+    public sealed class LifetimeScope_Handles_Fallback : LifetimeScopeTestBase
+    {
+        protected override void RegisterComponents(ContainerBuilder builder)
+        {
+        }
+
+        [Fact]
+        public void LifetimeScope_Resolves_Unregistered_Logger()
+        {
+            var logger = LifetimeScope.Resolve<ILogger>();
+            Assert.IsType<ConsoleLogger>(logger);
+        }
+
+        #region Cache
+
+        [Fact]
+        public void LifetimeScope_Fallback_Caches()
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
+            IContainer container = builder.Build();
+
+            var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
+            service.Cache = true;
+
+            container.Resolve<ILogger>();
+            container.Resolve<ILogger>();
+
+            // Assert that resolve service was only invoked once.
+            Assert.Equal(1, service.CallCount);
+        }
+
+        #endregion Cache
+
+        #region Don't cache
+
+        [Fact]
+        public void LifetimeScope_Fallback_DoesNot_Cache()
+        {
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
+            IContainer container = builder.Build();
+
+            var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
+            service.Cache = false;
+
+            container.Resolve<ILogger>();
+            container.Resolve<ILogger>();
+
+            // Assert that resolve service was actually invoked twice.
+            Assert.Equal(2, service.CallCount);
+        }
+
+        #endregion Don't cache
+
+        private sealed class ResolveLoggerService : IResolveUnregisteredInterfaceService
+        {
+            public int CallCount { get; private set; }
+            public bool Cache { get; set; }
+
+            public void Handle(ResolveUnregisteredInterfaceContext context)
+            {
+                CallCount++;
+                context.SetInterfaceImplementationType(typeof(ConsoleLogger));
+                context.CacheImplementation = Cache;
+            }
+        }
+    }
+
+    #endregion Fallback Implementation
 }

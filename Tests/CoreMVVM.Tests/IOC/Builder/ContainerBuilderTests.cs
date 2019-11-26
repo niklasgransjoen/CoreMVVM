@@ -7,12 +7,7 @@ namespace CoreMVVM.IOC.Builder.Tests
 {
     public class ContainerBuilderTests
     {
-        private readonly ContainerBuilder _builder;
-
-        public ContainerBuilderTests()
-        {
-            _builder = new ContainerBuilder(registerDefaults: false);
-        }
+        private readonly ContainerBuilder _builder = new ContainerBuilder();
 
         #region No scope
 

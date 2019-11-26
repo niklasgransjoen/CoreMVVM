@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace CoreMVVM
+namespace CoreMVVM.Implementations
 {
     /// <summary>
     /// Logs events and exceptions to the console.
     /// </summary>
-    public class ConsoleLogger : ILogger
+    public sealed class ConsoleLogger : ILogger
     {
         #region Methods
 

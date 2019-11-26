@@ -1,4 +1,6 @@
-﻿using CoreMVVM.IOC.Core;
+﻿using CoreMVVM.Implementations;
+using CoreMVVM.IOC.Core;
+using CoreMVVM.Services;
 using System;
 using System.Linq;
 
@@ -14,26 +16,11 @@ namespace CoreMVVM.IOC.Builder
         #region Constructors
 
         /// <summary>
-        /// Creates a new container builder with default registrations.
-        /// </summary>
-        public ContainerBuilder() : this(registerDefaults: true)
-        {
-        }
-
-        /// <summary>
         /// Creates a new container builder.
         /// </summary>
-        /// <param name="registerDefaults">Indicated if default registrations should be performed. See remarks.</param>
-        /// <remarks>
-        /// Defauls registrations include:
-        /// - <see cref="ILogger"/> as <see cref="ConsoleLogger"/>. A logger is required to use the resulting container.
-        /// </remarks>
-        public ContainerBuilder(bool registerDefaults)
+        public ContainerBuilder()
         {
-            if (registerDefaults)
-            {
-                RegisterSingleton<ConsoleLogger>().As<ILogger>();
-            }
+            RegisterSingleton<UnregisteredInterfaceFallbackService>().As<IResolveUnregisteredInterfaceService>();
         }
 
         #endregion Constructors
@@ -192,7 +179,8 @@ namespace CoreMVVM.IOC.Builder
             // Registers the container as a singleton, so it always resolves to this instance.
             RegisterSingleton<Container>().As<IContainer>().AsSelf();
 
-            Container container = new Container(_registrations);
+            ToolBox toolBox = new ToolBox(_registrations);
+            Container container = new Container(toolBox);
 
             // And set this instance as the last created one, so this is the one that's returned upon a call to IContainer.Resolve().
             IRegistration registration = _registrations[typeof(IContainer)];
