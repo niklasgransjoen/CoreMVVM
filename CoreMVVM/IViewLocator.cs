@@ -1,8 +1,13 @@
-﻿namespace CoreMVVM
+﻿using CoreMVVM.Implementations;
+using CoreMVVM.IOC;
+using System;
+
+namespace CoreMVVM
 {
     /// <summary>
     /// Provides methods for retrieving a view instance from a given view model.
     /// </summary>
+    [FallbackImplementation(typeof(ViewLocator))]
     public interface IViewLocator
     {
         /// <summary>
@@ -17,10 +22,31 @@
         object GetView(object viewModel);
 
         /// <summary>
-        /// Registers a view to a view model.
+        /// Adds a view provider to the view locator.
         /// </summary>
-        /// <typeparam name="TViewModel">The view model to register.</typeparam>
-        /// <typeparam name="TView">The view to register.</typeparam>
-        void RegisterView<TViewModel, TView>();
+        /// <typeparam name="IViewProivder">The type of the provider.</typeparam>
+        /// <remarks>
+        /// View providers are used to locate views belonging to a given view model.
+        /// </remarks>
+        void AddViewProvider<TViewProvider>() where TViewProvider : IViewProvider;
+
+        /// <summary>
+        /// Adds a view provider to the view locator.
+        /// </summary>
+        /// <param name="viewProvider">The provider.</param>
+        /// <remarks>
+        /// View providers are used to locate views belonging to a given view model.
+        /// </remarks>
+        void AddViewProvider(IViewProvider viewProvider);
+    }
+
+    /// <summary>
+    /// Implements functionality for finding the view belonging to a view model.
+    /// </summary>
+    public interface IViewProvider
+    {
+        Type FindView<TViewModel>();
+
+        Type FindView(Type viewModel);
     }
 }

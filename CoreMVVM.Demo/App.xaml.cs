@@ -30,8 +30,7 @@ namespace CoreMVVM.Demo
         private void Builder_OnBuild(IContainer container)
         {
             IViewLocator viewLocator = container.Resolve<IViewLocator>();
-
-            viewLocator.RegisterView<DialogWindowModel, DialogWindow>();
+            viewLocator.AddViewProvider<ViewProvider>();
         }
     }
 }
