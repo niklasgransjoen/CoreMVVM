@@ -9,7 +9,9 @@ namespace CoreMVVM.Windows
 {
     public abstract class WindowsApplication : Application
     {
-        protected IContainer Container { get; private set; }
+        private IContainer _container;
+
+        protected IContainer Container => _container ?? throw new NotInitializedException();
 
         protected WindowsApplication()
         {
@@ -28,7 +30,7 @@ namespace CoreMVVM.Windows
             builder.RegisterSingleton<WindowManager>().As<IWindowManager>();
 
             RegisterComponents(builder);
-            Container = builder.Build();
+            _container = builder.Build();
 
             OnStartupOverride(e);
         }
@@ -57,7 +59,11 @@ namespace CoreMVVM.Windows
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("UnhandledException", e.ExceptionObject as Exception);
+
+            if (e.ExceptionObject is Exception exception)
+                logger.Exception("UnhandledException", exception);
+            else
+                logger.Error($"Unhandled exception: {e.ExceptionObject}.");
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
