@@ -2,6 +2,7 @@
 using CoreMVVM.IOC;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 
@@ -35,14 +36,7 @@ namespace CoreMVVM.Windows
         {
             _logger.Debug($"View for view model '{typeof(TViewModel)} requested.");
 
-            Type viewType = null;
-            foreach (var viewProvider in _viewProviders)
-            {
-                viewType = viewProvider.FindView(typeof(TViewModel));
-                if (viewType != null)
-                    break;
-            }
-
+            Type viewType = LocateViewType(provider => provider.FindView<TViewModel>());
             if (viewType is null)
             {
                 _logger.Error($"Failed to find view for view model of type '{typeof(TViewModel)}'.");
@@ -61,14 +55,8 @@ namespace CoreMVVM.Windows
             _logger.Debug($"View for view model '{viewModel.GetType()} requested.");
 
             Type viewModelType = viewModel.GetType();
-            Type viewType = null;
-            foreach (var viewProvider in _viewProviders)
-            {
-                viewType = viewProvider.FindView(viewModelType);
-                if (viewType != null)
-                    break;
-            }
 
+            Type viewType = LocateViewType(provider => provider.FindView(viewModelType));
             if (viewType is null)
             {
                 _logger.Error($"Failed to find view for view model of type '{viewModel.GetType()}'.");
@@ -92,6 +80,18 @@ namespace CoreMVVM.Windows
         #endregion IViewLocator
 
         #region Helpers
+
+        private Type LocateViewType(Func<IViewProvider, Type> locator)
+        {
+            foreach (var viewProvider in Enumerable.Reverse(_viewProviders))
+            {
+                Type viewType = locator(viewProvider);
+                if (viewType != null)
+                    return viewType;
+            }
+
+            return null;
+        }
 
         private object CreateView(Type viewType, object viewModel)
         {
