@@ -7,7 +7,7 @@ namespace CoreMVVM.Implementations
     /// </summary>
     public sealed class DefaultViewProvider : IViewProvider
     {
-        public Type FindView<TViewModel>()
+        public Type FindView<TViewModel>() where TViewModel : class
         {
             return FindView(typeof(TViewModel));
         }

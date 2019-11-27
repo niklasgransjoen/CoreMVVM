@@ -14,7 +14,7 @@ namespace CoreMVVM
         /// Gets the view for the view model of a given type.
         /// </summary>
         /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        object GetView<TViewModel>();
+        object GetView<TViewModel>() where TViewModel : class;
 
         /// <summary>
         /// Gets the view for the given view model.
@@ -28,7 +28,7 @@ namespace CoreMVVM
         /// <remarks>
         /// View providers are used to locate views belonging to a given view model.
         /// </remarks>
-        void AddViewProvider<TViewProvider>() where TViewProvider : IViewProvider;
+        void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider;
 
         /// <summary>
         /// Adds a view provider to the view locator.
@@ -45,7 +45,7 @@ namespace CoreMVVM
     /// </summary>
     public interface IViewProvider
     {
-        Type FindView<TViewModel>();
+        Type FindView<TViewModel>() where TViewModel : class;
 
         Type FindView(Type viewModel);
     }

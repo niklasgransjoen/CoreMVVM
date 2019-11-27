@@ -14,7 +14,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        Window ShowWindow<TViewModel>(Window owner = null);
+        Window ShowWindow<TViewModel>(Window owner = null) where TViewModel : class;
 
         /// <summary>
         /// Shows a window for the given view model type.
@@ -28,7 +28,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        Window ShowDialog<TViewModel>(Window owner = null);
+        Window ShowDialog<TViewModel>(Window owner = null) where TViewModel : class;
 
         /// <summary>
         /// Shows a window for the given view model type as a dialog.

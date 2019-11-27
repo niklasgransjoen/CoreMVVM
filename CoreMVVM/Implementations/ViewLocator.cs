@@ -10,7 +10,8 @@ namespace CoreMVVM.Implementations
     public sealed class ViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
-        private readonly Dictionary<Type, MethodInfo> _methodCache = new Dictionary<Type, MethodInfo>();
+        private readonly Dictionary<Type, PropertyInfo> _dataContextCache = new Dictionary<Type, PropertyInfo>();
+        private readonly Dictionary<Type, MethodInfo> _initMethodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly ILifetimeScope _lifetimeScope;
 
@@ -24,6 +25,7 @@ namespace CoreMVVM.Implementations
         #region Properties
 
         private string _initializeMethodName = "InitializeComponent";
+        private string _dataContextPropertyName = "DataContext";
 
         /// <summary>
         /// Gets or sets the name of the initialize method to look for in constructed views.
@@ -35,7 +37,7 @@ namespace CoreMVVM.Implementations
             set
             {
                 _initializeMethodName = value;
-                _methodCache.Clear();
+                _initMethodCache.Clear();
             }
         }
 
@@ -43,13 +45,21 @@ namespace CoreMVVM.Implementations
         /// Gets or sets the name of the data context property to look for in constructed views.
         /// </summary>
         /// <value>The default is "DataContext".</value>
-        public string DataContextPropertyName { get; set; } = "DataContext";
+        public string DataContextPropertyName
+        {
+            get => _dataContextPropertyName;
+            set
+            {
+                _dataContextPropertyName = value;
+                _dataContextCache.Clear();
+            }
+        }
 
         #endregion Properties
 
         #region IViewLocator
 
-        public object GetView<TViewModel>()
+        public object GetView<TViewModel>() where TViewModel : class
         {
             LoggerHelper.Debug($"View for view model '{typeof(TViewModel)} requested.");
 
@@ -83,7 +93,7 @@ namespace CoreMVVM.Implementations
             return CreateView(viewType, viewModel);
         }
 
-        public void AddViewProvider<TViewProvider>() where TViewProvider : IViewProvider
+        public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
         {
             var viewProvider = _lifetimeScope.Resolve<TViewProvider>();
             AddViewProvider(viewProvider);
@@ -115,20 +125,23 @@ namespace CoreMVVM.Implementations
             object view = _lifetimeScope.Resolve(viewType);
             LoggerHelper.Debug($"Resolved to instance of '{view.GetType()}'.");
 
-            var dataContextProperty = viewType.GetProperty(DataContextPropertyName);
-
-            if (dataContextProperty is null)
+            if (!_dataContextCache.TryGetValue(viewType, out PropertyInfo dataContextProperty))
             {
-                LoggerHelper.Log($"View does not have DataContext property with name '{DataContextPropertyName}'.");
+                dataContextProperty = viewType.GetProperty(DataContextPropertyName);
+                if (dataContextProperty is null)
+                {
+                    LoggerHelper.Log($"View does not have DataContext property with name '{DataContextPropertyName}'.");
+                }
+                else if (dataContextProperty.PropertyType != typeof(object))
+                {
+                    LoggerHelper.Log($"Property '{DataContextPropertyName}' is not of type '{typeof(object)}'.");
+                }
+                else
+                {
+                    _dataContextCache[viewType] = dataContextProperty;
+                }
             }
-            else if (dataContextProperty.PropertyType != typeof(object))
-            {
-                LoggerHelper.Log($"Property '{DataContextPropertyName}' is not of type '{typeof(object)}'.");
-            }
-            else
-            {
-                dataContextProperty.SetValue(view, viewModel);
-            }
+            dataContextProperty?.SetValue(view, viewModel);
 
             InitializeComponent(viewType, view);
 
@@ -137,12 +150,12 @@ namespace CoreMVVM.Implementations
 
         private void InitializeComponent(Type viewType, object instance)
         {
-            if (!_methodCache.TryGetValue(viewType, out MethodInfo method))
+            if (!_initMethodCache.TryGetValue(viewType, out MethodInfo method))
             {
                 method = instance.GetType()
                                  .GetMethod(InitializeMethodName, BindingFlags.Instance | BindingFlags.Public);
 
-                _methodCache[viewType] = method;
+                _initMethodCache[viewType] = method;
             }
 
             method?.Invoke(instance, null);

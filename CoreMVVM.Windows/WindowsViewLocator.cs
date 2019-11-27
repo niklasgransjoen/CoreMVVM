@@ -15,7 +15,7 @@ namespace CoreMVVM.Windows
     public class WindowsViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
-        private readonly Dictionary<Type, MethodInfo> _methodCache = new Dictionary<Type, MethodInfo>();
+        private readonly Dictionary<Type, MethodInfo> _initMethodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly ILifetimeScope _lifetimeScope;
 
@@ -32,7 +32,7 @@ namespace CoreMVVM.Windows
 
         #region IViewLocator
 
-        public object GetView<TViewModel>()
+        public object GetView<TViewModel>() where TViewModel : class
         {
             LoggerHelper.Debug($"View for view model '{typeof(TViewModel)} requested.");
 
@@ -66,7 +66,7 @@ namespace CoreMVVM.Windows
             return CreateView(viewType, viewModel);
         }
 
-        public void AddViewProvider<TViewProvider>() where TViewProvider : IViewProvider
+        public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
         {
             var viewProvider = _lifetimeScope.Resolve<TViewProvider>();
             AddViewProvider(viewProvider);
@@ -98,12 +98,9 @@ namespace CoreMVVM.Windows
             object view = _lifetimeScope.Resolve(viewType);
             LoggerHelper.Debug($"Resolved to instance of '{view.GetType()}'.");
 
-            if (view is DependencyObject depObj)
+            if (view is FrameworkElement frameworkElement)
             {
-                LifetimeScopePropertyExtention.SetLifetimeScope(depObj, _lifetimeScope);
-
-                if (view is FrameworkElement frameworkElement)
-                    frameworkElement.DataContext = viewModel;
+                frameworkElement.DataContext = viewModel;
             }
 
             InitializeComponent(viewType, view);
@@ -113,12 +110,12 @@ namespace CoreMVVM.Windows
 
         private void InitializeComponent(Type viewType, object instance)
         {
-            if (!_methodCache.TryGetValue(viewType, out MethodInfo method))
+            if (!_initMethodCache.TryGetValue(viewType, out MethodInfo method))
             {
                 method = instance.GetType()
                                  .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
 
-                _methodCache[viewType] = method;
+                _initMethodCache[viewType] = method;
             }
 
             method?.Invoke(instance, null);

@@ -16,7 +16,10 @@ namespace CoreMVVM.IOC.Core.Tests
             ContainerBuilder builder = new ContainerBuilder();
             RegisterComponents(builder);
 
-            LifetimeScope = builder.Build();
+            IContainer container = builder.Build();
+
+            LifetimeScope = container;
+            ContainerProvider.Container = container;
         }
 
         protected ILifetimeScope LifetimeScope { get; }
@@ -540,6 +543,11 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Throws_ResolveIllegalTypes()
         {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                LifetimeScope.Resolve(typeof(int));
+            });
+
             Assert.Throws<ResolveConstructionException>(() =>
             {
                 LifetimeScope.Resolve<string>();

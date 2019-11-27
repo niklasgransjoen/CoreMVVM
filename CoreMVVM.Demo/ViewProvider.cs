@@ -7,7 +7,7 @@ namespace CoreMVVM.Demo
     {
         private readonly Dictionary<Type, Type> _registeredViews = new Dictionary<Type, Type>();
 
-        public Type FindView<TViewModel>()
+        public Type FindView<TViewModel>() where TViewModel : class
         {
             return FindView(typeof(TViewModel));
         }
@@ -23,7 +23,7 @@ namespace CoreMVVM.Demo
             return null;
         }
 
-        public void RegisterView<TViewModel, TView>()
+        public void RegisterView<TViewModel, TView>() where TViewModel : class
         {
             _registeredViews[typeof(TViewModel)] = typeof(TView);
         }

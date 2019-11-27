@@ -48,7 +48,10 @@ namespace CoreMVVM
         /// Returns an instance from the given type.
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
-        public static T Resolve<T>() => ContainerOrFallback().Resolve<T>();
+        public static T Resolve<T>() where T : class
+        {
+            return ContainerOrFallback().Resolve<T>();
+        }
 
         /// <summary>
         /// Returns an instance from the given type.

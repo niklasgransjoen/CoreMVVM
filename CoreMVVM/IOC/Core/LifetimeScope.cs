@@ -32,8 +32,6 @@ namespace CoreMVVM.IOC.Core
 
         #region Properties
 
-        public bool IsDisposed { get; private set; }
-
         /// <summary>
         /// Gets a collection of resolved instances with limited scoping.
         /// </summary>
@@ -41,23 +39,12 @@ namespace CoreMVVM.IOC.Core
 
         #endregion Properties
 
-        #region Methods
+        #region ILifetimeScope
 
         /// <summary>
-        /// Returns an instance from the given type.
+        /// Gets a value indicating if this container has been disposed.
         /// </summary>
-        /// <typeparam name="T">The type to get an instance for.</typeparam>
-        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public T Resolve<T>() => (T)Resolve(typeof(T), isOwned: false);
-
-        /// <summary>
-        /// Returns an instance from the given type.
-        /// </summary>
-        /// <param name="type">The type to get an instance for.</param>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public object Resolve(Type type) => Resolve(type, isOwned: false);
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Creates a new lifetime scope.
@@ -74,7 +61,33 @@ namespace CoreMVVM.IOC.Core
             return childScope;
         }
 
-        #endregion Methods
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to get an instance for.</typeparam>
+        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
+        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        public T Resolve<T>() where T : class
+        {
+            return (T)Resolve(typeof(T), isOwned: false);
+        }
+
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <param name="type">The type to get an instance for. Class or interface.</param>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
+        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        /// <exception cref="ArgumentException">type is value type.</exception>
+        public object Resolve(Type type)
+        {
+            if (type.IsValueType)
+                throw new ArgumentException("Cannot resolve value type");
+
+            return Resolve(type, isOwned: false);
+        }
+
+        #endregion ILifetimeScope
 
         #region IDispose
 
@@ -289,6 +302,10 @@ namespace CoreMVVM.IOC.Core
                 return instance;
             }
             catch (OwnedScopedComponentException)
+            {
+                throw;
+            }
+            catch (ResolveConstructionException)
             {
                 throw;
             }
