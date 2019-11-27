@@ -15,7 +15,7 @@
 
   <!-- .NET Standard 2.1 references, compilation flags and build options -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1'">
-    <DefineConstants>NETCORE;NETSTANDARD</DefineConstants>
+    <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
   <!-- .NET 4.5 references, compilation flags and build options -->
