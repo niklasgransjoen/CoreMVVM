@@ -537,7 +537,7 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.Throws<ResolveUnregisteredInterfaceException>(() => LifetimeScope.Resolve<IInterface>());
         }
 
-        [Fact(Skip = "This doesn't throw, but maybe it should")]
+        [Fact]
         public void LifetimeScope_Throws_ResolveIllegalTypes()
         {
             Assert.Throws<ResolveConstructionException>(() =>
