@@ -69,6 +69,7 @@ namespace CoreMVVM.IOC.Core.Tests
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.RegisterSingleton<Implementation>().As<IInterface>().AsSelf();
+            builder.RegisterSingleton<SimpleSingleton>().AsSelf();
         }
 
         [Fact]
@@ -123,6 +124,25 @@ namespace CoreMVVM.IOC.Core.Tests
 
                 interfaces.RemoveAt(0);
             }
+        }
+
+        [Fact]
+        public void LifetimeScope_SubScopes_Provides_Root_In_Constructor()
+        {
+            using var subscope = LifetimeScope.BeginLifetimeScope();
+
+            SimpleSingleton disposable = subscope.Resolve<SimpleSingleton>();
+            Assert.Same(LifetimeScope, disposable.LifetimeScope);
+        }
+
+        private sealed class SimpleSingleton
+        {
+            public SimpleSingleton(ILifetimeScope lifetimeScope)
+            {
+                LifetimeScope = lifetimeScope;
+            }
+
+            public ILifetimeScope LifetimeScope { get; }
         }
     }
 
