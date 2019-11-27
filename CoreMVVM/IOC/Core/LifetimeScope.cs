@@ -74,6 +74,10 @@ namespace CoreMVVM.IOC.Core
             return childScope;
         }
 
+        #endregion Methods
+
+        #region IDispose
+
         /// <summary>
         /// Disposes this LifetimeScope, along with all of its subscopes,
         /// as well as all instances resolved by it.
@@ -96,7 +100,7 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        #endregion Methods
+        #endregion IDispose
 
         #region Private resolve
 
@@ -105,23 +109,10 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            bool isRegistered = _toolBox.TryGetRegistration(type, out IRegistration registration);
-            if (isRegistered)
-            {
-                if (registration.Scope == InstanceScope.None)
-                {
-                    object instance = ConstructFromRegistration(registration, isOwned);
-                    if (instance != null)
-                        InitializeComponent(instance);
-
-                    return instance;
-                }
-
-                if (isOwned)
-                    throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
-
-                return ResolveScopedComponent(registration);
-            }
+            if (TryResolveRegisteredComponent(type, isOwned, out object component))
+                return component;
+            else if (TryResolveComponentByAttribute(type, isOwned, out component))
+                return component;
             else
             {
                 object instance = ConstructType(type, isOwned);
@@ -132,10 +123,63 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
+        /// <summary>
+        /// Attempts to resolve the component from the toolbox's registrations.
+        /// </summary>
+        private bool TryResolveRegisteredComponent(Type type, bool isOwned, out object component)
+        {
+            if (!_toolBox.TryGetRegistration(type, out IRegistration registration))
+            {
+                component = null;
+                return false;
+            }
+
+            component = ResolveFromRegistration(type, isOwned, registration);
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the component by checking for a <see cref="ScopeAttribute"/>.
+        /// </summary>
+        private bool TryResolveComponentByAttribute(Type type, bool isOwned, out object component)
+        {
+            var attribute = type.GetCustomAttribute<ScopeAttribute>();
+            if (attribute is null)
+            {
+                component = null;
+                return false;
+            }
+
+            Registration registration = new Registration(type)
+            {
+                Scope = attribute.Scope,
+            };
+            _toolBox.AddRegistration(type, registration);
+            component = ResolveFromRegistration(type, isOwned, registration);
+            return true;
+        }
+
+        private object ResolveFromRegistration(Type type, bool isOwned, IRegistration registration)
+        {
+            if (registration.Scope == ComponentScope.None)
+            {
+                object component = ConstructFromRegistration(registration, isOwned);
+                if (component != null)
+                    InitializeComponent(component);
+
+                return component;
+            }
+
+            if (isOwned)
+                throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
+
+            return ResolveScopedComponent(registration);
+        }
+
         private object ResolveScopedComponent(IRegistration registration)
         {
             // Singletons should only be resolved by root.
-            if (registration.Scope == InstanceScope.Singleton && _parent != null)
+            if (registration.Scope == ComponentScope.Singleton && _parent != null)
                 return _parent.ResolveScopedComponent(registration);
 
             // Result from scoped components are saved for future resolves.

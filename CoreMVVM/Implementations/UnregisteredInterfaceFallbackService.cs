@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.Services;
+using System.Reflection;
 
 namespace CoreMVVM.Implementations
 {
@@ -14,11 +15,10 @@ namespace CoreMVVM.Implementations
         /// </summary>
         public void Handle(ResolveUnregisteredInterfaceContext context)
         {
-            var attributes = context.InterfaceType.GetCustomAttributes(typeof(FallbackImplementationAttribute), inherit: false);
-            if (attributes.Length != 0)
+            var attributes = context.InterfaceType.GetCustomAttribute<FallbackImplementationAttribute>();
+            if (attributes != null)
             {
-                var fallbackAttribute = (FallbackImplementationAttribute)attributes[0];
-                context.SetInterfaceImplementationType(fallbackAttribute.Type);
+                context.SetInterfaceImplementationType(attributes.Type);
             }
         }
     }

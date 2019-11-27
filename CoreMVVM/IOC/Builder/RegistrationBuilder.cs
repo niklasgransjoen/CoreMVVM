@@ -16,7 +16,7 @@ namespace CoreMVVM.IOC.Builder
         private RegistrationBuilder(
             RegistrationCollection registrations,
             Type type,
-            InstanceScope scope)
+            ComponentScope scope)
         {
             _registrations = registrations;
 
@@ -27,7 +27,7 @@ namespace CoreMVVM.IOC.Builder
         private RegistrationBuilder(
             RegistrationCollection registrations,
             Type type,
-            InstanceScope scope,
+            ComponentScope scope,
             Func<ILifetimeScope, object> factory)
         {
             _registrations = registrations;
@@ -44,7 +44,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 type,
-                InstanceScope.None);
+                ComponentScope.None);
         }
 
         internal static RegistrationBuilder Create<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
@@ -52,7 +52,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
-                InstanceScope.None,
+                ComponentScope.None,
                 factory);
         }
 
@@ -65,7 +65,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 type,
-                InstanceScope.Singleton);
+                ComponentScope.Singleton);
         }
 
         internal static RegistrationBuilder CreateSingleton<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
@@ -73,7 +73,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
-                InstanceScope.Singleton,
+                ComponentScope.Singleton,
                 factory);
         }
 
@@ -86,7 +86,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 type,
-                InstanceScope.LifetimeScope);
+                ComponentScope.LifetimeScope);
         }
 
         internal static RegistrationBuilder CreateLifetimeScope<T>(RegistrationCollection registrations, Func<ILifetimeScope, T> factory) where T : class
@@ -94,7 +94,7 @@ namespace CoreMVVM.IOC.Builder
             return new RegistrationBuilder(
                 registrations,
                 typeof(T),
-                InstanceScope.LifetimeScope,
+                ComponentScope.LifetimeScope,
                 factory);
         }
 
@@ -112,7 +112,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets the scope <see cref="Type"/> is being registered in.
         /// </summary>
-        public InstanceScope Scope { get; }
+        public ComponentScope Scope { get; }
 
         /// <summary>
         /// Gets the factory being registered. May be null.
@@ -162,7 +162,7 @@ namespace CoreMVVM.IOC.Builder
         private void Register(Type type)
         {
             // If scope is limited, try copying the registration of an earlier registration of Type.
-            if (Scope != InstanceScope.None)
+            if (Scope != ComponentScope.None)
             {
                 bool result = TryCopyRegistration(type);
                 if (result)

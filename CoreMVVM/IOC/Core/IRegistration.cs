@@ -12,7 +12,7 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets or sets the scope of this registration.
         /// </summary>
-        InstanceScope Scope { get; set; }
+        ComponentScope Scope { get; set; }
 
         /// <summary>
         /// Gets or sets the factory of the registration.

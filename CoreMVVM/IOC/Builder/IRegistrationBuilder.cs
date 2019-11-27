@@ -14,7 +14,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets the scope <see cref="Type"/> is being registered in.
         /// </summary>
-        InstanceScope Scope { get; }
+        ComponentScope Scope { get; }
 
         /// <summary>
         /// Gets the factory being registered. May be null.

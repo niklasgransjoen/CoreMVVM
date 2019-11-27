@@ -57,7 +57,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, InstanceScope.None);
+            ThrowOnScopingConflict(type, ComponentScope.None);
 
             return RegistrationBuilder.Create(_registrations, type);
         }
@@ -74,7 +74,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(InstanceScope.None);
+            ThrowOnScopingConflict<T>(ComponentScope.None);
 
             return RegistrationBuilder.Create(_registrations, factory);
         }
@@ -102,7 +102,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, InstanceScope.Singleton);
+            ThrowOnScopingConflict(type, ComponentScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, type);
         }
@@ -119,7 +119,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(InstanceScope.Singleton);
+            ThrowOnScopingConflict<T>(ComponentScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, factory);
         }
@@ -147,7 +147,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, InstanceScope.LifetimeScope);
+            ThrowOnScopingConflict(type, ComponentScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, type);
         }
@@ -164,7 +164,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(InstanceScope.LifetimeScope);
+            ThrowOnScopingConflict<T>(ComponentScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, factory);
         }
@@ -195,9 +195,9 @@ namespace CoreMVVM.IOC.Builder
 
         #region Helper
 
-        private void ThrowOnScopingConflict<T>(InstanceScope scope) => ThrowOnScopingConflict(typeof(T), scope);
+        private void ThrowOnScopingConflict<T>(ComponentScope scope) => ThrowOnScopingConflict(typeof(T), scope);
 
-        private void ThrowOnScopingConflict(Type type, InstanceScope scope)
+        private void ThrowOnScopingConflict(Type type, ComponentScope scope)
         {
             // Verify that all registrations have the same scope.
             var previousRegs = _registrations.Where(r => r.Value.Type == type);

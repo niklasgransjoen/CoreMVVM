@@ -20,8 +20,8 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets or sets the scope of this registration.
         /// </summary>
-        /// <value>Default is <see cref="InstanceScope.None"/>.</value>
-        public InstanceScope Scope { get; set; } = InstanceScope.None;
+        /// <value>Default is <see cref="ComponentScope.None"/>.</value>
+        public ComponentScope Scope { get; set; } = ComponentScope.None;
 
         /// <summary>
         /// Gets or sets the factory of the registration.

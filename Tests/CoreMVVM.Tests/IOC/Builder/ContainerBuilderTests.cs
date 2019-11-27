@@ -16,14 +16,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.Register(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.None);
         }
 
         [Fact]
         public void Builder_Registers_Generics()
         {
             IRegistrationBuilder regBuilder = _builder.Register<IInterface>();
-            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), ComponentScope.None);
         }
 
         [Theory]
@@ -31,7 +31,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.Register(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.None);
         }
 
         #endregion No scope
@@ -43,14 +43,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers_Singleton(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.Singleton);
         }
 
         [Fact]
         public void Builder_Registers_GenericSingleton()
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton<Class>();
-            ValidateRegistrationBuilder(regBuilder, typeof(Class), InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.Singleton);
         }
 
         [Theory]
@@ -58,7 +58,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers_Singleton_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.Singleton);
         }
 
         #endregion Singleton
@@ -70,14 +70,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers_LifetimeScope(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.LifetimeScope);
         }
 
         [Fact]
         public void Builder_Registers_GenericLifetimeScope()
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope<Class>();
-            ValidateRegistrationBuilder(regBuilder, typeof(Class), InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.LifetimeScope);
         }
 
         [Theory]
@@ -85,7 +85,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void Builder_Registers_LifetimeScope_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.LifetimeScope);
         }
 
         #endregion Lifetime scope
@@ -109,7 +109,7 @@ namespace CoreMVVM.IOC.Builder.Tests
 
         #region Helpers
 
-        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, InstanceScope scope)
+        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
         {
             Assert.Equal(expectedType, regBuilder.Type);
             Assert.Equal(scope, regBuilder.Scope);
@@ -168,13 +168,13 @@ namespace CoreMVVM.IOC.Builder.Tests
                 }
             }
 
-            static IEnumerable<(Action<ContainerBuilder> builder, InstanceScope scope)> getRegistrators()
+            static IEnumerable<(Action<ContainerBuilder> builder, ComponentScope scope)> getRegistrators()
             {
                 Type t = typeof(IInterface);
 
-                yield return (b => b.Register(t).AsSelf(), InstanceScope.None);
-                yield return (b => b.RegisterSingleton(t).AsSelf(), InstanceScope.Singleton);
-                yield return (b => b.RegisterLifetimeScope(t).AsSelf(), InstanceScope.LifetimeScope);
+                yield return (b => b.Register(t).AsSelf(), ComponentScope.None);
+                yield return (b => b.RegisterSingleton(t).AsSelf(), ComponentScope.Singleton);
+                yield return (b => b.RegisterLifetimeScope(t).AsSelf(), ComponentScope.LifetimeScope);
             }
         }
 

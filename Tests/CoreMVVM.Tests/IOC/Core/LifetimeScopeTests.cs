@@ -78,7 +78,7 @@ namespace CoreMVVM.IOC.Core.Tests
             object subject1 = LifetimeScope.Resolve<IInterface>();
             object subject2 = LifetimeScope.Resolve<IInterface>();
 
-            Assert.Equal(subject1, subject2);
+            Assert.Same(subject1, subject2);
         }
 
         [Fact]
@@ -87,16 +87,25 @@ namespace CoreMVVM.IOC.Core.Tests
             IInterface s1 = LifetimeScope.Resolve<IInterface>();
             Implementation s2 = LifetimeScope.Resolve<Implementation>();
 
-            Assert.Equal(s1, s2);
+            Assert.Same(s1, s2);
         }
 
         [Fact]
-        public void LifetimeScope_ResolvesSingleton_FromLifetimeScope()
+        public void LifetimeScope_ResolvesSingleton_FromSubScope()
         {
             IInterface instance1 = LifetimeScope.Resolve<IInterface>();
             IInterface instance2 = LifetimeScope.BeginLifetimeScope().Resolve<IInterface>();
 
-            Assert.Equal(instance1, instance2);
+            Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void LifetimeScope_Resolves_Singleton_By_Attribute()
+        {
+            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
+            var instance2 = LifetimeScope.Resolve<AttributeSingleton>();
+
+            Assert.Same(instance1, instance2);
         }
 
         [Fact]
@@ -120,7 +129,7 @@ namespace CoreMVVM.IOC.Core.Tests
             while (interfaces.Count > 1)
             {
                 for (int i = 1; i < interfaces.Count; i++)
-                    Assert.Equal(interfaces[0], interfaces[i]);
+                    Assert.Same(interfaces[0], interfaces[i]);
 
                 interfaces.RemoveAt(0);
             }
@@ -133,6 +142,11 @@ namespace CoreMVVM.IOC.Core.Tests
 
             SimpleSingleton disposable = subscope.Resolve<SimpleSingleton>();
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
+        }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class AttributeSingleton
+        {
         }
 
         private sealed class SimpleSingleton
