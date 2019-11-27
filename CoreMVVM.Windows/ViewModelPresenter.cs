@@ -1,4 +1,4 @@
-﻿using CoreMVVM.IOC;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +10,8 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewModelPresenter : ContentControl
     {
+        private readonly Lazy<IViewLocator> _viewLocator = new Lazy<IViewLocator>(() => ContainerProvider.Resolve<IViewLocator>());
+
         static ViewModelPresenter()
         {
             FocusableProperty.OverrideMetadata(typeof(ViewModelPresenter),
@@ -58,17 +60,19 @@ namespace CoreMVVM.Windows
 
         private void UpdateView()
         {
-            if (ViewModel != null)
-            {
-                LifetimeScopePropertyExtention.TryFindLifetimeScope(this, out ILifetimeScope lifetimeScope);
-                if (lifetimeScope != null)
-                    Content = lifetimeScope.Resolve<IViewLocator>().GetView(ViewModel);
-                else
-                    Content = ViewModel;
-            }
-            else
+            if (ViewModel is null)
             {
                 Content = null;
+                return;
+            }
+
+            try
+            {
+                Content = _viewLocator.Value.GetView(ViewModel);
+            }
+            catch (Exception)
+            {
+                Content = ViewModel;
             }
         }
     }
