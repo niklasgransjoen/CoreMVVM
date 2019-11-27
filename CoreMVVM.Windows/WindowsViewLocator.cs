@@ -14,6 +14,7 @@ namespace CoreMVVM.Windows
     public class WindowsViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
+        private readonly Dictionary<Type, MethodInfo> _methodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly ILifetimeScope _lifetimeScope;
         private readonly ILogger _logger;
@@ -106,17 +107,22 @@ namespace CoreMVVM.Windows
                     frameworkElement.DataContext = viewModel;
             }
 
-            InitializeComponent(view);
+            InitializeComponent(viewType, view);
 
             return view;
         }
 
-        private void InitializeComponent(object element)
+        private void InitializeComponent(Type viewType, object instance)
         {
-            MethodInfo method = element.GetType()
-                                       .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
+            if (!_methodCache.TryGetValue(viewType, out MethodInfo method))
+            {
+                method = instance.GetType()
+                                 .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
 
-            method?.Invoke(element, null);
+                _methodCache[viewType] = method;
+            }
+
+            method?.Invoke(instance, null);
         }
 
         #endregion Helpers

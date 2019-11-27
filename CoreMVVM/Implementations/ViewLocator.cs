@@ -9,6 +9,7 @@ namespace CoreMVVM.Implementations
     public sealed class ViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
+        private readonly Dictionary<Type, MethodInfo> _methodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly ILifetimeScope _lifetimeScope;
         private readonly ILogger _logger;
@@ -23,11 +24,21 @@ namespace CoreMVVM.Implementations
 
         #region Properties
 
+        private string _initializeMethodName = "InitializeComponent";
+
         /// <summary>
         /// Gets or sets the name of the initialize method to look for in constructed views.
         /// </summary>
         /// <value>The default is "InitializeComponent".</value>
-        public string InitializeMethodName { get; set; } = "InitializeComponent";
+        public string InitializeMethodName
+        {
+            get => _initializeMethodName;
+            set
+            {
+                _initializeMethodName = value;
+                _methodCache.Clear();
+            }
+        }
 
         /// <summary>
         /// Gets or sets the name of the data context property to look for in constructed views.
@@ -120,17 +131,22 @@ namespace CoreMVVM.Implementations
                 dataContextProperty.SetValue(view, viewModel);
             }
 
-            InitializeComponent(view);
+            InitializeComponent(viewType, view);
 
             return view;
         }
 
-        private void InitializeComponent(object element)
+        private void InitializeComponent(Type viewType, object instance)
         {
-            MethodInfo method = element.GetType()
-                                       .GetMethod(InitializeMethodName, BindingFlags.Instance | BindingFlags.Public);
+            if (!_methodCache.TryGetValue(viewType, out MethodInfo method))
+            {
+                method = instance.GetType()
+                                 .GetMethod(InitializeMethodName, BindingFlags.Instance | BindingFlags.Public);
 
-            method?.Invoke(element, null);
+                _methodCache[viewType] = method;
+            }
+
+            method?.Invoke(instance, null);
         }
 
         #endregion Helpers
