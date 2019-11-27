@@ -1,7 +1,8 @@
 ﻿using CoreMVVM.Extentions;
-using CoreMVVM.IOC.Builder;
+using CoreMVVM.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,26 +11,26 @@ namespace CoreMVVM.IOC.Core
 {
     internal class LifetimeScope : ILifetimeScope
     {
-        private readonly IReadOnlyDictionary<Type, IRegistration> _registeredTypes;
+        private readonly ToolBox _toolBox;
         private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
         private readonly LifetimeScope _parent;
+        private readonly IResolveUnregisteredInterfaceService _resolveUnregisteredInterfaceService;
 
         private readonly object _disposeLock = new object();
 
-        public LifetimeScope(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
+        public LifetimeScope(ToolBox toolBox)
         {
-            _registeredTypes = registeredTypes;
+            _toolBox = toolBox;
+            _resolveUnregisteredInterfaceService = Resolve<IResolveUnregisteredInterfaceService>();
         }
 
-        public LifetimeScope(IReadOnlyDictionary<Type, IRegistration> registeredTypes, LifetimeScope parent)
+        public LifetimeScope(ToolBox toolBox, LifetimeScope parent)
+            : this(toolBox)
         {
-            _registeredTypes = registeredTypes;
             _parent = parent;
         }
 
         #region Properties
-
-        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets a collection of resolved instances with limited scoping.
@@ -38,23 +39,12 @@ namespace CoreMVVM.IOC.Core
 
         #endregion Properties
 
-        #region Methods
+        #region ILifetimeScope
 
         /// <summary>
-        /// Returns an instance from the given type.
+        /// Gets a value indicating if this container has been disposed.
         /// </summary>
-        /// <typeparam name="T">The type to get an instance for.</typeparam>
-        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public T Resolve<T>() => (T)Resolve(typeof(T), isOwned: false);
-
-        /// <summary>
-        /// Returns an instance from the given type.
-        /// </summary>
-        /// <param name="type">The type to get an instance for.</param>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
-        public object Resolve(Type type) => Resolve(type, isOwned: false);
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Creates a new lifetime scope.
@@ -65,11 +55,41 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            ILifetimeScope childScope = new LifetimeScope(_registeredTypes, this);
+            ILifetimeScope childScope = new LifetimeScope(_toolBox, this);
             _disposables.Add(childScope);
 
             return childScope;
         }
+
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to get an instance for.</typeparam>
+        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
+        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        public T Resolve<T>() where T : class
+        {
+            return (T)Resolve(typeof(T), isOwned: false);
+        }
+
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <param name="type">The type to get an instance for. Class or interface.</param>
+        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
+        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        /// <exception cref="ArgumentException">type is value type.</exception>
+        public object Resolve(Type type)
+        {
+            if (type.IsValueType)
+                throw new ArgumentException("Cannot resolve value type");
+
+            return Resolve(type, isOwned: false);
+        }
+
+        #endregion ILifetimeScope
+
+        #region IDispose
 
         /// <summary>
         /// Disposes this LifetimeScope, along with all of its subscopes,
@@ -93,7 +113,7 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        #endregion Methods
+        #endregion IDispose
 
         #region Private resolve
 
@@ -102,38 +122,77 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            bool isRegistered = _registeredTypes.TryGetValue(type, out IRegistration registration);
-            if (isRegistered)
-            {
-                if (registration.Scope == InstanceScope.None)
-                {
-                    object instance = ConstructFromRegistration(registration, isOwned);
-                    if (instance != null)
-                        InitializeComponent(instance);
-
-                    return instance;
-                }
-
-                if (isOwned)
-                    throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
-
-                return ResolveScopedComponent(registration, type);
-            }
+            if (TryResolveRegisteredComponent(type, isOwned, out object component))
+                return component;
+            else if (TryResolveComponentByAttribute(type, isOwned, out component))
+                return component;
             else
             {
                 object instance = ConstructType(type, isOwned);
-                if (instance != null)
-                    InitializeComponent(instance);
+                InitializeComponent(instance);
 
                 return instance;
             }
         }
 
-        private object ResolveScopedComponent(IRegistration registration, Type type)
+        /// <summary>
+        /// Attempts to resolve the component from the toolbox's registrations.
+        /// </summary>
+        private bool TryResolveRegisteredComponent(Type type, bool isOwned, out object component)
+        {
+            if (!_toolBox.TryGetRegistration(type, out IRegistration registration))
+            {
+                component = null;
+                return false;
+            }
+
+            component = ResolveFromRegistration(type, isOwned, registration);
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the component by checking for a <see cref="ScopeAttribute"/>.
+        /// </summary>
+        private bool TryResolveComponentByAttribute(Type type, bool isOwned, out object component)
+        {
+            var attribute = type.GetCustomAttribute<ScopeAttribute>();
+            if (attribute is null)
+            {
+                component = null;
+                return false;
+            }
+
+            Registration registration = new Registration(type)
+            {
+                Scope = attribute.Scope,
+            };
+            _toolBox.AddRegistration(type, registration);
+            component = ResolveFromRegistration(type, isOwned, registration);
+            return true;
+        }
+
+        private object ResolveFromRegistration(Type type, bool isOwned, IRegistration registration)
+        {
+            if (registration.Scope == ComponentScope.None)
+            {
+                object component = ConstructFromRegistration(registration, isOwned);
+                if (component != null)
+                    InitializeComponent(component);
+
+                return component;
+            }
+
+            if (isOwned)
+                throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
+
+            return ResolveScopedComponent(registration);
+        }
+
+        private object ResolveScopedComponent(IRegistration registration)
         {
             // Singletons should only be resolved by root.
-            if (registration.Scope == InstanceScope.Singleton && _parent != null)
-                return _parent.ResolveScopedComponent(registration, type);
+            if (registration.Scope == ComponentScope.Singleton && _parent != null)
+                return _parent.ResolveScopedComponent(registration);
 
             // Result from scoped components are saved for future resolves.
             lock (registration)
@@ -197,22 +256,43 @@ namespace CoreMVVM.IOC.Core
             if (implementsIOwned)
                 type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
 
+            // Check if type is unregistered interface.
             if (type.IsInterface)
-                throw new ResolveUnregisteredInterfaceException($"Expected class or struct, recieved interface '{type}'.");
+            {
+                var context = new ResolveUnregisteredInterfaceContext(type);
+                _resolveUnregisteredInterfaceService.Handle(context);
 
+                if (context.InterfaceImplementationType is null)
+                    throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
+
+                if (context.CacheImplementation)
+                    _toolBox.AddRegistration(type, new Registration(context.InterfaceImplementationType));
+
+                return Resolve(context.InterfaceImplementationType, isOwned);
+            }
+
+            // Construct type.
             try
             {
-                ConstructorInfo[] constructors = type.GetConstructors();
-                if (constructors.Length == 0)
-                    return type.GetDefault();
+                if (!_toolBox.TryGetConstructor(type, out ConstructorInfo constructor))
+                {
+                    ConstructorInfo[] constructors = type.GetConstructors();
+                    if (constructors.Length == 0)
+                        throw new ResolveConstructionException($"Type '{type}' has no accessible constructors.");
 
-                ConstructorInfo constructor = constructors
-                    .OrderByDescending(c => c.GetParameters().Length)
-                    .First();
+                    constructor = constructors
+                        .OrderByDescending(c => c.GetParameters().Length)
+                        .First();
 
-                object[] args = constructor.GetParameters()
-                                           .Select(param => Resolve(param.ParameterType, implementsIOwned))
-                                           .ToArray();
+                    _toolBox.AddConstructor(type, constructor);
+                    _toolBox.AddParameterInfo(constructor);
+                }
+
+                _toolBox.TryGetParameterInfo(constructor, out ParameterInfo[] parameters);
+                Debug.Assert(parameters != null);
+
+                object[] args = parameters.Select(param => Resolve(param.ParameterType, implementsIOwned))
+                                          .ToArray();
 
                 object instance = constructor.Invoke(args);
 
@@ -225,11 +305,15 @@ namespace CoreMVVM.IOC.Core
             {
                 throw;
             }
+            catch (ResolveConstructionException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 string message = $"Failed to construct instance of type '{type}'.";
 
-                Resolve<ILogger>().Exception(message, e);
+                LoggerHelper.Exception(message, e);
                 throw new ResolveConstructionException(message, e);
             }
         }
@@ -255,13 +339,18 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
+            factory = ConstructFactory(factoryType, isOwned);
+            return true;
+        }
+
+        private Func<object> ConstructFactory(Type factoryType, bool isOwned)
+        {
             Type resultType = factoryType.GenericTypeArguments[0];
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);
             Expression convertedResult = Expression.Convert(factoryBody, resultType);
 
-            factory = (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
-            return true;
+            return (Func<object>)Expression.Lambda(factoryType, convertedResult).Compile();
         }
 
         private bool TryConstructLazy(Type type, bool isOwned, out object lazyInstance)
@@ -273,6 +362,12 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
+            lazyInstance = ConstructLazy(type, isOwned);
+            return true;
+        }
+
+        private object ConstructLazy(Type type, bool isOwned)
+        {
             ConstructorInfo[] constructors = type.GetConstructors();
 
             ConstructorInfo constructor = null;
@@ -283,7 +378,8 @@ namespace CoreMVVM.IOC.Core
                 if (parameters.Length == 1)
                 {
                     Type paramType = parameters[0].ParameterType;
-                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>))
+                    if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>) &&
+                        paramType.GenericTypeArguments[0] == type.GenericTypeArguments[0])
                     {
                         constructor = c;
                         parameter = parameters[0];
@@ -293,11 +389,10 @@ namespace CoreMVVM.IOC.Core
                 }
             }
 
-            TryConstructFactory(parameter.ParameterType, isOwned, out Func<object> factory);
+            Func<object> factory = ConstructFactory(parameter.ParameterType, isOwned);
             object[] args = new object[] { factory };
 
-            lazyInstance = constructor.Invoke(args);
-            return true;
+            return constructor.Invoke(args);
         }
 
         private void RegisterDisposable(object instance)
@@ -309,11 +404,11 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Invokes the "InitializedComponent" method on the given component, if such a method exists.
         /// </summary>
-        /// <param name="component">The component to initialize. Not null.</param>
+        /// <param name="element">The component to initialize. Not null.</param>
         private void InitializeComponent(object element)
         {
             if (element is IComponent component)
-                component.InitializeComponent();
+                component.InitializeComponent(this);
         }
 
         #endregion Construct methods

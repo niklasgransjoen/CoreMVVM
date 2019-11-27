@@ -8,6 +8,7 @@
         /// <summary>
         /// Initialization invoked upon the component being resolved by the <see cref="ILifetimeScope"/>.
         /// </summary>
-        void InitializeComponent();
+        /// <param name="lifetimeScope">The lifetime scope that resolved the component.</param>
+        void InitializeComponent(ILifetimeScope lifetimeScope);
     }
 }

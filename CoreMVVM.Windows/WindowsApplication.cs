@@ -9,12 +9,14 @@ namespace CoreMVVM.Windows
 {
     public abstract class WindowsApplication : Application
     {
-        protected IContainer Container { get; private set; }
+        private IContainer _container;
 
-        public WindowsApplication()
+        protected IContainer Container => _container ?? throw new NotInitializedException();
+
+        protected WindowsApplication()
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-            Application.Current.DispatcherUnhandledException += OnDispatcherUnhandledException;
+            DispatcherUnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
         }
 
@@ -24,11 +26,10 @@ namespace CoreMVVM.Windows
 
             ContainerBuilder builder = new ContainerBuilder();
 
-            builder.RegisterSingleton<ViewLocator>().As<IViewLocator>();
-            builder.RegisterSingleton<WindowManager>().As<IWindowManager>();
+            builder.RegisterSingleton<WindowsViewLocator>().As<IViewLocator>();
 
             RegisterComponents(builder);
-            Container = builder.Build();
+            _container = builder.Build();
 
             OnStartupOverride(e);
         }
@@ -56,20 +57,20 @@ namespace CoreMVVM.Windows
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("UnhandledException", e.ExceptionObject as Exception);
+            if (e.ExceptionObject is Exception exception)
+                LoggerHelper.Exception("UnhandledException", exception);
+            else
+                LoggerHelper.Error($"Unhandled exception: {e.ExceptionObject}.");
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("DispatcherUnhandledException", e.Exception);
+            LoggerHelper.Exception("DispatcherUnhandledException", e.Exception);
         }
 
         private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("UnobservedTaskException", e.Exception);
+            LoggerHelper.Exception("UnobservedTaskException", e.Exception);
         }
 
         #endregion Listeners

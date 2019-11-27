@@ -1,4 +1,5 @@
 ﻿using CoreMVVM.Demo.Validation;
+using CoreMVVM.Windows;
 using System.Windows.Input;
 
 namespace CoreMVVM.Demo.ViewModels

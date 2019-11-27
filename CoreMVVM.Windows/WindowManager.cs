@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using CoreMVVM.IOC;
+using System.Windows;
 
 namespace CoreMVVM.Windows
 {
+    [Scope(ComponentScope.Singleton)]
     public class WindowManager : IWindowManager
     {
         private readonly IViewLocator _viewLocator;
@@ -18,7 +20,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        public Window ShowWindow<TViewModel>(Window owner = null)
+        public Window ShowWindow<TViewModel>(Window owner = null) where TViewModel : class
         {
             Window window = GetWindow<TViewModel>(owner);
             window.Show();
@@ -44,7 +46,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        public Window ShowDialog<TViewModel>(Window owner = null)
+        public Window ShowDialog<TViewModel>(Window owner = null) where TViewModel : class
         {
             Window window = GetWindow<TViewModel>(owner);
             window.ShowDialog();
@@ -67,7 +69,7 @@ namespace CoreMVVM.Windows
 
         #endregion IWindowManager
 
-        private Window GetWindow<TViewModel>(Window owner)
+        private Window GetWindow<TViewModel>(Window owner) where TViewModel : class
         {
             Window window = (Window)_viewLocator.GetView<TViewModel>();
             window.Owner = owner;

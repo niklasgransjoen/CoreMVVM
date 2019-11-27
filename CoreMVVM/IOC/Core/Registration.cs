@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM.IOC.Builder
+namespace CoreMVVM.IOC.Core
 {
     /// <summary>
     /// Stores info about a registration.
@@ -20,8 +20,8 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets or sets the scope of this registration.
         /// </summary>
-        /// <value>Default is <see cref="InstanceScope.None"/>.</value>
-        public InstanceScope Scope { get; set; } = InstanceScope.None;
+        /// <value>Default is <see cref="ComponentScope.None"/>.</value>
+        public ComponentScope Scope { get; set; } = ComponentScope.None;
 
         /// <summary>
         /// Gets or sets the factory of the registration.

@@ -1,104 +1,96 @@
-﻿using CoreMVVM.IOC;
-using CoreMVVM.IOC.Builder;
-using NUnit.Framework;
+﻿using CoreMVVM.Tests;
 using System;
 using System.Collections.Generic;
+using Xunit;
 
-namespace CoreMVVM.Tests.IOC.Builder
+namespace CoreMVVM.IOC.Builder.Tests
 {
-    [TestFixture]
     public class ContainerBuilderTests
     {
-        private ContainerBuilder _builder;
-
-        [SetUp]
-        public void BeforeEach()
-        {
-            _builder = new ContainerBuilder(registerDefaults: false);
-        }
-
-        [TearDown]
-        public void AfterEach()
-        {
-            _builder = null;
-        }
+        private readonly ContainerBuilder _builder = new ContainerBuilder();
 
         #region No scope
 
-        [TestCaseSource(nameof(GetTypes))]
+        [Theory]
+        [MemberData(nameof(GetTypes))]
         public void Builder_Registers(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.Register(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.None);
         }
 
-        [Test]
+        [Fact]
         public void Builder_Registers_Generics()
         {
             IRegistrationBuilder regBuilder = _builder.Register<IInterface>();
-            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), ComponentScope.None);
         }
 
-        [TestCaseSource(nameof(GetFactories))]
+        [Theory]
+        [MemberData(nameof(GetFactories))]
         public void Builder_Registers_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.Register(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.None);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.None);
         }
 
         #endregion No scope
 
         #region Singleton
 
-        [TestCaseSource(nameof(GetTypes))]
+        [Theory]
+        [MemberData(nameof(GetTypes))]
         public void Builder_Registers_Singleton(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.Singleton);
         }
 
-        [Test]
+        [Fact]
         public void Builder_Registers_GenericSingleton()
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton<Class>();
-            ValidateRegistrationBuilder(regBuilder, typeof(Class), InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.Singleton);
         }
 
-        [TestCaseSource(nameof(GetFactories))]
+        [Theory]
+        [MemberData(nameof(GetFactories))]
         public void Builder_Registers_Singleton_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterSingleton(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.Singleton);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.Singleton);
         }
 
         #endregion Singleton
 
         #region Lifetime scope
 
-        [TestCaseSource(nameof(GetTypes))]
+        [Theory]
+        [MemberData(nameof(GetTypes))]
         public void Builder_Registers_LifetimeScope(Type type)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(type);
-            ValidateRegistrationBuilder(regBuilder, type, InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.LifetimeScope);
         }
 
-        [Test]
+        [Fact]
         public void Builder_Registers_GenericLifetimeScope()
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope<Class>();
-            ValidateRegistrationBuilder(regBuilder, typeof(Class), InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.LifetimeScope);
         }
 
-        [TestCaseSource(nameof(GetFactories))]
+        [Theory]
+        [MemberData(nameof(GetFactories))]
         public void Builder_Registers_LifetimeScope_Factories(Func<ILifetimeScope, object> factory)
         {
             IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), InstanceScope.LifetimeScope);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.LifetimeScope);
         }
 
         #endregion Lifetime scope
 
-        [Test]
+        [Fact]
         public void Builder_ThrowsOn_ConflictingTypes()
         {
             IRegistrationBuilder regBuilder = _builder.Register<Class>();
@@ -106,67 +98,83 @@ namespace CoreMVVM.Tests.IOC.Builder
             Assert.Throws<IncompatibleTypeException>(() => regBuilder.As<IInterface>());
         }
 
-        [TestCaseSource(nameof(GetConflictingBuilders))]
-        public void Builder_ThrowsOn_ConflictingScope((Action reg1, Action reg2) data)
+        [Theory]
+        [MemberData(nameof(GetConflictingBuilders))]
+        public void Builder_ThrowsOn_ConflictingScope(Action reg1, Action reg2)
         {
-            data.reg1();
+            reg1();
 
-            Assert.Throws<ScopingConflictException>(() => data.reg2());
+            Assert.Throws<ScopingConflictException>(() => reg2());
         }
 
         #region Helpers
 
-        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, InstanceScope scope)
+        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
         {
-            Assert.Multiple(() =>
-            {
-                Assert.AreEqual(expectedType, regBuilder.Type);
-                Assert.AreEqual(scope, regBuilder.Scope);
-            });
+            Assert.Equal(expectedType, regBuilder.Type);
+            Assert.Equal(scope, regBuilder.Scope);
         }
 
         #endregion Helpers
 
         #region Test data
 
-        private static IEnumerable<Type> GetTypes()
+        public static IEnumerable<object[]> GetTypes()
         {
-            yield return typeof(IInterface);
-            yield return typeof(Class);
-            yield return typeof(Struct);
+            foreach (var type in getData())
+                yield return new object[] { type };
+
+            static IEnumerable<Type> getData()
+            {
+                yield return typeof(IInterface);
+                yield return typeof(Class);
+                yield return typeof(Struct);
+            }
         }
 
-        private static IEnumerable<Func<ILifetimeScope, object>> GetFactories()
+        public static IEnumerable<object[]> GetFactories()
         {
-            yield return c => new Class();
-            yield return c => new Struct();
-            yield return c => new Implementation();
+            foreach (var factory in getData())
+                yield return new object[] { factory };
+
+            static IEnumerable<Func<ILifetimeScope, object>> getData()
+            {
+                yield return c => new Class();
+                yield return c => new Struct();
+                yield return c => new Implementation();
+            }
         }
 
         /// <summary>
         /// Returns registrators that registrate <see cref="IInterface"/> in different scopes.
         /// </summary>
-        private static IEnumerable<(Action reg1, Action reg2)> GetConflictingBuilders()
+        public static IEnumerable<object[]> GetConflictingBuilders()
         {
-            foreach (var (builder1, scope1) in getRegistrators())
-            {
-                foreach (var (builder2, scope2) in getRegistrators())
-                {
-                    if (scope1 == scope2)
-                        continue;
+            foreach (var (reg1, reg2) in getData())
+                yield return new object[] { reg1, reg2 };
 
-                    ContainerBuilder b = new ContainerBuilder();
-                    yield return (() => builder1(b), () => builder2(b));
+            static IEnumerable<(Action reg1, Action reg2)> getData()
+            {
+                foreach (var (builder1, scope1) in getRegistrators())
+                {
+                    foreach (var (builder2, scope2) in getRegistrators())
+                    {
+                        if (scope1 == scope2)
+                            continue;
+
+                        ContainerBuilder b = new ContainerBuilder();
+                        yield return (() => builder1(b), () => builder2(b));
+                    }
                 }
             }
 
-            IEnumerable<(Action<ContainerBuilder> builder, InstanceScope scope)> getRegistrators()
+            static IEnumerable<(Action<ContainerBuilder> builder, ComponentScope scope)> getRegistrators()
             {
                 Type t = typeof(IInterface);
 
-                yield return (b => b.Register(t).AsSelf(), InstanceScope.None);
-                yield return (b => b.RegisterSingleton(t).AsSelf(), InstanceScope.Singleton);
-                yield return (b => b.RegisterLifetimeScope(t).AsSelf(), InstanceScope.LifetimeScope);
+                yield return (b => b.Register(t).AsSelf(), ComponentScope.None);
+                yield return (b => b.RegisterSingleton(t).AsSelf(), ComponentScope.Singleton);
+                yield return (b => b.RegisterLifetimeScope(t).AsSelf(), ComponentScope.LifetimeScope);
             }
         }
 

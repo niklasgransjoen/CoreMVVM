@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM.IOC.Builder
+namespace CoreMVVM.IOC.Core
 {
     internal interface IRegistration
     {
@@ -12,7 +12,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets or sets the scope of this registration.
         /// </summary>
-        InstanceScope Scope { get; set; }
+        ComponentScope Scope { get; set; }
 
         /// <summary>
         /// Gets or sets the factory of the registration.

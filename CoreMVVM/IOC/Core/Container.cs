@@ -13,7 +13,7 @@ namespace CoreMVVM.IOC.Core
         /// Creates a new container.
         /// </summary>
         /// <param name="registeredTypes">The registered types of this container.</param>
-        public Container(IReadOnlyDictionary<Type, IRegistration> registeredTypes) : base(registeredTypes)
+        public Container(ToolBox toolBox) : base(toolBox)
         {
         }
     }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace CoreMVVM.Extentions
 {
-    public static class TypeExtentions
+    internal static class TypeExtensions
     {
         /// <summary>
         /// Gets the default value of this type.
