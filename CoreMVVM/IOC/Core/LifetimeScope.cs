@@ -116,8 +116,7 @@ namespace CoreMVVM.IOC.Core
             else
             {
                 object instance = ConstructType(type, isOwned);
-                if (instance != null)
-                    InitializeComponent(instance);
+                InitializeComponent(instance);
 
                 return instance;
             }
@@ -266,7 +265,7 @@ namespace CoreMVVM.IOC.Core
                 {
                     ConstructorInfo[] constructors = type.GetConstructors();
                     if (constructors.Length == 0)
-                        return type.GetDefault();
+                        throw new ResolveConstructionException($"Type '{type}' has no accessible constructors.");
 
                     constructor = constructors
                         .OrderByDescending(c => c.GetParameters().Length)
