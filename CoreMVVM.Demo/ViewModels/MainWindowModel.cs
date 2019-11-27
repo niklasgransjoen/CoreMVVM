@@ -6,21 +6,19 @@ using System.Windows.Input;
 
 namespace CoreMVVM.Demo.ViewModels
 {
+    [Scope(ComponentScope.Singleton)]
     internal class MainWindowModel : BaseModel
     {
         private readonly ILifetimeScope _lifetimeScope;
-        private readonly ILogger _logger;
         private readonly IWindowManager _windowManager;
 
         public MainWindowModel(
             SinglePageViewModel content,
             ILifetimeScope lifetimeScope,
-            ILogger logger,
             IWindowManager windowManager)
         {
             Content = content;
             _lifetimeScope = lifetimeScope;
-            _logger = logger;
             _windowManager = windowManager;
 
             DebugCommand = new RelayCommand(OnDebug);
@@ -41,22 +39,22 @@ namespace CoreMVVM.Demo.ViewModels
 
         private void OnDebug()
         {
-            _logger.Debug("Debug action performed. Result: success.");
+            LoggerHelper.Debug("Debug action performed. Result: success.");
         }
 
         private void OnLog()
         {
-            _logger.Log("That button click was kind of important, and has been logged.");
+            LoggerHelper.Log("That button click was kind of important, and has been logged.");
         }
 
         private void OnError()
         {
-            _logger.Error("Clicking that button sent me into a state I shouldn't have been in. That's called an error.");
+            LoggerHelper.Error("Clicking that button sent me into a state I shouldn't have been in. That's called an error.");
         }
 
         private void OnException()
         {
-            _logger.Exception("An exception was thrown by clicking that button!", new Exception("Don't click the exception button, it will throw exceptions!"));
+            LoggerHelper.Exception("An exception was thrown by clicking that button!", new Exception("Don't click the exception button, it will throw exceptions!"));
         }
 
         #region ShowDialog 1

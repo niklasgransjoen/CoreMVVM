@@ -19,10 +19,7 @@ namespace CoreMVVM.Demo
 
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterSingleton<MainWindow>().AsSelf();
-            builder.RegisterSingleton<MainWindowModel>().AsSelf();
-
-            builder.RegisterSingleton<ScreenPrinter>().As<ILogger>().AsSelf();
+            builder.RegisterSingleton<ScreenPrinter>().As<ILogger>();
 
             builder.OnBuild += Builder_OnBuild;
         }

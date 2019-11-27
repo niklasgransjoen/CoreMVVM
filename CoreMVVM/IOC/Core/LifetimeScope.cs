@@ -296,7 +296,7 @@ namespace CoreMVVM.IOC.Core
             {
                 string message = $"Failed to construct instance of type '{type}'.";
 
-                Resolve<ILogger>().Exception(message, e);
+                LoggerHelper.Exception(message, e);
                 throw new ResolveConstructionException(message, e);
             }
         }

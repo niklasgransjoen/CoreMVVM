@@ -57,24 +57,20 @@ namespace CoreMVVM.Windows
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-
             if (e.ExceptionObject is Exception exception)
-                logger.Exception("UnhandledException", exception);
+                LoggerHelper.Exception("UnhandledException", exception);
             else
-                logger.Error($"Unhandled exception: {e.ExceptionObject}.");
+                LoggerHelper.Error($"Unhandled exception: {e.ExceptionObject}.");
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("DispatcherUnhandledException", e.Exception);
+            LoggerHelper.Exception("DispatcherUnhandledException", e.Exception);
         }
 
         private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            ILogger logger = Container.Resolve<ILogger>();
-            logger.Exception("UnobservedTaskException", e.Exception);
+            LoggerHelper.Exception("UnobservedTaskException", e.Exception);
         }
 
         #endregion Listeners

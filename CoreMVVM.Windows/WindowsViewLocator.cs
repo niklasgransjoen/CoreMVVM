@@ -18,14 +18,12 @@ namespace CoreMVVM.Windows
         private readonly Dictionary<Type, MethodInfo> _methodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly ILifetimeScope _lifetimeScope;
-        private readonly ILogger _logger;
 
         #region Constructors
 
-        public WindowsViewLocator(ILifetimeScope lifetimeScope, ILogger logger, DefaultViewProvider viewProvider)
+        public WindowsViewLocator(ILifetimeScope lifetimeScope, DefaultViewProvider viewProvider)
         {
             _lifetimeScope = lifetimeScope;
-            _logger = logger;
 
             _viewProviders.Add(viewProvider);
         }
@@ -36,12 +34,12 @@ namespace CoreMVVM.Windows
 
         public object GetView<TViewModel>()
         {
-            _logger.Debug($"View for view model '{typeof(TViewModel)} requested.");
+            LoggerHelper.Debug($"View for view model '{typeof(TViewModel)} requested.");
 
             Type viewType = LocateViewType(provider => provider.FindView<TViewModel>());
             if (viewType is null)
             {
-                _logger.Error($"Failed to find view for view model of type '{typeof(TViewModel)}'.");
+                LoggerHelper.Error($"Failed to find view for view model of type '{typeof(TViewModel)}'.");
                 throw new InvalidOperationException($"No view found for view model of type '{typeof(TViewModel)}'.");
             }
 
@@ -54,14 +52,14 @@ namespace CoreMVVM.Windows
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
 
-            _logger.Debug($"View for view model '{viewModel.GetType()} requested.");
+            LoggerHelper.Debug($"View for view model '{viewModel.GetType()} requested.");
 
             Type viewModelType = viewModel.GetType();
 
             Type viewType = LocateViewType(provider => provider.FindView(viewModelType));
             if (viewType is null)
             {
-                _logger.Error($"Failed to find view for view model of type '{viewModel.GetType()}'.");
+                LoggerHelper.Error($"Failed to find view for view model of type '{viewModel.GetType()}'.");
                 throw new InvalidOperationException($"No view found for view model of type '{viewModel.GetType()}'.");
             }
 
@@ -98,7 +96,7 @@ namespace CoreMVVM.Windows
         private object CreateView(Type viewType, object viewModel)
         {
             object view = _lifetimeScope.Resolve(viewType);
-            _logger.Debug($"Resolved to instance of '{view.GetType()}'.");
+            LoggerHelper.Debug($"Resolved to instance of '{view.GetType()}'.");
 
             if (view is DependencyObject depObj)
             {

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
 
 namespace CoreMVVM.Implementations
 {
     /// <summary>
     /// Logs events and exceptions to the console.
     /// </summary>
+    [Scope(ComponentScope.Singleton)]
     public sealed class ConsoleLogger : ILogger
     {
         #region Methods

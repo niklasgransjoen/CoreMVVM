@@ -1,10 +1,12 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace CoreMVVM.Demo
 {
+    [Scope(ComponentScope.Singleton)]
     public class ScreenPrinter : ILogger
     {
         private readonly Paragraph _paragraph = new Paragraph();

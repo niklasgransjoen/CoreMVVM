@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreMVVM.Singletons
+namespace CoreMVVM
 {
     public static class LoggerHelper
     {

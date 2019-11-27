@@ -1,8 +1,10 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
 using System.Windows;
 
 namespace CoreMVVM.Demo.Views
 {
+    [Scope(ComponentScope.Singleton)]
     public partial class MainWindow : Window
     {
         private readonly ScreenPrinter _screenPrinter;
