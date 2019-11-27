@@ -11,14 +11,21 @@ namespace CoreMVVM.Threading
     /// <summary>
     /// A task that does not continue on the captured context as default.
     /// </summary>
+#if NETCORE
+
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder))]
+#endif
     public readonly struct RebelTask : IEquatable<RebelTask>
     {
         private readonly Task _task;
 
         #region Constructors
 
+#if NETCORE
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
+#else
+        public static RebelTask CompletedTask { get; } = new RebelTask(Task.FromResult<object>(null));
+#endif
 
         public RebelTask(Task task)
         {
@@ -52,7 +59,11 @@ namespace CoreMVVM.Threading
 
         private Task GetTaskOrComplete()
         {
+#if NETCORE
             return _task ?? Task.CompletedTask;
+#else
+            return _task ?? CompletedTask._task;
+#endif
         }
 
         #region Static utilities

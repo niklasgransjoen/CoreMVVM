@@ -9,7 +9,10 @@ namespace CoreMVVM.Threading
     /// <summary>
     /// A task that does not continue on the captured context as default.
     /// </summary>
+#if NETSTANDARD
+
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder<>))]
+#endif
     public readonly struct RebelTask<TResult> : INotifyCompletion, IEquatable<RebelTask<TResult>>
     {
         private readonly Task<TResult> _task;

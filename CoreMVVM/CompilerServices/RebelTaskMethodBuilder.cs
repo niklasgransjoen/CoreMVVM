@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 
 namespace CoreMVVM.CompilerServices
 {
+#if NETCORE
+
     /// <summary>
     /// Task builder for the non-generic <see cref="RebelTask"/>.
     /// </summary>
@@ -113,4 +115,6 @@ namespace CoreMVVM.CompilerServices
 
         public RebelTask<TResult> Task => new RebelTask<TResult>(_builder.Task);
     }
+
+#endif
 }
