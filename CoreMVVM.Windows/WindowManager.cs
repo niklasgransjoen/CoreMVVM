@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using CoreMVVM.IOC;
+using System.Windows;
 
 namespace CoreMVVM.Windows
 {
+    [Scope(ComponentScope.Singleton)]
     public class WindowManager : IWindowManager
     {
         private readonly IViewLocator _viewLocator;
@@ -71,7 +73,7 @@ namespace CoreMVVM.Windows
         {
             Window window = (Window)_viewLocator.GetView<TViewModel>();
             window.Owner = owner;
-            
+
             return window;
         }
 

@@ -1,10 +1,12 @@
-﻿using System.Windows;
+﻿using CoreMVVM.IOC;
+using System.Windows;
 
 namespace CoreMVVM.Windows
 {
     /// <summary>
     /// Implements logic for managing windows.
     /// </summary>
+    [FallbackImplementation(typeof(WindowManager))]
     public interface IWindowManager
     {
         /// <summary>

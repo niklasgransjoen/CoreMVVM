@@ -255,7 +255,7 @@ namespace CoreMVVM.IOC.Core
                 if (context.CacheImplementation)
                     _toolBox.AddRegistration(type, new Registration(context.InterfaceImplementationType));
 
-                return ConstructType(context.InterfaceImplementationType, isOwned);
+                return Resolve(context.InterfaceImplementationType, isOwned);
             }
 
             // Construct type.

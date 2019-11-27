@@ -27,7 +27,6 @@ namespace CoreMVVM.Windows
             ContainerBuilder builder = new ContainerBuilder();
 
             builder.RegisterSingleton<WindowsViewLocator>().As<IViewLocator>();
-            builder.RegisterSingleton<WindowManager>().As<IWindowManager>();
 
             RegisterComponents(builder);
             _container = builder.Build();

@@ -6,6 +6,7 @@ using System.Reflection;
 
 namespace CoreMVVM.Implementations
 {
+    [Scope(ComponentScope.Singleton)]
     public sealed class ViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();

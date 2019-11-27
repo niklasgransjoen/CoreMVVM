@@ -11,6 +11,7 @@ namespace CoreMVVM.Windows
     /// <summary>
     /// Provides methods for retrieving a view instance from a given view model.
     /// </summary>
+    [Scope(ComponentScope.Singleton)]
     public class WindowsViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
