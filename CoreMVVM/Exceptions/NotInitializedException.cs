@@ -16,11 +16,23 @@ namespace CoreMVVM
         public NotInitializedException([CallerMemberName] string memberName = null)
         {
             Message = $"Attempted to read uninitialized member '{memberName}'.";
+            MemberName = memberName;
+        }
+
+        public NotInitializedException(string message, [CallerMemberName] string memberName = null)
+        {
+            Message = message;
+            MemberName = memberName;
         }
 
         /// <summary>
         /// Gets a message that describes the current exception.
         /// </summary>
         public override string Message { get; }
+
+        /// <summary>
+        /// Gets the name of the unitialized member.
+        /// </summary>
+        public string MemberName { get; }
     }
 }

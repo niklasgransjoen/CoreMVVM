@@ -11,8 +11,7 @@ namespace CoreMVVM
     {
         #region Fields
 
-        private static readonly object _fallbackLock = new object();
-        private static IContainer _fallbackContainer;
+        private static readonly Lazy<IContainer> _fallbackContainer = new Lazy<IContainer>(() => new ContainerBuilder().Build());
 
         #endregion Fields
 
@@ -21,22 +20,14 @@ namespace CoreMVVM
         /// <summary>
         /// Gets the container instance the provider defaults to when <see cref="Container"/> is null.
         /// </summary>
-        public static IContainer FallbackContainer
-        {
-            get
-            {
-                lock (_fallbackLock)
-                {
-                    if (_fallbackContainer is null)
-                    {
-                        ContainerBuilder builder = new ContainerBuilder();
-                        _fallbackContainer = builder.Build();
-                    }
+        public static IContainer FallbackContainer => _fallbackContainer.Value;
 
-                    return _fallbackContainer;
-                }
-            }
-        }
+        /// <summary>
+        /// Gets or sets a value indicating whether <see cref="FallbackContainer"/> should be used when <see cref="IContainer"/> is uninitialized.
+        /// <para>When false, <see cref="NotInitializedException"/> is thrown.</para>
+        /// </summary>
+        /// <value>Default is false.</value>
+        public static bool UseFallbackContainer { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the container of this provider. May be null.
@@ -69,7 +60,16 @@ namespace CoreMVVM
 
         #region Helpers
 
-        private static IContainer ContainerOrFallback() => Container ?? FallbackContainer;
+        private static IContainer ContainerOrFallback()
+        {
+            if (Container != null)
+                return Container;
+
+            if (UseFallbackContainer)
+                return FallbackContainer;
+
+            throw new NotInitializedException($"ContainerProvider cannot be used when uninitialized and the '{nameof(UseFallbackContainer)}' flag is not set.", nameof(Container));
+        }
 
         #endregion Helpers
     }

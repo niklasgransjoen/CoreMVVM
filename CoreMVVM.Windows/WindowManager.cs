@@ -71,7 +71,7 @@ namespace CoreMVVM.Windows
         {
             Window window = (Window)_viewLocator.GetView<TViewModel>();
             window.Owner = owner;
-
+            
             return window;
         }
 
