@@ -5,7 +5,7 @@ namespace CoreMVVM.Demo
 {
     /*
      * ViewModel not located in folder ViewModels.
-     * Will still be resolved to DialogWindow.xaml because it's been registered with the ViewLocator.
+     * Will still be resolved to DialogWindow.xaml because it's been registered with our IViewProvider implementation.
      */
 
     public class DialogWindowModel : BaseModel
@@ -21,7 +21,7 @@ namespace CoreMVVM.Demo
 
         private void OnButtonPressed(string text)
         {
-            Status = $"The current content of the textbox is \"{text}\".";
+            Status = StringParser.GetResource("CurrentContent", new StringTagPair("text", text));
         }
 
         #endregion Commands

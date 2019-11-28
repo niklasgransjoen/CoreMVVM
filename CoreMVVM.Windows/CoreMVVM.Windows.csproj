@@ -30,6 +30,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System.Xaml" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
     <DefineConstants>NET45;NETFULL</DefineConstants>

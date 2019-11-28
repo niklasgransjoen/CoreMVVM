@@ -4,7 +4,7 @@
     {
         public SinglePageViewModel()
         {
-            Text = "Hello World!";
+            Text = StringParser.GetResource("HelloWorld");
         }
 
         private string _text;

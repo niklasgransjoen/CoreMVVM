@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CoreMVVM.Demo.Views"
+        xmlns:markup="clr-namespace:CoreMVVM.Windows.Markup;assembly=CoreMVVM.Windows"
         mc:Ignorable="d"
         Title="DialogWindow" Height="450" Width="800">
     <Grid Margin="50" Height="150">
@@ -13,9 +14,9 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="UserInput" Height="25" Text="Matrix is the best movie" />
+        <TextBox x:Name="UserInput" Height="25" Text="{markup:StringResource MatrixTruth}" />
 
-        <Button Grid.Row="1" Content="Click me!" Height="25"
+        <Button Grid.Row="1" Content="{markup:StringResource ClickMe}" Height="25"
                 Command="{Binding ButtonCommand}" CommandParameter="{Binding ElementName=UserInput, Path=Text}" />
 
         <TextBlock Grid.Row="2" TextAlignment="Center" Text="{Binding Status}" />

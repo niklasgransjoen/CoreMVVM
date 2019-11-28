@@ -20,6 +20,7 @@ namespace CoreMVVM.Demo
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.RegisterSingleton<ScreenPrinter>().As<ILogger>();
+            builder.RegisterSingleton<ResourceManager>().As<IResourceService>();
 
             builder.OnBuild += OnContainerBuild;
         }
