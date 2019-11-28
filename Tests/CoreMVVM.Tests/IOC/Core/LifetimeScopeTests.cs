@@ -73,6 +73,7 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             builder.RegisterSingleton<Implementation>().As<IInterface>().AsSelf();
             builder.RegisterSingleton<SimpleSingleton>().AsSelf();
+            builder.RegisterSingleton<AttributeSingleton>().As<IAttributeSingleton>();
         }
 
         [Fact]
@@ -107,6 +108,24 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
             var instance2 = LifetimeScope.Resolve<AttributeSingleton>();
+
+            Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void LifetimeScope_Resolves_Singleton_By_Attribute_And_Registration()
+        {
+            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
+            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
+
+            Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void LifetimeScope_Resolves_Singleton_By_Registration_And_Attribute()
+        {
+            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
+            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
 
             Assert.Same(instance1, instance2);
         }
@@ -147,8 +166,12 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
         }
 
+        private interface IAttributeSingleton
+        {
+        }
+
         [Scope(ComponentScope.Singleton)]
-        private sealed class AttributeSingleton
+        private sealed class AttributeSingleton : IAttributeSingleton
         {
         }
 

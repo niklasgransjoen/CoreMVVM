@@ -115,7 +115,6 @@ namespace CoreMVVM.Threading
         }
 
         [DebuggerStepThrough]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Throw single aggregate exception")]
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
             IEnumerable<Task> wrappedTasks = tasks.Select(t => t._task);

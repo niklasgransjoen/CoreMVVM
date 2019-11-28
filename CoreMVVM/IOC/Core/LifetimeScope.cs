@@ -162,11 +162,8 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
-            Registration registration = new Registration(type)
-            {
-                Scope = attribute.Scope,
-            };
-            _toolBox.AddRegistration(type, registration);
+            // Register type as itself.
+            var registration = _toolBox.AddRegistration(type, type, attribute.Scope);
             component = ResolveFromRegistration(type, isOwned, registration);
             return true;
         }
@@ -266,7 +263,7 @@ namespace CoreMVVM.IOC.Core
                     throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
 
                 if (context.CacheImplementation)
-                    _toolBox.AddRegistration(type, new Registration(context.InterfaceImplementationType));
+                    _toolBox.AddRegistration(context.InterfaceImplementationType, type, ComponentScope.None);
 
                 return Resolve(context.InterfaceImplementationType, isOwned);
             }

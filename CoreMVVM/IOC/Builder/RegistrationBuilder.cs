@@ -127,7 +127,7 @@ namespace CoreMVVM.IOC.Builder
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
         /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
-        /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement T.</exception>
+        /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement <typeparamref name="T"/>.</exception>
         public IRegistrationBuilder As<T>() => As(typeof(T));
 
         /// <summary>
@@ -164,8 +164,7 @@ namespace CoreMVVM.IOC.Builder
             // If scope is limited, try copying the registration of an earlier registration of Type.
             if (Scope != ComponentScope.None)
             {
-                bool result = TryCopyRegistration(type);
-                if (result)
+                if (TryCopyRegistration(type))
                     return;
             }
 
@@ -181,15 +180,15 @@ namespace CoreMVVM.IOC.Builder
         {
             // Check if type has been registered already.
             // All registrations of a type with scope limitations must share a registration.
-            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.Type == Type);
-            if (registration == null)
+            IRegistration registration = _registrations.Values.SingleOrDefault(r => r.Type == Type);
+            if (registration is null)
                 return false;
 
             // Copy instance from previous registration.
             _registrations[type] = registration;
 
             // Overwrite previous factory
-            _registrations[type].Factory = Factory;
+            registration.Factory = Factory;
 
             return true;
         }

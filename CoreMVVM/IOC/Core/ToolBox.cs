@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace CoreMVVM.IOC.Core
@@ -31,9 +32,23 @@ namespace CoreMVVM.IOC.Core
             return _registrations.TryGetValue(type, out registration);
         }
 
-        public void AddRegistration(Type type, IRegistration registration)
+        public IRegistration AddRegistration(Type component, Type type, ComponentScope scope)
         {
+            // Make sure scopes components are only registered once.
+            if (scope != ComponentScope.None)
+            {
+                var previousRegistration = _registrations.Values.SingleOrDefault(r => r.Type == component);
+                if (previousRegistration != null)
+                {
+                    _registrations[type] = previousRegistration;
+                    return previousRegistration;
+                }
+            }
+
+            var registration = new Registration(component) { Scope = scope };
             _registrations[type] = registration;
+
+            return registration;
         }
 
         public bool TryGetConstructor(Type type, out ConstructorInfo constructor)
