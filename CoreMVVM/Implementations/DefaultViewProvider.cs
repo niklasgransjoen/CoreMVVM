@@ -7,15 +7,23 @@ namespace CoreMVVM.Implementations
     /// </summary>
     public sealed class DefaultViewProvider : IViewProvider
     {
-        public Type FindView<TViewModel>() where TViewModel : class
+        public bool FindView<TViewModel>(ViewProviderContext context) where TViewModel : class
         {
-            return FindView(typeof(TViewModel));
+            return FindView(typeof(TViewModel), context);
         }
 
-        public Type FindView(Type viewModel)
+        public bool FindView(Type viewModel, ViewProviderContext context)
         {
             string viewTypeName = viewModel.FullName.Replace("ViewModel", "View").Replace("WindowModel", "Window");
-            return viewModel.Assembly.GetType(viewTypeName);
+
+            Type viewType = viewModel.Assembly.GetType(viewTypeName);
+            if (viewType is null)
+                return false;
+
+            context.ViewType = viewType;
+            context.CacheView = true;
+
+            return true;
         }
     }
 }

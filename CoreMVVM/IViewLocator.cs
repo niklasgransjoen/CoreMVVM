@@ -24,7 +24,7 @@ namespace CoreMVVM
         /// <summary>
         /// Adds a view provider to the view locator.
         /// </summary>
-        /// <typeparam name="IViewProivder">The type of the provider.</typeparam>
+        /// <typeparam name="TViewProvider">The type of the provider.</typeparam>
         /// <remarks>
         /// View providers are used to locate views belonging to a given view model.
         /// </remarks>
@@ -45,8 +45,44 @@ namespace CoreMVVM
     /// </summary>
     public interface IViewProvider
     {
-        Type FindView<TViewModel>() where TViewModel : class;
+        /// <summary>
+        /// Attempts to locate a view.
+        /// </summary>
+        /// <typeparam name="TViewModel">The view model to locate the view of.</typeparam>
+        /// <param name="context">Context for providing the result.</param>
+        /// <returns>True if the view was found.</returns>
+        bool FindView<TViewModel>(ViewProviderContext context) where TViewModel : class;
 
-        Type FindView(Type viewModel);
+        /// <summary>
+        /// Attempts to locate a view.
+        /// </summary>
+        /// <param name="viewModel">The type of view model to locate the view of.</param>
+        /// <param name="context">Context for providing the result.</param>
+        /// <returns>True if the view was found.</returns>
+        bool FindView(Type viewModel, ViewProviderContext context);
+    }
+
+    /// <summary>
+    /// Context for resolving view from view model type.
+    /// </summary>
+    public sealed class ViewProviderContext
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ViewProviderContext"/> class.
+        /// </summary>
+        public ViewProviderContext()
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the resolved view type.
+        /// </summary>
+        public Type ViewType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating if the resolved view type should be cached.
+        /// </summary>
+        /// <value>Default is false.</value>
+        public bool CacheView { get; set; }
     }
 }

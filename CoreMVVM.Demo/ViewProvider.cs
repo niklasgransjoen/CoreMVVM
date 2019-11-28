@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 
 namespace CoreMVVM.Demo
 {
@@ -7,23 +8,30 @@ namespace CoreMVVM.Demo
     {
         private readonly Dictionary<Type, Type> _registeredViews = new Dictionary<Type, Type>();
 
-        public Type FindView<TViewModel>() where TViewModel : class
+        public bool FindView<TViewModel>(ViewProviderContext context) where TViewModel : class
         {
-            return FindView(typeof(TViewModel));
+            return FindView(typeof(TViewModel), context);
         }
 
-        public Type FindView(Type viewModel)
+        public bool FindView(Type viewModel, ViewProviderContext context)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
 
             if (_registeredViews.TryGetValue(viewModel, out Type viewType))
-                return viewType;
+            {
+                context.ViewType = viewType;
+                context.CacheView = true;
 
-            return null;
+                return true;
+            }
+
+            return false;
         }
 
-        public void RegisterView<TViewModel, TView>() where TViewModel : class
+        public void RegisterView<TViewModel, TView>() 
+            where TViewModel : class 
+            where TView : FrameworkElement
         {
             _registeredViews[typeof(TViewModel)] = typeof(TView);
         }
