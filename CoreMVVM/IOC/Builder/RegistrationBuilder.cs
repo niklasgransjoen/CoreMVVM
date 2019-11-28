@@ -180,7 +180,7 @@ namespace CoreMVVM.IOC.Builder
         {
             // Check if type has been registered already.
             // All registrations of a type with scope limitations must share a registration.
-            IRegistration registration = _registrations.Values.SingleOrDefault(r => r.Type == Type);
+            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.Type == Type);
             if (registration is null)
                 return false;
 

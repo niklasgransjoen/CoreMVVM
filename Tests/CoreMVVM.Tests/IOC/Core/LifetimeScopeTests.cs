@@ -74,6 +74,8 @@ namespace CoreMVVM.IOC.Core.Tests
             builder.RegisterSingleton<Implementation>().As<IInterface>().AsSelf();
             builder.RegisterSingleton<SimpleSingleton>().AsSelf();
             builder.RegisterSingleton<AttributeSingleton>().As<IAttributeSingleton>();
+
+            builder.RegisterSingleton<MultiInterfaceClass>().As<IInterface1>().As<IInterface2>();
         }
 
         [Fact]
@@ -131,6 +133,12 @@ namespace CoreMVVM.IOC.Core.Tests
         }
 
         [Fact]
+        public void LifetimeScope_Handles_Multiple_RegistratedInterfaces_With_Attribute_On_Implementations()
+        {
+            LifetimeScope.Resolve<MultiInterfaceClass>();
+        }
+
+        [Fact]
         public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
         {
             List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
@@ -184,6 +192,13 @@ namespace CoreMVVM.IOC.Core.Tests
 
             public ILifetimeScope LifetimeScope { get; }
         }
+
+        private interface IInterface1 { }
+
+        private interface IInterface2 { }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class MultiInterfaceClass : IInterface1, IInterface2 { }
     }
 
     public class LifetimeScope_Resolve_LifetimeScope : LifetimeScopeTestBase

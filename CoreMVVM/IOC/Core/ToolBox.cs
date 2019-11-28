@@ -37,7 +37,7 @@ namespace CoreMVVM.IOC.Core
             // Make sure scopes components are only registered once.
             if (scope != ComponentScope.None)
             {
-                var previousRegistration = _registrations.Values.SingleOrDefault(r => r.Type == component);
+                var previousRegistration = _registrations.Values.FirstOrDefault(r => r.Type == component);
                 if (previousRegistration != null)
                 {
                     _registrations[type] = previousRegistration;
