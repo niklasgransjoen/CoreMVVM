@@ -263,7 +263,7 @@ namespace CoreMVVM.IOC.Core
                     throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
 
                 if (context.CacheImplementation)
-                    _toolBox.AddRegistration(context.InterfaceImplementationType, type, ComponentScope.None);
+                    _toolBox.AddRegistration(context.InterfaceImplementationType, type, context.CacheScope);
 
                 return Resolve(context.InterfaceImplementationType, isOwned);
             }

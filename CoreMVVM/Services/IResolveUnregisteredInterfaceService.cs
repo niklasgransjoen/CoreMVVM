@@ -1,4 +1,5 @@
 ﻿using CoreMVVM.Extentions;
+using CoreMVVM.IOC;
 using System;
 
 namespace CoreMVVM.Services
@@ -48,6 +49,11 @@ namespace CoreMVVM.Services
         /// </summary>
         /// <remarks>This field has no effect when <see cref="InterfaceImplementationType"/> is not set.</remarks>
         public bool CacheImplementation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the scope to use when caching <see cref="InterfaceImplementationType"/>.
+        /// </summary>
+        public ComponentScope CacheScope { get; set; }
 
         #endregion Properties
 

@@ -816,11 +816,12 @@ namespace CoreMVVM.IOC.Core.Tests
             var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
             service.Cache = true;
 
-            container.Resolve<ILogger>();
-            container.Resolve<ILogger>();
+            var logger1 = container.Resolve<ILogger>();
+            var logger2 = container.Resolve<ILogger>();
 
             // Assert that resolve service was only invoked once.
             Assert.Equal(1, service.CallCount);
+            Assert.Same(logger1, logger2);
         }
 
         #endregion Cache
@@ -856,6 +857,7 @@ namespace CoreMVVM.IOC.Core.Tests
                 CallCount++;
                 context.SetInterfaceImplementationType(typeof(ConsoleLogger));
                 context.CacheImplementation = Cache;
+                context.CacheScope = ComponentScope.Singleton;
             }
         }
     }

@@ -22,7 +22,7 @@ namespace CoreMVVM.IOC.Core
         public ToolBox(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
         {
             foreach (var pair in registeredTypes)
-                _registrations.Add(pair.Key, pair.Value);
+                _registrations[pair.Key] = pair.Value;
         }
 
         #region Methods

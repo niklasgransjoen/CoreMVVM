@@ -21,16 +21,17 @@ namespace CoreMVVM.Demo
         {
             builder.RegisterSingleton<ScreenPrinter>().As<ILogger>();
 
-            builder.OnBuild += Builder_OnBuild;
+            builder.OnBuild += OnContainerBuild;
         }
 
-        private void Builder_OnBuild(IContainer container)
+        private void OnContainerBuild(IContainer container)
         {
-            IViewLocator viewLocator = container.Resolve<IViewLocator>();
+            ContainerProvider.Container = container;
 
             var viewProvider = new ViewProvider();
             viewProvider.RegisterView<DialogWindowModel, DialogWindow>();
 
+            IViewLocator viewLocator = container.Resolve<IViewLocator>();
             viewLocator.AddViewProvider(viewProvider);
         }
     }
