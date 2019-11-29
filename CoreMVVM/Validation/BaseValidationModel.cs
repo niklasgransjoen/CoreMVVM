@@ -76,7 +76,7 @@ namespace CoreMVVM.Validation
         /// <remarks>Uses the default EqualityComparer of the type of the property.</remarks>
         protected virtual bool SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
         {
-            if (EqualityComparer<T>.Default.Equals(property, value))
+            if (Equals(property, value))
                 return false;
 
             property = value;
