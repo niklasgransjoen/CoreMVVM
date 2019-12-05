@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net45</TargetFrameworks>
     <Authors>Niklas Gransjøen</Authors>
     <Description>A simple, lightweight MVVM library for .NET Standard made with Inversion of Control (IoC) in mind, with no external dependencies.</Description>
     <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
@@ -18,8 +18,13 @@
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
-  <!-- .NET 4.5 references, compilation flags and build options -->
+  <!-- .NET Standard 2.0 references, compilation flags and build options -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETSTANDARD</DefineConstants>
+  </PropertyGroup>
+
+  <!-- .NET Framework 4.5 references, compilation flags and build options -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
-    <DefineConstants>NET45;NETFULL</DefineConstants>
+    <DefineConstants>NETFRAMEWORK</DefineConstants>
   </PropertyGroup>
 </Project>

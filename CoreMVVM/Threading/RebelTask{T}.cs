@@ -9,7 +9,7 @@ namespace CoreMVVM.Threading
     /// <summary>
     /// A task that does not continue on the captured context as default.
     /// </summary>
-#if NETSTANDARD
+#if NETCORE
 
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder<>))]
 #endif
