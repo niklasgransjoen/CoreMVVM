@@ -44,7 +44,7 @@ namespace CoreMVVM.Validation
             else
             {
                 string message = ErrorMessage;
-                if (message == null)
+                if (message is null)
                     message = $"Invalid value for property {propertyName}.";
 
                 return ValidationResult.Fail(propertyName, message);

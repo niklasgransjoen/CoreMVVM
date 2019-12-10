@@ -53,8 +53,7 @@ namespace CoreMVVM.Validation
             if (string.IsNullOrEmpty(propertyName))
                 return _errors.SelectMany(e => e.Value);
 
-            bool result = _errors.TryGetValue(propertyName, out IEnumerable<string> errors);
-            if (result)
+            if (_errors.TryGetValue(propertyName, out IEnumerable<string> errors))
                 return errors;
 
             return Enumerable.Empty<string>();
@@ -97,13 +96,33 @@ namespace CoreMVVM.Validation
             var groupedResult = results.GroupBy(r => r.PropertyName);
             foreach (var result in groupedResult)
             {
-                var validationErrors = result.Where(r => !r.IsSuccess);
-                if (validationErrors.Any())
-                    _errors[result.Key] = validationErrors.Select(r => r.ErrorMessage);
-                else
-                    _errors.Remove(result.Key);
+                var validationErrors = result.Where(r => !r.IsSuccess).ToArray();
+                if (validationErrors.Length == 0)
+                {
+                    // There were no errors
+                    if (_errors.Remove(result.Key))
+                        RaiseErrorsChanged(result.Key);
 
-                RaiseErrorsChanged(result.Key);
+                    continue;
+                }
+
+                // There were errors
+                var errorMessages = validationErrors.Select(r => r.ErrorMessage).ToList().AsReadOnly();
+                if (!_errors.ContainsKey(result.Key))
+                {
+                    // state went from no error to errors
+                    _errors[result.Key] = errorMessages;
+                    RaiseErrorsChanged(result.Key);
+                }
+                else if (_errors.TryGetValue(result.Key, out var previousErrors))
+                {
+                    // Skip if error messages hasn't changed.
+                    if (previousErrors.SequenceEqual(errorMessages))
+                        continue;
+
+                    _errors[result.Key] = errorMessages;
+                    RaiseErrorsChanged(result.Key);
+                }
             }
         }
 
