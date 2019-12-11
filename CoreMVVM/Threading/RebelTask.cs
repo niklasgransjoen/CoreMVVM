@@ -21,7 +21,7 @@ namespace CoreMVVM.Threading
 
         #region Constructors
 
-#if NETCORE
+#if NETCORE || NETSTANDARD
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
 #else
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.FromResult<object>(null));
