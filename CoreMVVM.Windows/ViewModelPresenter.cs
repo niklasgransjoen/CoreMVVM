@@ -40,9 +40,6 @@ namespace CoreMVVM.Windows
 
         private static void OnViewModelChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
-            if (DesignerProperties.GetIsInDesignMode(o))
-                return;
-
             ViewModelPresenter presenter = (ViewModelPresenter)o;
             presenter.UpdateView();
         }
@@ -50,13 +47,6 @@ namespace CoreMVVM.Windows
         #endregion ViewModel
 
         #endregion Dependency properties
-
-        protected override void OnVisualParentChanged(DependencyObject oldParent)
-        {
-            base.OnVisualParentChanged(oldParent);
-
-            UpdateView();
-        }
 
         private void UpdateView()
         {
@@ -66,14 +56,19 @@ namespace CoreMVVM.Windows
                 return;
             }
 
-            try
+            if (DesignerProperties.GetIsInDesignMode(this))
             {
-                Content = _viewLocator.Value.GetView(ViewModel);
+                Content = ViewModel.GetType().FullName;
+                return;
             }
-            catch (Exception)
-            {
-                Content = ViewModel;
-            }
+
+            // Ensure that the ViewModel has a corresponding DataTemplate.
+            Type viewModelType = ViewModel.GetType();
+            Type viewType = _viewLocator.Value.GetViewType(viewModelType);
+            DataTemplateRegistrator.AssureDataTemplateExists(viewModelType, viewType);
+
+            // Update the content.
+            Content = ViewModel;
         }
     }
 }
