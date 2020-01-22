@@ -22,6 +22,23 @@ namespace CoreMVVM
         object GetView(object viewModel);
 
         /// <summary>
+        /// Gets the view type for the given view model.
+        /// </summary>
+        /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
+        Type GetViewType<TViewModel>();
+
+        /// <summary>
+        /// Gets the view type for the given view model.
+        /// </summary>
+        Type GetViewType(Type viewModelType);
+
+        /// <summary>
+        /// Adds an action that gets performed on the resolved view before it's returned.
+        /// </summary>
+        /// <param name="action">The action to perform. The first argument is the view model, the second is the view.</param>
+        void AddOnResolve(Action<object, object> action);
+
+        /// <summary>
         /// Adds a view provider to the view locator.
         /// </summary>
         /// <typeparam name="TViewProvider">The type of the provider.</typeparam>
@@ -51,7 +68,7 @@ namespace CoreMVVM
         /// <typeparam name="TViewModel">The view model to locate the view of.</typeparam>
         /// <param name="context">Context for providing the result.</param>
         /// <returns>True if the view was found.</returns>
-        bool FindView<TViewModel>(ViewProviderContext context) where TViewModel : class;
+        bool FindView<TViewModel>(ViewProviderContext context);
 
         /// <summary>
         /// Attempts to locate a view.

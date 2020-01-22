@@ -3,7 +3,6 @@ using CoreMVVM.IOC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Windows;
 
 namespace CoreMVVM.Windows
@@ -15,9 +14,8 @@ namespace CoreMVVM.Windows
     public class WindowsViewLocator : IViewLocator
     {
         private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
-
         private readonly Dictionary<Type, Type> _viewCache = new Dictionary<Type, Type>();
-        private readonly Dictionary<Type, MethodInfo> _initMethodCache = new Dictionary<Type, MethodInfo>();
+        private readonly List<Action<object, object>> _onResolveActions = new List<Action<object, object>>();
 
         private readonly ILifetimeScope _lifetimeScope;
 
@@ -57,25 +55,7 @@ namespace CoreMVVM.Windows
             return CreateView(viewType, viewModel);
         }
 
-        public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
-        {
-            var viewProvider = _lifetimeScope.Resolve<TViewProvider>();
-            _viewProviders.Add(viewProvider);
-        }
-
-        public void AddViewProvider(IViewProvider viewProvider)
-        {
-            if (viewProvider is null)
-                throw new ArgumentNullException(nameof(viewProvider));
-
-            _viewProviders.Add(viewProvider);
-        }
-
-        #endregion IViewLocator
-
-        #region Helpers
-
-        private Type GetViewType<TViewModel>() where TViewModel : class
+        public Type GetViewType<TViewModel>()
         {
             if (_viewCache.TryGetValue(typeof(TViewModel), out var viewType))
                 return viewType;
@@ -93,7 +73,7 @@ namespace CoreMVVM.Windows
             return result.ViewType;
         }
 
-        private Type GetViewType(Type viewModelType)
+        public Type GetViewType(Type viewModelType)
         {
             if (_viewCache.TryGetValue(viewModelType, out var viewType))
                 return viewType;
@@ -110,6 +90,43 @@ namespace CoreMVVM.Windows
 
             return result.ViewType;
         }
+
+        public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
+        {
+            var viewProvider = _lifetimeScope.Resolve<TViewProvider>();
+            _viewProviders.Add(viewProvider);
+        }
+
+        public void AddViewProvider(IViewProvider viewProvider)
+        {
+            if (viewProvider is null)
+                throw new ArgumentNullException(nameof(viewProvider));
+
+            _viewProviders.Add(viewProvider);
+        }
+
+        #endregion IViewLocator
+
+        #region Methods
+
+        /// <summary>
+        /// Adds an action that gets performed on the resolved view before it's returned.
+        /// </summary>
+        /// <param name="action">The action to perform. The first argument is the view model, the second is the view.</param>
+        /// <remarks>
+        /// Actions are executed in the order they are added. They are executed after DataContext is assigned (if view is FrameworkElement).
+        /// </remarks>
+        public void AddOnResolve(Action<object, object> action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            _onResolveActions.Add(action);
+        }
+
+        #endregion Methods
+
+        #region Helpers
 
         private ViewProviderContext LocateViewType(Func<IViewProvider, ViewProviderContext, bool> locator)
         {
@@ -135,7 +152,7 @@ namespace CoreMVVM.Windows
             LoggerHelper.Debug($"Resolved to instance of '{view.GetType()}'.");
 
             TrySetDataContext(viewModel, view);
-            InitializeComponent(viewType, view);
+            _onResolveActions.ForEach(a => a(viewModel, view));
 
             return view;
         }
@@ -150,19 +167,6 @@ namespace CoreMVVM.Windows
             {
                 LoggerHelper.Log($"View '{view.GetType()}' is not of type '{typeof(FrameworkElement)}'.");
             }
-        }
-
-        private void InitializeComponent(Type viewType, object instance)
-        {
-            if (!_initMethodCache.TryGetValue(viewType, out MethodInfo method))
-            {
-                method = instance.GetType()
-                                 .GetMethod("InitializeComponent", BindingFlags.Instance | BindingFlags.Public);
-
-                _initMethodCache[viewType] = method;
-            }
-
-            method?.Invoke(instance, null);
         }
 
         #endregion Helpers

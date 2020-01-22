@@ -12,6 +12,7 @@ namespace CoreMVVM.Demo.Views
         public MainWindow(ScreenPrinter screenPrinter)
         {
             _screenPrinter = screenPrinter;
+            InitializeComponent();
         }
 
         protected override void OnInitialized(EventArgs e)
