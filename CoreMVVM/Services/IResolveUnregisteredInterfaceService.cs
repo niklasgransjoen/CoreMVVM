@@ -66,7 +66,7 @@ namespace CoreMVVM.Services
         public void SetInterfaceImplementationType(Type interfaceImplementationType)
         {
             if (!interfaceImplementationType.ImplementsInterface(InterfaceType))
-                throw new ArgumentException($"Argument does not implement interface '{interfaceImplementationType}'.", nameof(interfaceImplementationType));
+                throw new ArgumentException($"Type '{interfaceImplementationType}' does not implement interface '{InterfaceType}'.", nameof(interfaceImplementationType));
 
             InterfaceImplementationType = interfaceImplementationType;
         }
