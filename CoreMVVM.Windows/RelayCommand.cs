@@ -5,6 +5,11 @@ namespace CoreMVVM.Windows
 {
     public class RelayCommand : ICommand
     {
+        /// <summary>
+        /// Gets a reference to an empty relay command.
+        /// </summary>
+        public static RelayCommand Empty { get; } = new RelayCommand(() => { });
+
         #region Fields
 
         private readonly Action<object> _execute = null;
@@ -146,6 +151,11 @@ namespace CoreMVVM.Windows
 
     public class RelayCommand<T> : ICommand
     {
+        /// <summary>
+        /// Gets a reference to an empty relay command.
+        /// </summary>
+        public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
+
         #region Fields
 
         private readonly Action<T> _execute = null;
