@@ -123,6 +123,19 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
+        [DebuggerStepThrough]
+        public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
+        {
+            var wrappedTasks = tasks
+                .Cast<RebelTask>()
+                .Select(t => t._task)
+                .Cast<Task<TResult>>();
+
+            var result = Task.WhenAll(wrappedTasks);
+
+            return new RebelTask<TResult[]>(result);
+        }
+
         #endregion Static utilities
 
         #region Operators
