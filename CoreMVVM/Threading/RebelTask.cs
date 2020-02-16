@@ -127,7 +127,7 @@ namespace CoreMVVM.Threading
         public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
         {
             var wrappedTasks = tasks
-                .Cast<RebelTask>()
+                .Select(task => (RebelTask)task)
                 .Select(t => t._task)
                 .Cast<Task<TResult>>();
 
