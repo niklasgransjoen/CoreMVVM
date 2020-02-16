@@ -13,11 +13,11 @@ namespace CoreMVVM.Implementations
         private readonly Dictionary<Type, Type> _viewCache = new Dictionary<Type, Type>();
         private readonly List<Action<object, object>> _onResolveActions = new List<Action<object, object>>();
 
-        private readonly ILifetimeScope _lifetimeScope;
+        private readonly IContainer _container;
 
-        public ViewLocator(ILifetimeScope lifetimeScope, DefaultViewProvider viewProvider)
+        public ViewLocator(IContainer container, DefaultViewProvider viewProvider)
         {
-            _lifetimeScope = lifetimeScope;
+            _container = container;
 
             _viewProviders.Add(viewProvider);
         }
@@ -30,7 +30,7 @@ namespace CoreMVVM.Implementations
 
             Type viewType = GetViewType<TViewModel>();
 
-            TViewModel viewModel = _lifetimeScope.Resolve<TViewModel>();
+            TViewModel viewModel = _container.Resolve<TViewModel>();
             return CreateView(viewType, viewModel);
         }
 
@@ -85,7 +85,7 @@ namespace CoreMVVM.Implementations
 
         public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
         {
-            var viewProvider = _lifetimeScope.Resolve<TViewProvider>();
+            var viewProvider = _container.Resolve<TViewProvider>();
             _viewProviders.Add(viewProvider);
         }
 
@@ -140,7 +140,7 @@ namespace CoreMVVM.Implementations
 
         private object CreateView(Type viewType, object viewModel)
         {
-            object view = _lifetimeScope.Resolve(viewType);
+            object view = _container.Resolve(viewType);
             LoggerHelper.Debug($"Resolved to instance of '{view.GetType()}'.");
 
             _onResolveActions.ForEach(a => a(viewModel, view));
