@@ -235,7 +235,7 @@ namespace CoreMVVM.Windows
 
             FrameworkElement getView()
             {
-                object rawView = _viewLocator.Value.GetView(viewModel);
+                object rawView = _viewLocator.Value.ResolveView(viewModel);
                 if (rawView is FrameworkElement frameworkElement)
                     return frameworkElement;
 

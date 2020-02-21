@@ -8,7 +8,8 @@ using System.Windows;
 namespace CoreMVVM.Windows
 {
     /// <summary>
-    /// Provides methods for retrieving a view instance from a given view model.
+    /// This implementation of the <see cref="IViewLocator"/> attempts to assign the view model to the resolved view,
+    /// if the view is of type <see cref="FrameworkElement"/>.
     /// </summary>
     [Scope(ComponentScope.Singleton)]
     public class WindowsViewLocator : IViewLocator
@@ -32,17 +33,19 @@ namespace CoreMVVM.Windows
 
         #region IViewLocator
 
-        public object GetView<TViewModel>() where TViewModel : class
+        #region ResolveView
+
+        public object ResolveView<TViewModel>() where TViewModel : class
         {
             LoggerHelper.Debug($"View for view model '{typeof(TViewModel)} requested.");
 
-            Type viewType = GetViewType<TViewModel>();
+            Type viewType = ResolveViewType<TViewModel>();
 
             TViewModel viewModel = _container.Resolve<TViewModel>();
             return CreateView(viewType, viewModel);
         }
 
-        public object GetView(object viewModel)
+        public object ResolveView(object viewModel)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
@@ -50,12 +53,12 @@ namespace CoreMVVM.Windows
             LoggerHelper.Debug($"View for view model '{viewModel.GetType()} requested.");
 
             Type viewModelType = viewModel.GetType();
-            Type viewType = GetViewType(viewModelType);
+            Type viewType = ResolveViewType(viewModelType);
 
             return CreateView(viewType, viewModel);
         }
 
-        public Type GetViewType<TViewModel>()
+        public Type ResolveViewType<TViewModel>()
         {
             if (_viewCache.TryGetValue(typeof(TViewModel), out var viewType))
                 return viewType;
@@ -64,7 +67,7 @@ namespace CoreMVVM.Windows
             if (result is null)
             {
                 LoggerHelper.Error($"Failed to find view for view model of type '{typeof(TViewModel)}'.");
-                throw new InvalidOperationException($"No view found for view model of type '{typeof(TViewModel)}'.");
+                throw new ViewNotFoundException($"No view found for view model of type '{typeof(TViewModel)}'.");
             }
 
             if (result.CacheView)
@@ -73,7 +76,7 @@ namespace CoreMVVM.Windows
             return result.ViewType;
         }
 
-        public Type GetViewType(Type viewModelType)
+        public Type ResolveViewType(Type viewModelType)
         {
             if (_viewCache.TryGetValue(viewModelType, out var viewType))
                 return viewType;
@@ -82,7 +85,7 @@ namespace CoreMVVM.Windows
             if (result is null)
             {
                 LoggerHelper.Error($"Failed to find view for view model of type '{viewModelType}'.");
-                throw new InvalidOperationException($"No view found for view model of type '{viewModelType}'.");
+                throw new ViewNotFoundException($"No view found for view model of type '{viewModelType}'.");
             }
 
             if (result.CacheView)
@@ -90,6 +93,85 @@ namespace CoreMVVM.Windows
 
             return result.ViewType;
         }
+
+        #endregion ResolveView
+
+        #region TryResolveView
+
+        public bool TryResolveView<TViewModel>(out object view) where TViewModel : class
+        {
+            LoggerHelper.Debug($"View for view model '{typeof(TViewModel)} requested.");
+
+            if (!TryResolveViewType<TViewModel>(out Type viewType))
+            {
+                view = null;
+                return false;
+            }
+
+            TViewModel viewModel = _container.Resolve<TViewModel>();
+            view = CreateView(viewType, viewModel);
+            return true;
+        }
+
+        public bool TryResolveView(object viewModel, out object view)
+        {
+            if (viewModel is null)
+                throw new ArgumentNullException(nameof(viewModel));
+
+            LoggerHelper.Debug($"View for view model '{viewModel.GetType()} requested.");
+
+            Type viewModelType = viewModel.GetType();
+            if (!TryResolveViewType(viewModelType, out Type viewType))
+            {
+                view = null;
+                return false;
+            }
+
+            view = CreateView(viewType, viewModel);
+            return true;
+        }
+
+        public bool TryResolveViewType<TViewModel>(out Type viewType)
+        {
+            if (_viewCache.TryGetValue(typeof(TViewModel), out viewType))
+                return true;
+
+            var result = LocateViewType((provider, context) => provider.FindView<TViewModel>(context));
+            if (result is null)
+            {
+                LoggerHelper.Log($"Failed to find view for view model of type '{typeof(TViewModel)}'.");
+                viewType = null;
+                return false;
+            }
+
+            if (result.CacheView)
+                _viewCache[typeof(TViewModel)] = result.ViewType;
+
+            viewType = result.ViewType;
+            return true;
+        }
+
+        public bool TryResolveViewType(Type viewModelType, out Type viewType)
+        {
+            if (_viewCache.TryGetValue(viewModelType, out viewType))
+                return true;
+
+            var result = LocateViewType((provider, context) => provider.FindView(viewModelType, context));
+            if (result is null)
+            {
+                LoggerHelper.Log($"Failed to find view for view model of type '{viewModelType}'.");
+                viewType = null;
+                return false;
+            }
+
+            if (result.CacheView)
+                _viewCache[viewModelType] = result.ViewType;
+
+            viewType = result.ViewType;
+            return true;
+        }
+
+        #endregion TryResolveView
 
         public void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider
         {

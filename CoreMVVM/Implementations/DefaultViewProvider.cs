@@ -14,7 +14,9 @@ namespace CoreMVVM.Implementations
 
         public bool FindView(Type viewModel, ViewProviderContext context)
         {
-            string viewTypeName = viewModel.FullName.Replace("ViewModel", "View").Replace("WindowModel", "Window");
+            string viewTypeName = viewModel.FullName
+                .Replace("ViewModel", "View")
+                .Replace("WindowModel", "Window");
 
             Type viewType = viewModel.Assembly.GetType(viewTypeName);
             if (viewType is null)
