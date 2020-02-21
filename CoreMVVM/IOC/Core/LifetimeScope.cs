@@ -87,6 +87,8 @@ namespace CoreMVVM.IOC.Core
             return Resolve(type, isOwned: false);
         }
 
+        object IServiceProvider.GetService(Type serviceType) => Resolve(serviceType);
+
         #endregion ILifetimeScope
 
         #region IDispose

@@ -2,7 +2,7 @@
 
 namespace CoreMVVM.IOC
 {
-    public interface ILifetimeScope : IDisposable
+    public interface ILifetimeScope : IServiceProvider, IDisposable
     {
         /// <summary>
         /// Gets a value indicating if this container has been disposed.

@@ -1,8 +1,4 @@
-﻿using CoreMVVM.IOC.Builder;
-using System;
-using System.Collections.Generic;
-
-namespace CoreMVVM.IOC.Core
+﻿namespace CoreMVVM.IOC.Core
 {
     /// <summary>
     /// Implementation of <see cref="IContainer"/>.
@@ -12,7 +8,6 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Creates a new container.
         /// </summary>
-        /// <param name="registeredTypes">The registered types of this container.</param>
         public Container(ToolBox toolBox) : base(toolBox)
         {
         }
