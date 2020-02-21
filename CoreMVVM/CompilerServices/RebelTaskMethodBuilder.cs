@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.Threading;
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace CoreMVVM.CompilerServices
@@ -23,11 +24,8 @@ namespace CoreMVVM.CompilerServices
             return new RebelTaskMethodBuilder();
         }
 
-        public void SetResult()
-        {
-            _builder.SetResult();
-        }
-
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
             where TStateMachine : IAsyncStateMachine
         {
@@ -46,6 +44,7 @@ namespace CoreMVVM.CompilerServices
             _builder.AwaitOnCompleted(ref awaiter, ref stateMachine);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
@@ -58,7 +57,18 @@ namespace CoreMVVM.CompilerServices
             _builder.SetStateMachine(stateMachine);
         }
 
-        public RebelTask Task => new RebelTask(_builder.Task);
+        public RebelTask Task
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => new RebelTask(_builder.Task);
+        }
+
+        public void SetResult()
+        {
+            _builder.SetResult();
+        }
+
+        internal object ObjectIdForDebugger { get; } = Guid.NewGuid();
     }
 
     /// <summary>
@@ -114,6 +124,8 @@ namespace CoreMVVM.CompilerServices
         }
 
         public RebelTask<TResult> Task => new RebelTask<TResult>(_builder.Task);
+
+        internal object ObjectIdForDebugger { get; } = Guid.NewGuid();
     }
 
 #endif

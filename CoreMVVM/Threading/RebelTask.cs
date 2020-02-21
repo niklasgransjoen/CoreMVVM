@@ -19,13 +19,13 @@ namespace CoreMVVM.Threading
     {
         private readonly Task _task;
 
-        #region Constructors
-
 #if NETCORE || NETSTANDARD
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
 #else
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.FromResult<object>(null));
 #endif
+
+        #region Constructors
 
         public RebelTask(Task task)
         {
