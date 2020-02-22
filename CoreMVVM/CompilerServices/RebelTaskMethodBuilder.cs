@@ -11,6 +11,7 @@ namespace CoreMVVM.CompilerServices
     /// Task builder for the non-generic <see cref="RebelTask"/>.
     /// </summary>
     /// <remarks>This builder is a simple wrapper of the general task builder.</remarks>
+    [DebuggerStepThrough]
     public sealed class RebelTaskMethodBuilder
     {
         private AsyncTaskMethodBuilder _builder = AsyncTaskMethodBuilder.Create();
@@ -24,7 +25,6 @@ namespace CoreMVVM.CompilerServices
             return new RebelTaskMethodBuilder();
         }
 
-        [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
             where TStateMachine : IAsyncStateMachine
@@ -75,6 +75,7 @@ namespace CoreMVVM.CompilerServices
     /// Task builder for the generic <see cref="RebelTask{TResult}"/>.
     /// </summary>
     /// <remarks>This builder is a simple wrapper of the general task builder.</remarks>
+    [DebuggerStepThrough]
     public sealed class RebelTaskMethodBuilder<TResult>
     {
         private AsyncTaskMethodBuilder<TResult> _builder = AsyncTaskMethodBuilder<TResult>.Create();

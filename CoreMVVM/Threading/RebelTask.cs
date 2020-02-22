@@ -15,6 +15,7 @@ namespace CoreMVVM.Threading
 
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder))]
 #endif
+    [DebuggerStepThrough]
     public readonly struct RebelTask : IEquatable<RebelTask>
     {
         private readonly Task _task;
@@ -68,7 +69,6 @@ namespace CoreMVVM.Threading
 
         #region Static utilities
 
-        [DebuggerStepThrough]
         public static RebelTask Delay(int millisecondsDelay)
         {
             Task result = Task.Delay(millisecondsDelay);
@@ -76,7 +76,6 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask Delay(TimeSpan delay)
         {
             Task result = Task.Delay(delay);
@@ -84,7 +83,6 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask Run(Action action)
         {
             Task result = Task.Run(action);
@@ -92,7 +90,6 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask<TResult> Run<TResult>(Func<TResult> action)
         {
             Task<TResult> result = Task.Run(action);
@@ -100,21 +97,18 @@ namespace CoreMVVM.Threading
             return new RebelTask<TResult>(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask Run(Func<Task> action)
         {
             Task result = action();
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> action)
         {
             Task<TResult> result = action();
             return new RebelTask<TResult>(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
             IEnumerable<Task> wrappedTasks = tasks.Select(t => t._task);
@@ -123,7 +117,6 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
         public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
         {
             var wrappedTasks = tasks

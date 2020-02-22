@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.CompilerServices;
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace CoreMVVM.Threading
 
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder<>))]
 #endif
+    [DebuggerStepThrough]
     public readonly struct RebelTask<TResult> : INotifyCompletion, IEquatable<RebelTask<TResult>>
     {
         private readonly Task<TResult> _task;
