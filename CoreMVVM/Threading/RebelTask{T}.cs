@@ -17,20 +17,19 @@ namespace CoreMVVM.Threading
     [DebuggerStepThrough]
     public readonly struct RebelTask<TResult> : INotifyCompletion, IEquatable<RebelTask<TResult>>
     {
-        private readonly Task<TResult> _task;
         private readonly TResult _result;
 
         #region Constructors
 
         public RebelTask(Task<TResult> task)
         {
-            _task = task;
+            Task = task;
             _result = default;
         }
 
         public RebelTask(TResult result)
         {
-            _task = null;
+            Task = null;
             _result = result;
         }
 
@@ -41,16 +40,25 @@ namespace CoreMVVM.Threading
         /// </summary>
         public ConfiguredTaskAwaitable<TResult> ContinueOnCapturedContext()
         {
-            if (_task is null)
-                return Task.FromResult(_result).ConfigureAwait(true);
+            if (Task is null)
+                return System.Threading.Tasks.Task.FromResult(_result).ConfigureAwait(true);
 
-            return _task.ConfigureAwait(true);
+            return Task.ConfigureAwait(true);
         }
 
         /// <summary>
         /// Returns the awaiter of this task, configured to not continue on the captured context.
         /// </summary>
         public RebelTask<TResult> GetAwaiter() => this;
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the task object of this RebelTask.
+        /// </summary>
+        public Task<TResult> Task { get; }
+
+        #endregion Properties
 
         #region Awaiter
 
@@ -61,10 +69,10 @@ namespace CoreMVVM.Threading
         {
             get
             {
-                if (_task is null)
+                if (Task is null)
                     return true;
 
-                return _task.IsCompleted;
+                return Task.IsCompleted;
             }
         }
 
@@ -73,7 +81,7 @@ namespace CoreMVVM.Threading
             if (IsCompleted)
                 continuation();
             else
-                _task.ConfigureAwait(false).GetAwaiter().OnCompleted(continuation);
+                Task.ConfigureAwait(false).GetAwaiter().OnCompleted(continuation);
         }
 
         /// <summary>
@@ -81,17 +89,17 @@ namespace CoreMVVM.Threading
         /// </summary>
         public TResult GetResult()
         {
-            if (_task is null)
+            if (Task is null)
                 return _result;
 
-            if (_task.Exception != null)
+            if (Task.Exception != null)
             {
-                Exception taskException = _task.Exception.InnerException;
+                Exception taskException = Task.Exception.InnerException;
                 ExceptionDispatchInfo.Capture(taskException).Throw();
                 throw taskException; // Is never called.
             }
 
-            return _task.Result;
+            return Task.Result;
         }
 
         #endregion Awaiter
@@ -108,10 +116,10 @@ namespace CoreMVVM.Threading
 
         public bool Equals(RebelTask<TResult> other)
         {
-            if (_task != null && other._task != null)
-                return _task == other._task;
+            if (Task != null && other.Task != null)
+                return Task == other.Task;
 
-            if (_task == null ^ other._task == null)
+            if (Task == null ^ other.Task == null)
                 return false;
 
             if (_result == null && other._result == null)
@@ -127,7 +135,7 @@ namespace CoreMVVM.Threading
         {
             int hash = 39;
             hash = (hash * 7) + _result?.GetHashCode() ?? 13;
-            hash = (hash * 7) + _task?.GetHashCode() ?? 13;
+            hash = (hash * 7) + Task?.GetHashCode() ?? 13;
 
             return hash;
         }
@@ -149,10 +157,10 @@ namespace CoreMVVM.Threading
 
         public static implicit operator RebelTask(RebelTask<TResult> rebelTask)
         {
-            if (rebelTask._task is null)
-                return new RebelTask(Task.FromResult(rebelTask._result));
+            if (rebelTask.Task is null)
+                return new RebelTask(System.Threading.Tasks.Task.FromResult(rebelTask._result));
 
-            return new RebelTask(rebelTask._task);
+            return new RebelTask(rebelTask.Task);
         }
 
         #endregion Operators

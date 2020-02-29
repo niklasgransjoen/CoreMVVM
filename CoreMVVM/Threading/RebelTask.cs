@@ -18,8 +18,6 @@ namespace CoreMVVM.Threading
     [DebuggerStepThrough]
     public readonly struct RebelTask : IEquatable<RebelTask>
     {
-        private readonly Task _task;
-
 #if NETCORE || NETSTANDARD
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
 #else
@@ -30,7 +28,7 @@ namespace CoreMVVM.Threading
 
         public RebelTask(Task task)
         {
-            _task = task;
+            Task = task;
         }
 
         public static RebelTask<TResult> FromResult<TResult>(TResult result)
@@ -61,11 +59,20 @@ namespace CoreMVVM.Threading
         private Task GetTaskOrComplete()
         {
 #if NETCORE
-            return _task ?? Task.CompletedTask;
+            return Task ?? Task.CompletedTask;
 #else
-            return _task ?? CompletedTask._task;
+            return Task ?? CompletedTask.Task;
 #endif
         }
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the task object of this RebelTask.
+        /// </summary>
+        public Task Task { get; }
+
+        #endregion Properties
 
         #region Static utilities
 
@@ -79,14 +86,12 @@ namespace CoreMVVM.Threading
         public static RebelTask Delay(TimeSpan delay)
         {
             Task result = Task.Delay(delay);
-
             return new RebelTask(result);
         }
 
         public static RebelTask Run(Action action)
         {
             Task result = Task.Run(action);
-
             return new RebelTask(result);
         }
 
@@ -97,21 +102,33 @@ namespace CoreMVVM.Threading
             return new RebelTask<TResult>(result);
         }
 
+        public static RebelTask Run(Func<RebelTask> action)
+        {
+            Task result = Task.Run(() => action().Task);
+            return new RebelTask(result);
+        }
+
+        public static RebelTask<TResult> Run<TResult>(Func<RebelTask<TResult>> action)
+        {
+            Task<TResult> result = Task.Run(() => action().Task);
+            return new RebelTask<TResult>(result);
+        }
+
         public static RebelTask Run(Func<Task> action)
         {
-            Task result = action();
+            Task result = Task.Run(action);
             return new RebelTask(result);
         }
 
         public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> action)
         {
-            Task<TResult> result = action();
+            Task<TResult> result = Task.Run(action);
             return new RebelTask<TResult>(result);
         }
 
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
-            IEnumerable<Task> wrappedTasks = tasks.Select(t => t._task);
+            IEnumerable<Task> wrappedTasks = tasks.Select(t => t.Task);
             Task result = Task.WhenAll(wrappedTasks);
 
             return new RebelTask(result);
@@ -121,7 +138,7 @@ namespace CoreMVVM.Threading
         {
             var wrappedTasks = tasks
                 .Select(task => (RebelTask)task)
-                .Select(t => t._task)
+                .Select(t => t.Task)
                 .Cast<Task<TResult>>();
 
             var result = Task.WhenAll(wrappedTasks);
@@ -143,7 +160,7 @@ namespace CoreMVVM.Threading
 
         public bool Equals(RebelTask other)
         {
-            return _task == other._task;
+            return Task == other.Task;
         }
 
         public override int GetHashCode()
