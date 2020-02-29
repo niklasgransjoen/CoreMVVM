@@ -7,11 +7,11 @@ namespace CoreMVVM
     /// <summary>
     /// Base for dialog view models.
     /// </summary>
-    public abstract class DialogBase : BaseValidationModel, IDialog
+    public abstract class BaseDialog : BaseValidationModel, IDialog
     {
         private readonly TaskCompletionSource<int> _taskCompletionSource = new TaskCompletionSource<int>();
 
-        public DialogBase()
+        protected BaseDialog()
         {
         }
 
@@ -49,11 +49,11 @@ namespace CoreMVVM
     /// <summary>
     /// Base for dialog view models.
     /// </summary>
-    public abstract class DialogBase<TResult> : BaseValidationModel, IDialog<TResult>
+    public abstract class BaseDialog<TResult> : BaseValidationModel, IDialog<TResult>
     {
         private readonly TaskCompletionSource<TResult> _taskCompletionSource = new TaskCompletionSource<TResult>();
 
-        public DialogBase()
+        protected BaseDialog()
         {
         }
 
