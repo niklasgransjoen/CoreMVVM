@@ -1,4 +1,5 @@
-﻿using CoreMVVM.Validation;
+﻿using CoreMVVM.Threading;
+using CoreMVVM.Validation;
 using System;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        public Task Task => _taskCompletionSource.Task;
+        public RebelTask Task => _taskCompletionSource.Task;
 
         #endregion Properties
 
@@ -71,12 +72,12 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        public Task<TResult> Task => _taskCompletionSource.Task;
+        public RebelTask<TResult> Task => _taskCompletionSource.Task;
 
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        Task IDialog.Task => Task;
+        RebelTask IDialog.Task => Task;
 
         #endregion Properties
 
