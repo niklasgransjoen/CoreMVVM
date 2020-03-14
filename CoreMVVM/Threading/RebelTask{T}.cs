@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CoreMVVM.Threading
@@ -27,15 +28,15 @@ namespace CoreMVVM.Threading
             _result = default;
         }
 
-        public RebelTask(Func<TResult> function)
+        public RebelTask(Func<TResult> function, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function);
+            Task = new Task<TResult>(function, cancellationToken);
             _result = default;
         }
 
-        public RebelTask(Func<object, TResult> function, object state)
+        public RebelTask(Func<object, TResult> function, object state, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function, state);
+            Task = new Task<TResult>(function, state, cancellationToken);
             _result = default;
         }
 
