@@ -118,6 +118,11 @@ namespace CoreMVVM.Threading
             if (Task is null)
                 return _result;
 
+            if (Task.IsCanceled)
+            {
+                throw new TaskCanceledException(Task);
+            }
+
             if (Task.Exception != null)
             {
                 Exception taskException = Task.Exception.InnerException;
