@@ -31,12 +31,44 @@ namespace CoreMVVM.Threading
             Task = task;
         }
 
+        public RebelTask(Action action)
+        {
+            Task = new Task(action);
+        }
+
+        public RebelTask(Action<object> action, object state)
+        {
+            Task = new Task(action, state);
+        }
+
         public static RebelTask<TResult> FromResult<TResult>(TResult result)
         {
             return new RebelTask<TResult>(result);
         }
 
         #endregion Constructors
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the task object of this RebelTask.
+        /// </summary>
+        public Task Task { get; }
+
+        #endregion Properties
+
+        /// <summary>
+        /// Starts the task on the current task scheduler.
+        /// </summary>
+        public void Start()
+        {
+            Task.Start();
+        }
+
+        public void Start(TaskScheduler taskScheduler)
+        {
+            Task.Start(taskScheduler);
+        }
 
         /// <summary>
         /// Returns a task configured to continue on the captured context.
@@ -64,15 +96,6 @@ namespace CoreMVVM.Threading
             return Task ?? CompletedTask.Task;
 #endif
         }
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the task object of this RebelTask.
-        /// </summary>
-        public Task Task { get; }
-
-        #endregion Properties
 
         #region Static utilities
 

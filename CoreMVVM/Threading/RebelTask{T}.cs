@@ -27,6 +27,18 @@ namespace CoreMVVM.Threading
             _result = default;
         }
 
+        public RebelTask(Func<TResult> function)
+        {
+            Task = new Task<TResult>(function);
+            _result = default;
+        }
+
+        public RebelTask(Func<object, TResult> function, object state)
+        {
+            Task = new Task<TResult>(function, state);
+            _result = default;
+        }
+
         public RebelTask(TResult result)
         {
             Task = null;
@@ -34,6 +46,28 @@ namespace CoreMVVM.Threading
         }
 
         #endregion Constructors
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the task object of this RebelTask.
+        /// </summary>
+        public Task<TResult> Task { get; }
+
+        #endregion Properties
+
+        /// <summary>
+        /// Starts the task on the current task scheduler.
+        /// </summary>
+        public void Start()
+        {
+            Task.Start();
+        }
+
+        public void Start(TaskScheduler taskScheduler)
+        {
+            Task.Start(taskScheduler);
+        }
 
         /// <summary>
         /// Returns a task configured to continue on the captured context.
@@ -50,15 +84,6 @@ namespace CoreMVVM.Threading
         /// Returns the awaiter of this task, configured to not continue on the captured context.
         /// </summary>
         public RebelTask<TResult> GetAwaiter() => this;
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the task object of this RebelTask.
-        /// </summary>
-        public Task<TResult> Task { get; }
-
-        #endregion Properties
 
         #region Awaiter
 
