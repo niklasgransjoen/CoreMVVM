@@ -1,6 +1,4 @@
-﻿using CoreMVVM.Implementations;
-using CoreMVVM.IOC.Core;
-using CoreMVVM.Services;
+﻿using CoreMVVM.IOC.Core;
 using System;
 using System.Linq;
 
@@ -20,7 +18,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public ContainerBuilder()
         {
-            RegisterSingleton<UnregisteredInterfaceFallbackService>().As<IResolveUnregisteredInterfaceService>();
+            RegisterSingleton<FallbackImplementations.UnregisteredInterfaceFallbackService>().As<IResolveUnregisteredInterfaceService>();
         }
 
         #endregion Constructors

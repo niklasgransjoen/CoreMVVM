@@ -1,8 +1,7 @@
 ﻿using CoreMVVM.IOC;
-using CoreMVVM.Services;
 using System.Reflection;
 
-namespace CoreMVVM.Implementations
+namespace CoreMVVM.IOC.FallbackImplementations
 {
     /// <summary>
     /// Implementation of <see cref="IResolveUnregisteredInterfaceService"/>,

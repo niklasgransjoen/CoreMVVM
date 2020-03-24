@@ -1,8 +1,7 @@
 ﻿using CoreMVVM.Extentions;
-using CoreMVVM.IOC;
 using System;
 
-namespace CoreMVVM.Services
+namespace CoreMVVM.IOC
 {
     /// <summary>
     /// Implements functionality for handling attempts to resolve unregistered interfaces.

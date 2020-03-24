@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Text;
 
 namespace CoreMVVM
 {
@@ -9,204 +8,101 @@ namespace CoreMVVM
     /// </summary>
     public static class StringParser
     {
+        private static readonly Lazy<IStringParser> _stringParser = ContainerProvider.Resolve<Lazy<IStringParser>>();
+
+        public static IStringParser Core => _stringParser.Value;
+
+        /// <summary>
+        /// Utility method. Parser the given value, then formats it with the given arguments.
+        /// </summary>
         public static string Format(string value, params object[] args)
         {
-            string parsedValue = Parse(value);
-            try
-            {
-                return string.Format(CultureInfo.InvariantCulture, parsedValue, args);
-            }
-            catch (FormatException e)
-            {
-                LoggerHelper.Exception("StringParser.Format", e);
-
-                return parsedValue;
-            }
+            using var resourceService = GetResourceService();
+            return Core.Format(resourceService.Value, CultureInfo.CurrentCulture, value, args);
         }
 
         /// <summary>
-        /// Parses a string by expanding all ${property} values.
+        /// Utility method. Parser the given value, then formats it with the given arguments.
+        /// </summary>
+        public static string Format(IFormatProvider formatProvider, string value, params object[] args)
+        {
+            using var resourceService = GetResourceService();
+            return Core.Format(resourceService.Value, formatProvider, value, args);
+        }
+
+        /// <summary>
+        /// Parses a string.
         /// </summary>
         /// <param name="value">The value to parse.</param>
         /// <returns>The parsed value.</returns>
-        public static string Parse(string value, params StringTagPair[] customTags)
+        public static string Parse(string value, params StringTagPair[] args)
         {
-            if (value is null)
-                throw new ArgumentNullException(nameof(value));
-
-            int pos = 0;
-            StringBuilder output = null; // don't use StringBuilder if input is a single property
-            do
-            {
-                int oldPos = pos;
-                pos = value.IndexOf("${", pos, StringComparison.Ordinal);
-                if (pos < 0)
-                {
-                    if (output is null)
-                        return value;
-
-                    if (oldPos < value.Length)
-                    {
-                        // normal text after last property
-                        output.Append(value, oldPos, value.Length - oldPos);
-                    }
-
-                    return output.ToString();
-                }
-
-                if (output is null)
-                {
-                    if (pos == 0)
-                        output = new StringBuilder();
-                    else
-                        output = new StringBuilder(value, 0, pos, pos + 16);
-                }
-                else
-                {
-                    if (pos > oldPos)
-                    {
-                        // normal text between two properties
-                        output.Append(value, oldPos, pos - oldPos);
-                    }
-                }
-                int end = value.IndexOf('}', pos + 1);
-                if (end < 0)
-                {
-                    output.Append("${");
-                    pos += 2;
-                }
-                else
-                {
-                    string property = value.Substring(pos + 2, end - pos - 2);
-                    string val = GetValue(property, customTags);
-                    if (val is null)
-                    {
-                        output.Append("${");
-                        output.Append(property);
-                        output.Append('}');
-                    }
-                    else
-                    {
-                        output.Append(val);
-                    }
-                    pos = end + 1;
-                }
-            } while (pos < value.Length);
-
-            return output.ToString();
+            using var resourceService = GetResourceService();
+            return Core.Parse(resourceService.Value, value, args);
         }
-
-        public static string GetValue(string propertyName) => GetValue(propertyName, null);
 
         /// <summary>
         /// Evaluates the value of a property.
         /// </summary>
         /// <param name="propertyName">The name of the property to evaluate.</param>
         /// <returns>The value that the property was evaluated to.</returns>
-        public static string GetValue(string propertyName, params StringTagPair[] customTags)
+        public static string GetValue(string propertyName, params StringTagPair[] args)
         {
-            if (propertyName is null) throw new ArgumentNullException(nameof(propertyName));
-
-            if (customTags != null)
-            {
-                foreach (StringTagPair pair in customTags)
-                {
-                    if (propertyName.Equals(pair.Tag, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return pair.Value ?? string.Empty;
-                    }
-                }
-            }
-
-            if (propertyName.Contains(":"))
-            {
-                // It's a prefixed property.
-
-                if (propertyName.StartsWith("res:", StringComparison.OrdinalIgnoreCase))
-                {
-                    IResourceService resourceService = ContainerProvider.Resolve<IResourceService>();
-
-                    string resource = resourceService.GetString(propertyName.Substring(4));
-                    if (resource != null)
-                        return Parse(resource, customTags);
-                }
-            }
-            else
-            {
-                // It's not a prefixed property.
-            }
-
-            return $"${{{propertyName}}}";
+            using var resourceService = GetResourceService();
+            return Core.GetValue(resourceService.Value, propertyName, args);
         }
 
-        public static string GetResource(string key)
+        /// <summary>
+        /// Utility method. Resolves the given resource, then parses it.
+        /// </summary>
+        /// <returns>The resolved, parsed resource. If resource does not exist, returns null.</returns>
+        public static string GetResource(string key, params StringTagPair[] args)
         {
-            return GetResource(key, null);
+            using var resourceService = GetResourceService();
+            return Core.GetResource(resourceService.Value, key, args);
         }
 
-        public static string GetResource(string key, params StringTagPair[] customTags)
+#if NETCORE
+
+        public static string GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args)
         {
-            return GetValue("res:" + key, customTags);
+            using var resourceService = GetResourceService();
+            return Core.GetValue(resourceService.Value, propertyName, args);
         }
+
+        /// <summary>
+        /// Utility method. Resolves the given resource, then parses it.
+        /// </summary>
+        /// <returns>The resolved, parsed resource. If resource does not exist, returns null.</returns>
+        public static string GetResource(ReadOnlySpan<char> key, params StringTagPair[] args)
+        {
+            using var resourceService = GetResourceService();
+            return Core.GetResource(resourceService.Value, key, args);
+        }
+
+#endif
+
+        #region Utilities
+
+        private static ResourceService GetResourceService() => new ResourceService(null);
+
+        private readonly struct ResourceService : IDisposable
+        {
+            private static readonly Lazy<IResourceServiceProvider> _resourceServiceProvider = ContainerProvider.Resolve<Lazy<IResourceServiceProvider>>();
+
+            public ResourceService(object _)
+            {
+                Value = _resourceServiceProvider.Value.GetResourceService();
+            }
+
+            public IResourceService Value { get; }
+
+            public void Dispose()
+            {
+                _resourceServiceProvider.Value.FreeResourceService(Value);
+            }
+        }
+
+        #endregion Utilities
     }
-
-    #region StringTagPair
-
-    public struct StringTagPair : IEquatable<StringTagPair>
-    {
-        public StringTagPair(string tag, string value)
-        {
-            Tag = tag;
-            Value = value;
-        }
-
-        public StringTagPair(string tag, object value)
-        {
-            Tag = tag;
-
-            if (value is IConvertible convertible)
-                Value = convertible.ToString(CultureInfo.CurrentCulture);
-            else
-                Value = value?.ToString();
-        }
-
-        public string Tag { get; }
-
-        public string Value { get; }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is StringTagPair other)
-                Equals(other);
-
-            return false;
-        }
-
-        public bool Equals(StringTagPair other)
-        {
-            return Tag == other.Tag &&
-                   Value == other.Value;
-        }
-
-        public override int GetHashCode()
-        {
-            int hash = 13;
-            hash = (hash * 7) + Tag.GetHashCode();
-            hash = (hash * 7) + Value?.GetHashCode() ?? 13;
-
-            return hash;
-        }
-
-        public static bool operator ==(StringTagPair left, StringTagPair right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(StringTagPair left, StringTagPair right)
-        {
-            return !(left == right);
-        }
-    }
-
-    #endregion StringTagPair
 }
