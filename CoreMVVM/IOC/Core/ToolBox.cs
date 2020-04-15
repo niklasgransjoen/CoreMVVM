@@ -34,6 +34,8 @@ namespace CoreMVVM.IOC.Core
 
         public IRegistration AddRegistration(Type component, Type type, ComponentScope scope)
         {
+            _registrations.AssertNoScopingConflicts(component, scope);
+
             // Make sure scopes components are only registered once.
             if (scope != ComponentScope.None)
             {
@@ -65,7 +67,7 @@ namespace CoreMVVM.IOC.Core
         {
             ConstructorInfo[] constructors = type.GetConstructors();
             if (constructors.Length == 0)
-                throw new ResolveConstructionException($"Type '{type}' has no accessible constructors.");
+                throw new ResolveException($"Type '{type}' has no accessible constructors.");
 
             var constructor = constructors
                 .OrderByDescending(c => c.GetParameters().Length)
@@ -91,7 +93,7 @@ namespace CoreMVVM.IOC.Core
 
         private static void ValidateParameters(Type type, ParameterInfo[] parameters)
         {
-            List<ResolveConstructionException> exceptions = null;
+            List<ResolveException> exceptions = null;
             foreach (var parameter in parameters)
             {
                 if (parameter.ParameterType.IsValueType)
@@ -103,15 +105,15 @@ namespace CoreMVVM.IOC.Core
             if (exceptions != null)
             {
                 var aggregateException = new AggregateException(exceptions);
-                throw new ResolveConstructionException($"One or more parameters in the constructor of type '{type}' were invalid.", aggregateException);
+                throw new ResolveException($"One or more parameters in the constructor of type '{type}' were invalid.", aggregateException);
             }
 
             void addException(string message)
             {
                 if (exceptions == null)
-                    exceptions = new List<ResolveConstructionException>();
+                    exceptions = new List<ResolveException>();
 
-                exceptions.Add(new ResolveConstructionException(message));
+                exceptions.Add(new ResolveException(message));
             }
         }
 

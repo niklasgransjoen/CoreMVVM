@@ -10,11 +10,11 @@ namespace CoreMVVM.IOC.Core
     internal class LifetimeScope : ILifetimeScope
     {
         private readonly ToolBox _toolBox;
-        private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
         private readonly LifetimeScope _parent;
         private readonly IResolveUnregisteredInterfaceService _resolveUnregisteredInterfaceService;
 
-        private readonly object _disposeLock = new object();
+        private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
+        private readonly HashSet<IRegistration> _resolvingScopedComponents = new HashSet<IRegistration>();
 
         public LifetimeScope(ToolBox toolBox)
         {
@@ -64,7 +64,7 @@ namespace CoreMVVM.IOC.Core
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
         /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        /// <exception cref="ResolveException">Fails to construct type or one of its arguments.</exception>
         public T Resolve<T>() where T : class
         {
             return (T)Resolve(typeof(T), isOwned: false);
@@ -75,7 +75,7 @@ namespace CoreMVVM.IOC.Core
         /// </summary>
         /// <param name="type">The type to get an instance for. Class or interface.</param>
         /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type or one of its arguments.</exception>
+        /// <exception cref="ResolveException">Fails to construct type or one of its arguments.</exception>
         /// <exception cref="ArgumentException">type is value type.</exception>
         public object Resolve(Type type)
         {
@@ -100,17 +100,11 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 return;
 
-            lock (_disposeLock)
-            {
-                if (IsDisposed)
-                    return;
+            IsDisposed = true;
+            foreach (IDisposable disposable in _disposables)
+                disposable.Dispose();
 
-                IsDisposed = true;
-                foreach (IDisposable disposable in _disposables)
-                    disposable.Dispose();
-
-                _disposables.Clear();
-            }
+            _disposables.Clear();
         }
 
         #endregion IDispose
@@ -194,16 +188,38 @@ namespace CoreMVVM.IOC.Core
             if (registration.Scope == ComponentScope.Singleton && _parent != null)
                 return _parent.ResolveScopedComponent(registration);
 
-            // Result from scoped components are saved for future resolves.
             lock (registration)
             {
+                // Result from scoped components are saved for future resolves.
                 if (!ResolvedInstances.TryGetValue(registration, out object instance))
                 {
-                    instance = ConstructFromRegistration(registration, isOwned: false);
-                    ResolvedInstances[registration] = instance;
+                    if (!_resolvingScopedComponents.Add(registration))
+                    {
+                        throw new ResolveException(
+                            $"Recursive pattern on scoped components detected. " +
+                            $"This was detected while resolving service '{registration.Type}'.");
+                    }
 
-                    if (instance != null)
-                        InitializeComponent(instance);
+                    try
+                    {
+                        instance = ConstructFromRegistration(registration, isOwned: false);
+                        if (ResolvedInstances.ContainsKey(registration))
+                        {
+                            throw new ResolveException(
+                                $"Recursive pattern on scoped components detected. " +
+                                $"This was detected while resolving service '{registration.Type}'.");
+                        }
+
+                        ResolvedInstances.Add(registration, instance);
+                        if (instance != null)
+                        {
+                            InitializeComponent(instance);
+                        }
+                    }
+                    finally
+                    {
+                        _resolvingScopedComponents.Remove(registration);
+                    }
                 }
 
                 return instance;
@@ -235,8 +251,7 @@ namespace CoreMVVM.IOC.Core
         /// <param name="type">The type of component to construct.</param>
         /// <param name="isOwned">Indicates if the caller to resolve should own the constructed component,
         /// instead of this lifetimescope.</param>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type is an interface.</exception>
-        /// <exception cref="ResolveConstructionException">Fails to construct type.</exception>
+        /// <exception cref="IOCException">Construction fails.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
             // Resolve ILifetimeScope
@@ -287,11 +302,7 @@ namespace CoreMVVM.IOC.Core
 
                 return instance;
             }
-            catch (OwnedScopedComponentException)
-            {
-                throw;
-            }
-            catch (ResolveConstructionException)
+            catch (IOCException)
             {
                 throw;
             }
@@ -300,7 +311,7 @@ namespace CoreMVVM.IOC.Core
                 string message = $"Failed to construct instance of type '{type}'.";
 
                 LoggerHelper.Exception(message, e);
-                throw new ResolveConstructionException(message, e);
+                throw new ResolveException(message, e);
             }
         }
 
@@ -333,7 +344,7 @@ namespace CoreMVVM.IOC.Core
         {
             Type resultType = factoryType.GenericTypeArguments[0];
             if (resultType.IsValueType)
-                throw new ResolveConstructionException($"Cannot resolve factory for value type '{resultType}'.");
+                throw new ResolveException($"Cannot resolve factory for value type '{resultType}'.");
 
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);

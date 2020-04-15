@@ -1,13 +1,12 @@
 ﻿using CoreMVVM.IOC.Core;
 using System;
-using System.Linq;
 
 namespace CoreMVVM.IOC.Builder
 {
     /// <summary>
     /// For building a container.
     /// </summary>
-    public class ContainerBuilder
+    public sealed class ContainerBuilder
     {
         private readonly RegistrationCollection _registrations = new RegistrationCollection();
 
@@ -55,7 +54,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, ComponentScope.None);
+            _registrations.AssertNoScopingConflicts(type, ComponentScope.None);
 
             return RegistrationBuilder.Create(_registrations, type);
         }
@@ -72,7 +71,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(ComponentScope.None);
+            _registrations.AssertNoScopingConflicts<T>(ComponentScope.None);
 
             return RegistrationBuilder.Create(_registrations, factory);
         }
@@ -100,7 +99,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, ComponentScope.Singleton);
+            _registrations.AssertNoScopingConflicts(type, ComponentScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, type);
         }
@@ -117,7 +116,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(ComponentScope.Singleton);
+            _registrations.AssertNoScopingConflicts<T>(ComponentScope.Singleton);
 
             return RegistrationBuilder.CreateSingleton(_registrations, factory);
         }
@@ -145,7 +144,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            ThrowOnScopingConflict(type, ComponentScope.LifetimeScope);
+            _registrations.AssertNoScopingConflicts(type, ComponentScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, type);
         }
@@ -162,7 +161,7 @@ namespace CoreMVVM.IOC.Builder
             if (factory is null)
                 throw new ArgumentNullException(nameof(factory));
 
-            ThrowOnScopingConflict<T>(ComponentScope.LifetimeScope);
+            _registrations.AssertNoScopingConflicts<T>(ComponentScope.LifetimeScope);
 
             return RegistrationBuilder.CreateLifetimeScope(_registrations, factory);
         }
@@ -190,26 +189,5 @@ namespace CoreMVVM.IOC.Builder
         }
 
         #endregion Methods
-
-        #region Helper
-
-        private void ThrowOnScopingConflict<T>(ComponentScope scope) => ThrowOnScopingConflict(typeof(T), scope);
-
-        private void ThrowOnScopingConflict(Type type, ComponentScope scope)
-        {
-            // Verify that all registrations have the same scope.
-            var previousRegs = _registrations.Where(r => r.Value.Type == type);
-            if (previousRegs.All(r => r.Value.Scope == scope))
-                return;
-
-            var previousReg = previousRegs.First();
-            string message =
-                $"Attempted to register type '{type}' with scope '{scope}', " +
-                $"which conflicts with earlier registration as a component of '{previousReg.Key}', with with scope '{previousReg.Value.Scope}'.";
-
-            throw new ScopingConflictException(message);
-        }
-
-        #endregion Helper
     }
 }

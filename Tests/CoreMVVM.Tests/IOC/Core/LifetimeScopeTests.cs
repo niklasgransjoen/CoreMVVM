@@ -62,7 +62,7 @@ namespace CoreMVVM.IOC.Core.Tests
             object subject1 = LifetimeScope.Resolve<IInterface>();
             object subject2 = LifetimeScope.Resolve<IInterface>();
 
-            Assert.NotEqual(subject1, subject2);
+            Assert.NotSame(subject1, subject2);
         }
     }
 
@@ -173,6 +173,28 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
         }
 
+        /**
+         * See issue #30.
+         */
+
+        [Fact]
+        public void LifetimeScope_Handles_Recursive_Scoped_Service_Pattern()
+        {
+            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService1>());
+        }
+
+        /**
+         * See issue #30.
+         */
+
+        [Fact]
+        public void LifetimeScope_Handles_Recursive_Scoped_Service_Constructor_Pattern()
+        {
+            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService2>());
+        }
+
+        #region Resources
+
         private interface IAttributeSingleton
         {
         }
@@ -198,6 +220,42 @@ namespace CoreMVVM.IOC.Core.Tests
 
         [Scope(ComponentScope.Singleton)]
         private sealed class MultiInterfaceClass : IInterface1, IInterface2 { }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService1
+        {
+            public SingletonService1()
+            {
+                GC.KeepAlive(InstanceService1.Instance);
+            }
+        }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService2
+        {
+            public SingletonService2(SingletonService3 singletonService3)
+            {
+            }
+        }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService3
+        {
+            public SingletonService3(SingletonService2 singletonService2)
+            {
+            }
+        }
+
+        private sealed class InstanceService1
+        {
+            public static readonly SingletonService1 Instance = ContainerProvider.Resolve<SingletonService1>();
+
+            public InstanceService1()
+            {
+            }
+        }
+
+        #endregion Resources
     }
 
     public class LifetimeScope_Resolve_LifetimeScope : LifetimeScopeTestBase
@@ -260,7 +318,7 @@ namespace CoreMVVM.IOC.Core.Tests
             while (interfaces.Count > 1)
             {
                 for (int i = 1; i < interfaces.Count; i++)
-                    Assert.Equal(interfaces[0], interfaces[i]);
+                    Assert.Same(interfaces[0], interfaces[i]);
 
                 interfaces.RemoveAt(0);
             }
@@ -326,11 +384,11 @@ namespace CoreMVVM.IOC.Core.Tests
         public void LifetimeScope_Resolves_Self()
         {
             ILifetimeScope res1 = LifetimeScope.Resolve<ILifetimeScope>();
-            Assert.Equal(LifetimeScope, res1);
+            Assert.Same(LifetimeScope, res1);
 
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
             ILifetimeScope res2 = subscope.Resolve<ILifetimeScope>();
-            Assert.Equal(subscope, res2);
+            Assert.Same(subscope, res2);
         }
     }
 
@@ -585,7 +643,7 @@ namespace CoreMVVM.IOC.Core.Tests
                 LifetimeScope.Resolve(typeof(int));
             });
 
-            Assert.Throws<ResolveConstructionException>(() =>
+            Assert.Throws<ResolveException>(() =>
             {
                 LifetimeScope.Resolve<string>();
             });

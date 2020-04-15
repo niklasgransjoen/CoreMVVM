@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace CoreMVVM.IOC
+﻿namespace CoreMVVM.IOC
 {
     /// <summary>
     /// Occurs when the attempting to resolve an interface with the resolver.
     /// </summary>
-    public class ResolveUnregisteredInterfaceException : Exception
+    public sealed class ResolveUnregisteredInterfaceException : IOCException
     {
         public ResolveUnregisteredInterfaceException(string message) : base(message)
         {
