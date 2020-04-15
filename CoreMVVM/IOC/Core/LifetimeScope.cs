@@ -1,7 +1,6 @@
 ﻿using CoreMVVM.Extentions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -81,7 +80,7 @@ namespace CoreMVVM.IOC.Core
         public object Resolve(Type type)
         {
             if (type.IsValueType)
-                throw new ArgumentException("Cannot resolve value type");
+                throw new ArgumentException($"Cannot resolve value type '{type}'.");
 
             return Resolve(type, isOwned: false);
         }
@@ -123,16 +122,19 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
+            if (type.IsValueType)
+                throw new ArgumentException($"Cannot resolve value type (Type '{type}').");
+
             if (TryResolveRegisteredComponent(type, isOwned, out object component))
                 return component;
             else if (TryResolveComponentByAttribute(type, isOwned, out component))
                 return component;
             else
             {
-                object instance = ConstructType(type, isOwned);
-                InitializeComponent(instance);
+                component = ConstructType(type, isOwned);
+                InitializeComponent(component);
 
-                return instance;
+                return component;
             }
         }
 
@@ -272,22 +274,8 @@ namespace CoreMVVM.IOC.Core
             // Construct type.
             try
             {
-                if (!_toolBox.TryGetConstructor(type, out ConstructorInfo constructor))
-                {
-                    ConstructorInfo[] constructors = type.GetConstructors();
-                    if (constructors.Length == 0)
-                        throw new ResolveConstructionException($"Type '{type}' has no accessible constructors.");
-
-                    constructor = constructors
-                        .OrderByDescending(c => c.GetParameters().Length)
-                        .First();
-
-                    _toolBox.AddConstructor(type, constructor);
-                    _toolBox.AddParameterInfo(constructor);
-                }
-
-                _toolBox.TryGetParameterInfo(constructor, out ParameterInfo[] parameters);
-                Debug.Assert(parameters != null);
+                var constructor = _toolBox.GetConstructor(type);
+                var parameters = _toolBox.GetParameterInfo(constructor);
 
                 object[] args = parameters.Select(param => Resolve(param.ParameterType, implementsIOwned))
                                           .ToArray();
@@ -344,6 +332,9 @@ namespace CoreMVVM.IOC.Core
         private Func<object> ConstructFactory(Type factoryType, bool isOwned)
         {
             Type resultType = factoryType.GenericTypeArguments[0];
+            if (resultType.IsValueType)
+                throw new ResolveConstructionException($"Cannot resolve factory for value type '{resultType}'.");
+
             Expression<Func<object>> factoryExpression = () => Resolve(resultType, isOwned);
             Expression factoryBody = Expression.Invoke(factoryExpression);
             Expression convertedResult = Expression.Convert(factoryBody, resultType);

@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.Windows;
+using CoreMVVM.Windows.Threading;
 using System;
 using System.Collections;
 using System.Windows;
@@ -89,6 +90,8 @@ namespace CoreMVVM.Demo.ViewModels
             Window dialogView = _windowManager.ShowWindow(dialog);
 
             string result = await dialog.Task;
+
+            await TaskMaster.AwaitUIThread();
             dialogView.Close();
 
             string title = StringParser.GetResource("DialogResult");

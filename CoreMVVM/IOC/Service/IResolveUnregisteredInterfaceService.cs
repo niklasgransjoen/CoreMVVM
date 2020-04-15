@@ -39,7 +39,7 @@ namespace CoreMVVM.IOC
         public Type InterfaceType { get; }
 
         /// <summary>
-        /// Gets the type to resolve to. Implements <see cref="InterfaceType"/>.
+        /// Gets the type to resolve to. Is a non-abstract, non-static class that implements <see cref="InterfaceType"/>.
         /// </summary>
         public Type InterfaceImplementationType { get; private set; }
 
@@ -66,6 +66,9 @@ namespace CoreMVVM.IOC
         {
             if (!interfaceImplementationType.ImplementsInterface(InterfaceType))
                 throw new ArgumentException($"Type '{interfaceImplementationType}' does not implement interface '{InterfaceType}'.", nameof(interfaceImplementationType));
+
+            if (!interfaceImplementationType.IsClass || interfaceImplementationType.IsAbstract)
+                throw new ArgumentException($"Type '{interfaceImplementationType}' must be a non-abstract, non-static class.", nameof(interfaceImplementationType));
 
             InterfaceImplementationType = interfaceImplementationType;
         }

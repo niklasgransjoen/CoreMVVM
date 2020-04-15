@@ -51,24 +51,68 @@ namespace CoreMVVM.IOC.Core
             return registration;
         }
 
-        public bool TryGetConstructor(Type type, out ConstructorInfo constructor)
+        public ConstructorInfo GetConstructor(Type type)
         {
-            return _constructors.TryGetValue(type, out constructor);
+            if (_constructors.TryGetValue(type, out var constructor))
+            {
+                return constructor;
+            }
+
+            return AddConstructor(type);
         }
 
-        public void AddConstructor(Type type, ConstructorInfo constructor)
+        private ConstructorInfo AddConstructor(Type type)
         {
+            ConstructorInfo[] constructors = type.GetConstructors();
+            if (constructors.Length == 0)
+                throw new ResolveConstructionException($"Type '{type}' has no accessible constructors.");
+
+            var constructor = constructors
+                .OrderByDescending(c => c.GetParameters().Length)
+                .First();
+
             _constructors[type] = constructor;
+            AddParameterInfo(constructor);
+
+            return constructor;
         }
 
-        public bool TryGetParameterInfo(ConstructorInfo constructor, out ParameterInfo[] parameters)
+        public ParameterInfo[] GetParameterInfo(ConstructorInfo constructor) => _parameters[constructor];
+
+        private ParameterInfo[] AddParameterInfo(ConstructorInfo constructor)
         {
-            return _parameters.TryGetValue(constructor, out parameters);
+            var parameters = constructor.GetParameters();
+            ValidateParameters(constructor.DeclaringType, parameters);
+
+            _parameters[constructor] = parameters;
+
+            return parameters;
         }
 
-        public void AddParameterInfo(ConstructorInfo constructor)
+        private static void ValidateParameters(Type type, ParameterInfo[] parameters)
         {
-            _parameters[constructor] = constructor.GetParameters();
+            List<ResolveConstructionException> exceptions = null;
+            foreach (var parameter in parameters)
+            {
+                if (parameter.ParameterType.IsValueType)
+                {
+                    addException($"Parameter of type '{parameter.ParameterType}' is invalid.");
+                }
+            }
+
+            if (exceptions != null)
+            {
+                var aggregateException = new AggregateException(exceptions);
+                throw new ResolveConstructionException($"One or more parameters in the constructor of type '{type}' were invalid.", aggregateException);
+            }
+
+            void addException(string message)
+            {
+                if (exceptions == null)
+                    exceptions = new List<ResolveConstructionException>();
+
+                exceptions.Add(new ResolveConstructionException(message));
+            }
         }
 
         #endregion Methods

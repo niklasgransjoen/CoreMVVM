@@ -34,5 +34,10 @@ namespace CoreMVVM.Demo
         {
             return Resources.Resources.ResourceManager.GetString(key, _cultureInfo);
         }
+
+        public string GetString(ReadOnlySpan<char> key)
+        {
+            return GetString(key.ToString());
+        }
     }
 }

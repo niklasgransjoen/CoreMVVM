@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.Implementations;
 using CoreMVVM.IOC.Builder;
-using CoreMVVM.Services;
 using CoreMVVM.Tests;
 using System;
 using System.Collections.Generic;
