@@ -143,7 +143,7 @@ namespace CoreMVVM.IOC.Core
                 return false;
             }
 
-            component = ResolveFromRegistration(type, isOwned, registration);
+            component = ResolveFromRegistration(registration, isOwned);
             return true;
         }
 
@@ -161,11 +161,11 @@ namespace CoreMVVM.IOC.Core
 
             // Register type as itself.
             var registration = _toolBox.AddRegistration(type, type, attribute.Scope);
-            component = ResolveFromRegistration(type, isOwned, registration);
+            component = ResolveFromRegistration(registration, isOwned);
             return true;
         }
 
-        private object ResolveFromRegistration(Type type, bool isOwned, IRegistration registration)
+        private object ResolveFromRegistration(IRegistration registration, bool isOwned)
         {
             if (registration.Scope == ComponentScope.None)
             {
@@ -177,7 +177,7 @@ namespace CoreMVVM.IOC.Core
             }
 
             if (isOwned)
-                throw new OwnedScopedComponentException($"Attempted to own component of type '{type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
+                throw new OwnedScopedComponentException($"Attempted to own component of type '{registration.Type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
 
             return ResolveScopedComponent(registration);
         }
@@ -281,7 +281,10 @@ namespace CoreMVVM.IOC.Core
                     throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
 
                 if (context.CacheImplementation)
-                    _toolBox.AddRegistration(context.InterfaceImplementationType, type, context.CacheScope);
+                {
+                    var registration = _toolBox.AddRegistration(context.InterfaceImplementationType, type, context.CacheScope);
+                    return ResolveFromRegistration(registration, isOwned);
+                }
 
                 return Resolve(context.InterfaceImplementationType, isOwned);
             }
