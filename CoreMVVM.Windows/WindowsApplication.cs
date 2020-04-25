@@ -29,6 +29,7 @@ namespace CoreMVVM.Windows
             builder.RegisterSingleton<WindowsViewLocator>().As<IViewLocator>();
 
             RegisterComponents(builder);
+            builder.OnBuild += OnContainerBuilt;
             _container = builder.Build();
 
             OnStartupOverride(e);
@@ -55,6 +56,13 @@ namespace CoreMVVM.Windows
 
         #region Listeners
 
+        private void OnContainerBuilt(IContainer container)
+        {
+            ContainerProvider.Container = container;
+        }
+
+        #region UnhandledException
+
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.ExceptionObject is Exception exception)
@@ -72,6 +80,8 @@ namespace CoreMVVM.Windows
         {
             LoggerHelper.Exception("UnobservedTaskException", e.Exception);
         }
+
+        #endregion UnhandledException
 
         #endregion Listeners
     }
