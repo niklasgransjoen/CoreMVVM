@@ -148,7 +148,15 @@ namespace CoreMVVM.Threading
             return new RebelTask<TResult>(result);
         }
 
-        public static RebelTask WhenAll(params RebelTask[] tasks) => WhenAll(tasks.AsEnumerable());
+        public static RebelTask WhenAll(params RebelTask[] tasks) => WhenAll((IReadOnlyCollection<RebelTask>)tasks);
+
+        public static RebelTask WhenAll(IReadOnlyCollection<RebelTask> tasks)
+        {
+            if (tasks.Count == 0)
+                return CompletedTask;
+
+            return WhenAll(tasks.AsEnumerable());
+        }
 
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
@@ -158,7 +166,20 @@ namespace CoreMVVM.Threading
             return new RebelTask(result);
         }
 
-        public static RebelTask<TResult[]> WhenAll<TResult>(params RebelTask<TResult>[] tasks) => WhenAll(tasks.AsEnumerable());
+        public static RebelTask<TResult[]> WhenAll<TResult>(params RebelTask<TResult>[] tasks) => WhenAll((IReadOnlyCollection<RebelTask<TResult>>)tasks);
+
+        public static RebelTask<TResult[]> WhenAll<TResult>(IReadOnlyCollection<RebelTask<TResult>> tasks)
+        {
+#if NET45
+            if (tasks.Count == 0)
+                return FromResult(new TResult[0]);
+#else
+            if (tasks.Count == 0)
+                return FromResult(Array.Empty<TResult>());
+#endif
+
+            return WhenAll(tasks.AsEnumerable());
+        }
 
         public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
         {
