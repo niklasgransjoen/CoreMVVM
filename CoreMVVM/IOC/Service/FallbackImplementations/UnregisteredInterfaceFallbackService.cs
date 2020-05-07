@@ -1,5 +1,4 @@
-﻿using CoreMVVM.IOC;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace CoreMVVM.IOC.FallbackImplementations
 {
@@ -18,6 +17,7 @@ namespace CoreMVVM.IOC.FallbackImplementations
             if (attribute != null)
             {
                 context.SetInterfaceImplementationType(attribute.Type);
+                context.CacheImplementation = true;
                 context.CacheScope = ComponentScope.Singleton;
             }
         }

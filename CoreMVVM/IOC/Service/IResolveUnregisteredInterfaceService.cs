@@ -46,12 +46,13 @@ namespace CoreMVVM.IOC
         /// <summary>
         /// Gets or sets a value indicating whether the value of <see cref="InterfaceImplementationType"/> should be cached.
         /// </summary>
-        /// <remarks>This field has no effect when <see cref="InterfaceImplementationType"/> is not set.</remarks>
+        /// <remarks>This property has no effect when <see cref="InterfaceImplementationType"/> is not set.</remarks>
         public bool CacheImplementation { get; set; }
 
         /// <summary>
         /// Gets or sets the scope to use when caching <see cref="InterfaceImplementationType"/>.
         /// </summary>
+        /// <remarks>This property has no effect when <see cref="CacheImplementation"/> is not set.</remarks>
         public ComponentScope CacheScope { get; set; }
 
         #endregion Properties
