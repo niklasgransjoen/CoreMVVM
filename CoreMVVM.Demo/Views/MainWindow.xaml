@@ -4,10 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:windows="clr-namespace:CoreMVVM.Windows;assembly=CoreMVVM.Windows"
+        xmlns:markup="clr-namespace:CoreMVVM.Windows.Markup;assembly=CoreMVVM.Windows"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="{markup:StringResource MainWindow}"
+        Height="450" SizeToContent="Width"
+        MaxWidth="1200">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -20,21 +24,26 @@
                     <Setter Property="Padding" Value="5 0" />
                 </Style>
             </StackPanel.Resources>
-            <TextBlock Text="Control Panel" />
-            <Button Content="Debug" Command="{Binding DebugCommand}" />
-            <Button Content="Log" Command="{Binding LogCommand}" />
-            <Button Content="Error" Command="{Binding ErrorCommand}" />
-            <Button Content="Exception" Command="{Binding ExceptionCommand}" />
-            <Button Content="Show dialog 1" Command="{Binding ShowDialog1Command}" />
-            <Button Content="Show dialog 2" Command="{Binding ShowDialog2Command}" />
+            <TextBlock Text="{markup:StringResource ControlPanel}" />
+            <Button Content="{markup:StringResource Debug}" Command="{Binding DebugCommand}" />
+            <Button Content="{markup:StringResource Log}" Command="{Binding LogCommand}" />
+            <Button Content="{markup:StringResource Error}" Command="{Binding ErrorCommand}" />
+            <Button Content="{markup:StringResource Exception}" Command="{Binding ExceptionCommand}" />
+            <Button Content="{markup:StringResource ShowDialog1}" Command="{Binding ShowDialog1Command}" />
+            <Button Content="{markup:StringResource ShowDialog2}" Command="{Binding ShowDialog2Command}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5">
+            <TextBlock Text="{markup:StringResource Language}" Margin="5 0 10 0"/>
+            <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" SelectedIndex="0"/>
         </StackPanel>
 
         <!--Log-->
-        <DockPanel Grid.Row="1">
+        <DockPanel Grid.Row="2">
             <windows:ViewModelPresenter ViewModel="{Binding Content}" DockPanel.Dock="Top" />
-            <TextBlock Text="Event log:" DockPanel.Dock="Top" Foreground="Blue" Margin="5 0 0 0" />
+            <TextBlock Text="{markup:StringResource EventLog}" DockPanel.Dock="Top" Foreground="Blue" Margin="5 0 0 0" />
             <RichTextBox Name="textBox" Margin="5 0 5 5"
-                     IsReadOnly="True"
+                     IsReadOnly="True" Width="auto"
                      VerticalScrollBarVisibility="Auto" />
         </DockPanel>
     </Grid>

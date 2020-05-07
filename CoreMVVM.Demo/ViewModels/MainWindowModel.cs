@@ -1,6 +1,8 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.Windows;
+using CoreMVVM.Windows.Threading;
 using System;
+using System.Collections;
 using System.Windows;
 using System.Windows.Input;
 
@@ -10,15 +12,18 @@ namespace CoreMVVM.Demo.ViewModels
     internal class MainWindowModel : BaseModel
     {
         private readonly ILifetimeScope _lifetimeScope;
+        private readonly IResourceService _resourceService;
         private readonly IWindowManager _windowManager;
 
         public MainWindowModel(
             SinglePageViewModel content,
             ILifetimeScope lifetimeScope,
+            IResourceService resourceService,
             IWindowManager windowManager)
         {
             Content = content;
             _lifetimeScope = lifetimeScope;
+            _resourceService = resourceService;
             _windowManager = windowManager;
 
             DebugCommand = new RelayCommand(OnDebug);
@@ -39,22 +44,22 @@ namespace CoreMVVM.Demo.ViewModels
 
         private void OnDebug()
         {
-            LoggerHelper.Debug("Debug action performed. Result: success.");
+            LoggerHelper.Debug("${res:DebugAction}");
         }
 
         private void OnLog()
         {
-            LoggerHelper.Log("That button click was kind of important, and has been logged.");
+            LoggerHelper.Log("${res:LogAction}");
         }
 
         private void OnError()
         {
-            LoggerHelper.Error("Clicking that button sent me into a state I shouldn't have been in. That's called an error.");
+            LoggerHelper.Error("${res:ErrorAction}");
         }
 
         private void OnException()
         {
-            LoggerHelper.Exception("An exception was thrown by clicking that button!", new Exception("Don't click the exception button, it will throw exceptions!"));
+            LoggerHelper.Exception("${res:ExceptionAction}", new Exception("Don't click the exception button, it will throw exceptions!"));
         }
 
         #region ShowDialog 1
@@ -85,9 +90,13 @@ namespace CoreMVVM.Demo.ViewModels
             Window dialogView = _windowManager.ShowWindow(dialog);
 
             string result = await dialog.Task;
+
+            await TaskMaster.AwaitUIThread();
             dialogView.Close();
 
-            MessageBox.Show($"You entered: {result}", "Dialog result");
+            string title = StringParser.GetResource("DialogResult");
+            string body = StringParser.GetResource("YouEntered", new StringTagPair("result", result));
+            MessageBox.Show(body, title);
 
             _isShowingDialog = false;
             ShowDialog2Command.RaiseCanExecute();
@@ -105,6 +114,23 @@ namespace CoreMVVM.Demo.ViewModels
         {
             get => _content;
             set => SetProperty(ref _content, value);
+        }
+
+        public IEnumerable Languages { get; } = new[] { "English (EU)", "Norwegian" };
+
+        private string _selectedLanguage;
+
+        public string SelectedLanguage
+        {
+            get => _selectedLanguage;
+            set
+            {
+                if (SetProperty(ref _selectedLanguage, value))
+                {
+                    string currentCulture = value.Equals("Norwegian") ? "no" : "en";
+                    _resourceService.CurrentCulture = new System.Globalization.CultureInfo(currentCulture);
+                }
+            }
         }
 
         #endregion Properties

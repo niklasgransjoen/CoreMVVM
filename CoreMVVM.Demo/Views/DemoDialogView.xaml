@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:CoreMVVM.Windows.Markup;assembly=CoreMVVM.Windows"
     mc:Ignorable="d"
     WindowStyle="None"
     SizeToContent="Height"
@@ -34,17 +35,17 @@
     </Window.Resources>
 
     <StackPanel Width="200">
-        <TextBlock Text="Input" TextAlignment="Center" Margin="5" />
+        <TextBlock Text="{markup:StringResource Input}" TextAlignment="Center" Margin="5" />
         <TextBox Margin="5" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         <TextBox Margin="5" Text="{Binding Fullname, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
         <TextBox x:Name="InputTextBox" Margin="5" />
         <Button Margin="5"
-                Content="Confirm"
+                Content="{markup:StringResource Confirm}"
                 IsDefault="True"
                 Command="{Binding CloseCommand}"
                 CommandParameter="{Binding ElementName=InputTextBox, Path=Text}" />
         <Button Margin="5"
-                Content="Validate all fields"
+                Content="{markup:StringResource ValidateFields}"
                 Command="{Binding ValidateAllCommand}" />
     </StackPanel>
 </Window>

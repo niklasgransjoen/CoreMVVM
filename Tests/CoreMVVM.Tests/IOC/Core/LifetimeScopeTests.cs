@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.Implementations;
 using CoreMVVM.IOC.Builder;
-using CoreMVVM.Services;
 using CoreMVVM.Tests;
 using System;
 using System.Collections.Generic;
@@ -63,7 +62,7 @@ namespace CoreMVVM.IOC.Core.Tests
             object subject1 = LifetimeScope.Resolve<IInterface>();
             object subject2 = LifetimeScope.Resolve<IInterface>();
 
-            Assert.NotEqual(subject1, subject2);
+            Assert.NotSame(subject1, subject2);
         }
     }
 
@@ -73,6 +72,9 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             builder.RegisterSingleton<Implementation>().As<IInterface>().AsSelf();
             builder.RegisterSingleton<SimpleSingleton>().AsSelf();
+            builder.RegisterSingleton<AttributeSingleton>().As<IAttributeSingleton>();
+
+            builder.RegisterSingleton<MultiInterfaceClass>().As<IInterface1>().As<IInterface2>();
         }
 
         [Fact]
@@ -112,6 +114,30 @@ namespace CoreMVVM.IOC.Core.Tests
         }
 
         [Fact]
+        public void LifetimeScope_Resolves_Singleton_By_Attribute_And_Registration()
+        {
+            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
+            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
+
+            Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void LifetimeScope_Resolves_Singleton_By_Registration_And_Attribute()
+        {
+            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
+            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
+
+            Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void LifetimeScope_Handles_Multiple_RegistratedInterfaces_With_Attribute_On_Implementations()
+        {
+            LifetimeScope.Resolve<MultiInterfaceClass>();
+        }
+
+        [Fact]
         public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
         {
             List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
@@ -147,8 +173,34 @@ namespace CoreMVVM.IOC.Core.Tests
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
         }
 
+        /**
+         * See issue #30.
+         */
+
+        [Fact]
+        public void LifetimeScope_Handles_Recursive_Scoped_Service_Pattern()
+        {
+            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService1>());
+        }
+
+        /**
+         * See issue #30.
+         */
+
+        [Fact]
+        public void LifetimeScope_Handles_Recursive_Scoped_Service_Constructor_Pattern()
+        {
+            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService2>());
+        }
+
+        #region Resources
+
+        private interface IAttributeSingleton
+        {
+        }
+
         [Scope(ComponentScope.Singleton)]
-        private sealed class AttributeSingleton
+        private sealed class AttributeSingleton : IAttributeSingleton
         {
         }
 
@@ -161,6 +213,49 @@ namespace CoreMVVM.IOC.Core.Tests
 
             public ILifetimeScope LifetimeScope { get; }
         }
+
+        private interface IInterface1 { }
+
+        private interface IInterface2 { }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class MultiInterfaceClass : IInterface1, IInterface2 { }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService1
+        {
+            public SingletonService1()
+            {
+                GC.KeepAlive(InstanceService1.Instance);
+            }
+        }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService2
+        {
+            public SingletonService2(SingletonService3 singletonService3)
+            {
+            }
+        }
+
+        [Scope(ComponentScope.Singleton)]
+        private sealed class SingletonService3
+        {
+            public SingletonService3(SingletonService2 singletonService2)
+            {
+            }
+        }
+
+        private sealed class InstanceService1
+        {
+            public static readonly SingletonService1 Instance = ContainerProvider.Resolve<SingletonService1>();
+
+            public InstanceService1()
+            {
+            }
+        }
+
+        #endregion Resources
     }
 
     public class LifetimeScope_Resolve_LifetimeScope : LifetimeScopeTestBase
@@ -223,7 +318,7 @@ namespace CoreMVVM.IOC.Core.Tests
             while (interfaces.Count > 1)
             {
                 for (int i = 1; i < interfaces.Count; i++)
-                    Assert.Equal(interfaces[0], interfaces[i]);
+                    Assert.Same(interfaces[0], interfaces[i]);
 
                 interfaces.RemoveAt(0);
             }
@@ -289,11 +384,11 @@ namespace CoreMVVM.IOC.Core.Tests
         public void LifetimeScope_Resolves_Self()
         {
             ILifetimeScope res1 = LifetimeScope.Resolve<ILifetimeScope>();
-            Assert.Equal(LifetimeScope, res1);
+            Assert.Same(LifetimeScope, res1);
 
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
             ILifetimeScope res2 = subscope.Resolve<ILifetimeScope>();
-            Assert.Equal(subscope, res2);
+            Assert.Same(subscope, res2);
         }
     }
 
@@ -548,7 +643,7 @@ namespace CoreMVVM.IOC.Core.Tests
                 LifetimeScope.Resolve(typeof(int));
             });
 
-            Assert.Throws<ResolveConstructionException>(() =>
+            Assert.Throws<ResolveException>(() =>
             {
                 LifetimeScope.Resolve<string>();
             });
@@ -793,11 +888,12 @@ namespace CoreMVVM.IOC.Core.Tests
             var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
             service.Cache = true;
 
-            container.Resolve<ILogger>();
-            container.Resolve<ILogger>();
+            var logger1 = container.Resolve<ILogger>();
+            var logger2 = container.Resolve<ILogger>();
 
             // Assert that resolve service was only invoked once.
             Assert.Equal(1, service.CallCount);
+            Assert.Same(logger1, logger2);
         }
 
         #endregion Cache
@@ -833,6 +929,7 @@ namespace CoreMVVM.IOC.Core.Tests
                 CallCount++;
                 context.SetInterfaceImplementationType(typeof(ConsoleLogger));
                 context.CacheImplementation = Cache;
+                context.CacheScope = ComponentScope.Singleton;
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using CoreMVVM.Validation;
+﻿using CoreMVVM.Threading;
+using CoreMVVM.Validation;
 using System;
 using System.Threading.Tasks;
 
@@ -7,11 +8,11 @@ namespace CoreMVVM
     /// <summary>
     /// Base for dialog view models.
     /// </summary>
-    public abstract class DialogBase : BaseValidationModel, IDialog
+    public abstract class BaseDialog : BaseValidationModel, IDialog
     {
         private readonly TaskCompletionSource<int> _taskCompletionSource = new TaskCompletionSource<int>();
 
-        public DialogBase()
+        protected BaseDialog()
         {
         }
 
@@ -29,7 +30,7 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        public Task Task => _taskCompletionSource.Task;
+        public RebelTask Task => _taskCompletionSource.Task;
 
         #endregion Properties
 
@@ -49,11 +50,11 @@ namespace CoreMVVM
     /// <summary>
     /// Base for dialog view models.
     /// </summary>
-    public abstract class DialogBase<TResult> : BaseValidationModel, IDialog<TResult>
+    public abstract class BaseDialog<TResult> : BaseValidationModel, IDialog<TResult>
     {
         private readonly TaskCompletionSource<TResult> _taskCompletionSource = new TaskCompletionSource<TResult>();
 
-        public DialogBase()
+        protected BaseDialog()
         {
         }
 
@@ -71,12 +72,12 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        public Task<TResult> Task => _taskCompletionSource.Task;
+        public RebelTask<TResult> Task => _taskCompletionSource.Task;
 
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        Task IDialog.Task => Task;
+        RebelTask IDialog.Task => Task;
 
         #endregion Properties
 

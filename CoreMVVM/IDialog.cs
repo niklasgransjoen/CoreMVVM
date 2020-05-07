@@ -1,5 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using CoreMVVM.Threading;
+using System;
 
 namespace CoreMVVM
 {
@@ -16,7 +16,7 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        Task Task { get; }
+        RebelTask Task { get; }
     }
 
     /// <summary>
@@ -28,6 +28,6 @@ namespace CoreMVVM
         /// <summary>
         /// A task promising the result of the dialog.
         /// </summary>
-        new Task<TResult> Task { get; }
+        new RebelTask<TResult> Task { get; }
     }
 }

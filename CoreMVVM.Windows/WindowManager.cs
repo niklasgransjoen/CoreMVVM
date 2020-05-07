@@ -71,7 +71,7 @@ namespace CoreMVVM.Windows
 
         private Window GetWindow<TViewModel>(Window owner) where TViewModel : class
         {
-            Window window = (Window)_viewLocator.GetView<TViewModel>();
+            Window window = (Window)_viewLocator.ResolveView<TViewModel>();
             window.Owner = owner;
 
             return window;
@@ -79,7 +79,7 @@ namespace CoreMVVM.Windows
 
         private Window GetWindow(object viewModel, Window owner)
         {
-            var window = (Window)_viewLocator.GetView(viewModel);
+            var window = (Window)_viewLocator.ResolveView(viewModel);
             window.Owner = owner;
 
             return window;

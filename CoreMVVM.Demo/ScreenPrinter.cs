@@ -54,7 +54,7 @@ namespace CoreMVVM.Demo
 
         private void AppendParagraph(string message, Brush foreground = null)
         {
-            string formattedMessage = DateTime.Now.ToString("yyyy-dd-MM HH:mm:ss") + " - " + message;
+            string formattedMessage = DateTime.Now.ToString("yyyy-dd-MM HH:mm:ss") + " - " + StringParser.Parse(message);
 
             Run run = new Run(formattedMessage);
             if (foreground != null)

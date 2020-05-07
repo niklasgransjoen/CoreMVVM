@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CoreMVVM.Threading
@@ -15,21 +16,30 @@ namespace CoreMVVM.Threading
 
     [AsyncMethodBuilder(typeof(RebelTaskMethodBuilder))]
 #endif
+    [DebuggerStepThrough]
     public readonly struct RebelTask : IEquatable<RebelTask>
     {
-        private readonly Task _task;
-
-        #region Constructors
-
-#if NETCORE
+#if NETCORE || NETSTANDARD
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
 #else
         public static RebelTask CompletedTask { get; } = new RebelTask(Task.FromResult<object>(null));
 #endif
 
+        #region Constructors
+
         public RebelTask(Task task)
         {
-            _task = task;
+            Task = task;
+        }
+
+        public RebelTask(Action action, CancellationToken cancellationToken = default)
+        {
+            Task = new Task(action, cancellationToken);
+        }
+
+        public RebelTask(Action<object> action, object state, CancellationToken cancellationToken = default)
+        {
+            Task = new Task(action, state, cancellationToken);
         }
 
         public static RebelTask<TResult> FromResult<TResult>(TResult result)
@@ -38,6 +48,28 @@ namespace CoreMVVM.Threading
         }
 
         #endregion Constructors
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the task object of this RebelTask.
+        /// </summary>
+        public Task Task { get; }
+
+        #endregion Properties
+
+        /// <summary>
+        /// Starts the task on the current task scheduler.
+        /// </summary>
+        public void Start()
+        {
+            Task.Start();
+        }
+
+        public void Start(TaskScheduler taskScheduler)
+        {
+            Task.Start(taskScheduler);
+        }
 
         /// <summary>
         /// Returns a task configured to continue on the captured context.
@@ -60,68 +92,82 @@ namespace CoreMVVM.Threading
         private Task GetTaskOrComplete()
         {
 #if NETCORE
-            return _task ?? Task.CompletedTask;
+            return Task ?? Task.CompletedTask;
 #else
-            return _task ?? CompletedTask._task;
+            return Task ?? CompletedTask.Task;
 #endif
         }
 
         #region Static utilities
 
-        [DebuggerStepThrough]
-        public static RebelTask Delay(int millisecondsDelay)
+        public static RebelTask Delay(int millisecondsDelay, CancellationToken cancellationToken = default)
         {
-            Task result = Task.Delay(millisecondsDelay);
-
+            Task result = Task.Delay(millisecondsDelay, cancellationToken);
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
-        public static RebelTask Delay(TimeSpan delay)
+        public static RebelTask Delay(TimeSpan delay, CancellationToken cancellationToken = default)
         {
-            Task result = Task.Delay(delay);
-
+            Task result = Task.Delay(delay, cancellationToken);
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
-        public static RebelTask Run(Action action)
+        public static RebelTask Run(Action action, CancellationToken cancellationToken = default)
         {
-            Task result = Task.Run(action);
-
+            Task result = Task.Run(action, cancellationToken);
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
-        public static RebelTask<TResult> Run<TResult>(Func<TResult> action)
+        public static RebelTask<TResult> Run<TResult>(Func<TResult> action, CancellationToken cancellationToken = default)
         {
-            Task<TResult> result = Task.Run(action);
-
+            Task<TResult> result = Task.Run(action, cancellationToken);
             return new RebelTask<TResult>(result);
         }
 
-        [DebuggerStepThrough]
-        public static RebelTask Run(Func<Task> action)
+        public static RebelTask Run(Func<RebelTask> action, CancellationToken cancellationToken = default)
         {
-            Task result = action();
+            Task result = Task.Run(() => action().Task, cancellationToken);
             return new RebelTask(result);
         }
 
-        [DebuggerStepThrough]
-        public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> action)
+        public static RebelTask<TResult> Run<TResult>(Func<RebelTask<TResult>> action, CancellationToken cancellationToken = default)
         {
-            Task<TResult> result = action();
+            Task<TResult> result = Task.Run(() => action().Task, cancellationToken);
             return new RebelTask<TResult>(result);
         }
 
-        [DebuggerStepThrough]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Throw single aggregate exception")]
+        public static RebelTask Run(Func<Task> action, CancellationToken cancellationToken = default)
+        {
+            Task result = Task.Run(action, cancellationToken);
+            return new RebelTask(result);
+        }
+
+        public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> action, CancellationToken cancellationToken = default)
+        {
+            Task<TResult> result = Task.Run(action, cancellationToken);
+            return new RebelTask<TResult>(result);
+        }
+
+        public static RebelTask WhenAll(params RebelTask[] tasks) => WhenAll(tasks.AsEnumerable());
+
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
-            IEnumerable<Task> wrappedTasks = tasks.Select(t => t._task);
+            IEnumerable<Task> wrappedTasks = tasks.Select(t => t.Task);
             Task result = Task.WhenAll(wrappedTasks);
 
             return new RebelTask(result);
+        }
+
+        public static RebelTask<TResult[]> WhenAll<TResult>(params RebelTask<TResult>[] tasks) => WhenAll(tasks.AsEnumerable());
+
+        public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
+        {
+            var wrappedTasks = tasks
+                .Select(task => task.Task);
+
+            var result = Task.WhenAll(wrappedTasks);
+
+            return new RebelTask<TResult[]>(result);
         }
 
         #endregion Static utilities
@@ -138,7 +184,7 @@ namespace CoreMVVM.Threading
 
         public bool Equals(RebelTask other)
         {
-            return _task == other._task;
+            return Task == other.Task;
         }
 
         public override int GetHashCode()

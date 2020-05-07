@@ -1,7 +1,7 @@
 ﻿using CoreMVVM.Extentions;
 using System;
 
-namespace CoreMVVM.Services
+namespace CoreMVVM.IOC
 {
     /// <summary>
     /// Implements functionality for handling attempts to resolve unregistered interfaces.
@@ -39,7 +39,7 @@ namespace CoreMVVM.Services
         public Type InterfaceType { get; }
 
         /// <summary>
-        /// Gets the type to resolve to. Implements <see cref="InterfaceType"/>.
+        /// Gets the type to resolve to. Is a non-abstract, non-static class that implements <see cref="InterfaceType"/>.
         /// </summary>
         public Type InterfaceImplementationType { get; private set; }
 
@@ -48,6 +48,11 @@ namespace CoreMVVM.Services
         /// </summary>
         /// <remarks>This field has no effect when <see cref="InterfaceImplementationType"/> is not set.</remarks>
         public bool CacheImplementation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the scope to use when caching <see cref="InterfaceImplementationType"/>.
+        /// </summary>
+        public ComponentScope CacheScope { get; set; }
 
         #endregion Properties
 
@@ -60,7 +65,10 @@ namespace CoreMVVM.Services
         public void SetInterfaceImplementationType(Type interfaceImplementationType)
         {
             if (!interfaceImplementationType.ImplementsInterface(InterfaceType))
-                throw new ArgumentException($"Argument does not implement interface '{interfaceImplementationType}'.", nameof(interfaceImplementationType));
+                throw new ArgumentException($"Type '{interfaceImplementationType}' does not implement interface '{InterfaceType}'.", nameof(interfaceImplementationType));
+
+            if (!interfaceImplementationType.IsClass || interfaceImplementationType.IsAbstract)
+                throw new ArgumentException($"Type '{interfaceImplementationType}' must be a non-abstract, non-static class.", nameof(interfaceImplementationType));
 
             InterfaceImplementationType = interfaceImplementationType;
         }

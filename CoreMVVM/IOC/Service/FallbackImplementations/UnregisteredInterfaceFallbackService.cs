@@ -1,8 +1,7 @@
 ﻿using CoreMVVM.IOC;
-using CoreMVVM.Services;
 using System.Reflection;
 
-namespace CoreMVVM.Implementations
+namespace CoreMVVM.IOC.FallbackImplementations
 {
     /// <summary>
     /// Implementation of <see cref="IResolveUnregisteredInterfaceService"/>,
@@ -15,10 +14,11 @@ namespace CoreMVVM.Implementations
         /// </summary>
         public void Handle(ResolveUnregisteredInterfaceContext context)
         {
-            var attributes = context.InterfaceType.GetCustomAttribute<FallbackImplementationAttribute>();
-            if (attributes != null)
+            var attribute = context.InterfaceType.GetCustomAttribute<FallbackImplementationAttribute>();
+            if (attribute != null)
             {
-                context.SetInterfaceImplementationType(attributes.Type);
+                context.SetInterfaceImplementationType(attribute.Type);
+                context.CacheScope = ComponentScope.Singleton;
             }
         }
     }

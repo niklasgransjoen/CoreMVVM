@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace CoreMVVM.Demo.ViewModels
 {
-    public class DemoDialogViewModel : DialogBase<string>
+    public class DemoDialogViewModel : BaseDialog<string>
     {
         public DemoDialogViewModel()
         {
