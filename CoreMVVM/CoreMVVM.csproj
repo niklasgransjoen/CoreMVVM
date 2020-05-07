@@ -6,7 +6,7 @@
     <Description>A simple, lightweight MVVM library for .NET Standard made with Inversion of Control (IoC) in mind, with no external dependencies.</Description>
     <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/niklasgransjoen/CoreMVVM</RepositoryUrl>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
