@@ -6,7 +6,7 @@ namespace CoreMVVM.Windows
     /// <summary>
     /// Implements logic for managing windows.
     /// </summary>
-    [FallbackImplementation(typeof(WindowManager))]
+    [FallbackImplementation(typeof(FallbackImplementations.WindowManager))]
     public interface IWindowManager
     {
         /// <summary>
