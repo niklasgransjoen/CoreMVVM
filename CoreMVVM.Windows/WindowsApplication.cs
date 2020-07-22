@@ -75,7 +75,9 @@ namespace CoreMVVM.Windows
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            var logger = Container.Resolve<ILogger<WindowsApplication>>();
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
 
             if (e.ExceptionObject is Exception exception)
                 logger.LogError(exception, "Unhandled Exception");
@@ -85,14 +87,18 @@ namespace CoreMVVM.Windows
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            var logger = Container.Resolve<ILogger<WindowsApplication>>();
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
 
             logger.LogError(e.Exception, "DispatcherUnhandledException", e.Exception);
         }
 
         private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            var logger = Container.Resolve<ILogger<WindowsApplication>>();
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
 
             logger.LogError(e.Exception, "UnobservedTaskException");
         }

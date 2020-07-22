@@ -14,7 +14,7 @@ namespace CoreMVVM.IOC.Tests
             builder.Register<Implementation>().As<IInterface>();
             IContainer container = builder.Build();
 
-            IOwned<IInterface> instance = container.Resolve<IOwned<IInterface>>();
+            IOwned<IInterface> instance = container.ResolveRequiredService<IOwned<IInterface>>();
             Exception e = Record.Exception(() =>
             {
                 IOwned<object> downcastOwned = instance;

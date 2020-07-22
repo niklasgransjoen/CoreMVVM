@@ -1,5 +1,4 @@
-﻿using CoreMVVM.Implementations;
-using CoreMVVM.IOC.Builder;
+﻿using CoreMVVM.IOC.Builder;
 using CoreMVVM.Tests;
 using System;
 using System.Collections.Generic;
@@ -41,7 +40,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
     #region Scope
 
-    public class LifetimeScope_Resolve : LifetimeScopeTestBase
+    public class LifetimeScope_Resolve_Transient : LifetimeScopeTestBase
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
@@ -51,7 +50,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesInterface_ToRegistration()
         {
-            IInterface subject = LifetimeScope.Resolve<IInterface>();
+            IInterface subject = LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.IsType<Implementation>(subject);
         }
@@ -59,8 +58,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesRegistrations_ToUniqueInstances()
         {
-            object subject1 = LifetimeScope.Resolve<IInterface>();
-            object subject2 = LifetimeScope.Resolve<IInterface>();
+            object subject1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            object subject2 = LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.NotSame(subject1, subject2);
         }
@@ -80,8 +79,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesSingleton_ToSingleInstance()
         {
-            object subject1 = LifetimeScope.Resolve<IInterface>();
-            object subject2 = LifetimeScope.Resolve<IInterface>();
+            object subject1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            object subject2 = LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.Same(subject1, subject2);
         }
@@ -89,8 +88,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_InterfaceAndImplementation_ToSameInstance()
         {
-            IInterface s1 = LifetimeScope.Resolve<IInterface>();
-            Implementation s2 = LifetimeScope.Resolve<Implementation>();
+            IInterface s1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            Implementation s2 = LifetimeScope.ResolveRequiredService<Implementation>();
 
             Assert.Same(s1, s2);
         }
@@ -98,8 +97,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesSingleton_FromSubScope()
         {
-            IInterface instance1 = LifetimeScope.Resolve<IInterface>();
-            IInterface instance2 = LifetimeScope.BeginLifetimeScope().Resolve<IInterface>();
+            IInterface instance1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            IInterface instance2 = LifetimeScope.BeginLifetimeScope().ResolveRequiredService<IInterface>();
 
             Assert.Same(instance1, instance2);
         }
@@ -107,8 +106,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Singleton_By_Attribute()
         {
-            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
-            var instance2 = LifetimeScope.Resolve<AttributeSingleton>();
+            var instance1 = LifetimeScope.ResolveRequiredService<AttributeSingleton>();
+            var instance2 = LifetimeScope.ResolveRequiredService<AttributeSingleton>();
 
             Assert.Same(instance1, instance2);
         }
@@ -116,8 +115,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Singleton_By_Attribute_And_Registration()
         {
-            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
-            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
+            var instance1 = LifetimeScope.ResolveRequiredService<AttributeSingleton>();
+            var instance2 = LifetimeScope.ResolveRequiredService<IAttributeSingleton>();
 
             Assert.Same(instance1, instance2);
         }
@@ -125,8 +124,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Singleton_By_Registration_And_Attribute()
         {
-            var instance2 = LifetimeScope.Resolve<IAttributeSingleton>();
-            var instance1 = LifetimeScope.Resolve<AttributeSingleton>();
+            var instance2 = LifetimeScope.ResolveRequiredService<IAttributeSingleton>();
+            var instance1 = LifetimeScope.ResolveRequiredService<AttributeSingleton>();
 
             Assert.Same(instance1, instance2);
         }
@@ -134,7 +133,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Handles_Multiple_RegistratedInterfaces_With_Attribute_On_Implementations()
         {
-            LifetimeScope.Resolve<MultiInterfaceClass>();
+            LifetimeScope.ResolveRequiredService<MultiInterfaceClass>();
         }
 
         [Fact]
@@ -142,13 +141,13 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
             {
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
-                Task.Run(() => LifetimeScope.Resolve<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
             };
 
             List<IInterface> interfaces = new List<IInterface>();
@@ -169,7 +168,7 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             using var subscope = LifetimeScope.BeginLifetimeScope();
 
-            SimpleSingleton disposable = subscope.Resolve<SimpleSingleton>();
+            SimpleSingleton disposable = subscope.ResolveRequiredService<SimpleSingleton>();
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
         }
 
@@ -180,7 +179,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Handles_Recursive_Scoped_Service_Pattern()
         {
-            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService1>());
+            Assert.Throws<ResolveException>(() => LifetimeScope.ResolveRequiredService<SingletonService1>());
         }
 
         /**
@@ -190,7 +189,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Handles_Recursive_Scoped_Service_Constructor_Pattern()
         {
-            Assert.Throws<ResolveException>(() => LifetimeScope.Resolve<SingletonService2>());
+            Assert.Throws<ResolveException>(() => LifetimeScope.ResolveRequiredService<SingletonService2>());
         }
 
         #region Resources
@@ -248,7 +247,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         private sealed class InstanceService1
         {
-            public static readonly SingletonService1 Instance = ContainerProvider.Resolve<SingletonService1>();
+            public static readonly SingletonService1 Instance = ContainerProvider.ResolveRequiredService<SingletonService1>();
 
             public InstanceService1()
             {
@@ -268,8 +267,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesFromRoot_ToSingleInstance()
         {
-            object subject1 = LifetimeScope.Resolve<IInterface>();
-            object subject2 = LifetimeScope.Resolve<IInterface>();
+            object subject1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            object subject2 = LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.Equal(subject1, subject2);
         }
@@ -279,8 +278,8 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             using ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
 
-            object subject1 = subscope.Resolve<IInterface>();
-            object subject2 = subscope.Resolve<IInterface>();
+            object subject1 = subscope.ResolveRequiredService<IInterface>();
+            object subject2 = subscope.ResolveRequiredService<IInterface>();
 
             Assert.Equal(subject1, subject2);
         }
@@ -290,8 +289,8 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
 
-            object subject1 = LifetimeScope.Resolve<IInterface>();
-            object subject2 = subscope.Resolve<IInterface>();
+            object subject1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            object subject2 = subscope.ResolveRequiredService<IInterface>();
 
             Assert.NotEqual(subject1, subject2);
         }
@@ -302,13 +301,13 @@ namespace CoreMVVM.IOC.Core.Tests
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
             List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
             {
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
-                Task.Run(() => subscope.Resolve<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
+                Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
             };
 
             List<IInterface> interfaces = new List<IInterface>();
@@ -326,6 +325,33 @@ namespace CoreMVVM.IOC.Core.Tests
     }
 
     #endregion Scope
+
+    #region Resolve
+
+    public class LifetimeScope_Resolve : LifetimeScopeTestBase
+    {
+        [Fact]
+        public void LifetimeScope_Resolve_Requires_Parameters()
+        {
+            Assert.Throws<ResolveUnregisteredServiceException>(() => LifetimeScope.ResolveService<MyClass>());
+        }
+
+        private class MyClass
+        {
+            public MyClass(IMyDependency dependency)
+            {
+                Dependency = dependency;
+            }
+
+            public IMyDependency Dependency { get; }
+        }
+
+        private interface IMyDependency
+        {
+        }
+    }
+
+    #endregion Resolve
 
     #region Resolve Factory
 
@@ -347,7 +373,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Factory()
         {
-            IInterface subject = LifetimeScope.Resolve<IInterface>();
+            IInterface subject = LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.IsType<ClassWithProperties>(subject);
             Assert.Equal(4, ((ClassWithProperties)subject).MyVal);
@@ -356,8 +382,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Singleton_FromFactory()
         {
-            SingletonWithProperties subject1 = LifetimeScope.Resolve<SingletonWithProperties>();
-            SingletonWithProperties subject2 = LifetimeScope.Resolve<SingletonWithProperties>();
+            SingletonWithProperties subject1 = LifetimeScope.ResolveRequiredService<SingletonWithProperties>();
+            SingletonWithProperties subject2 = LifetimeScope.ResolveRequiredService<SingletonWithProperties>();
 
             Assert.Equal(subject1, subject2);
             Assert.Equal("unique-string", subject1.Str);
@@ -383,11 +409,11 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Self()
         {
-            ILifetimeScope res1 = LifetimeScope.Resolve<ILifetimeScope>();
+            ILifetimeScope res1 = LifetimeScope.ResolveRequiredService<ILifetimeScope>();
             Assert.Same(LifetimeScope, res1);
 
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
-            ILifetimeScope res2 = subscope.Resolve<ILifetimeScope>();
+            ILifetimeScope res2 = subscope.ResolveRequiredService<ILifetimeScope>();
             Assert.Same(subscope, res2);
         }
     }
@@ -407,7 +433,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Func()
         {
-            Func<IInterface> factory = LifetimeScope.Resolve<Func<IInterface>>();
+            Func<IInterface> factory = LifetimeScope.ResolveRequiredService<Func<IInterface>>();
 
             Assert.NotNull(factory);
             Assert.IsType<Func<IInterface>>(factory);
@@ -419,8 +445,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Handles_NullReturningFunc()
         {
-            var instance = LifetimeScope.Resolve<Class>();
-            Assert.Null(instance);
+            Assert.Throws<ResolveException>(() => LifetimeScope.ResolveRequiredService<Class>());
         }
     }
 
@@ -434,7 +459,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Lazy()
         {
-            Lazy<IInterface> lazyInstance = LifetimeScope.Resolve<Lazy<IInterface>>();
+            Lazy<IInterface> lazyInstance = LifetimeScope.ResolveRequiredService<Lazy<IInterface>>();
 
             Assert.False(lazyInstance.IsValueCreated);
 
@@ -447,7 +472,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_UnregistratedLazy()
         {
-            Lazy<Class> lazyInstance = LifetimeScope.Resolve<Lazy<Class>>();
+            Lazy<Class> lazyInstance = LifetimeScope.ResolveRequiredService<Lazy<Class>>();
 
             Assert.False(lazyInstance.IsValueCreated);
 
@@ -460,7 +485,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_UnregistratedLazyWithParameters()
         {
-            Lazy<MyClass> lazyInstance = LifetimeScope.Resolve<Lazy<MyClass>>();
+            Lazy<MyClass> lazyInstance = LifetimeScope.ResolveRequiredService<Lazy<MyClass>>();
 
             Assert.False(lazyInstance.IsValueCreated);
 
@@ -474,7 +499,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_LazyFunc()
         {
-            Lazy<Func<IInterface>> lazyFactory = LifetimeScope.Resolve<Lazy<Func<IInterface>>>();
+            Lazy<Func<IInterface>> lazyFactory = LifetimeScope.ResolveRequiredService<Lazy<Func<IInterface>>>();
 
             Assert.False(lazyFactory.IsValueCreated);
 
@@ -510,7 +535,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Owned()
         {
-            Owned<IInterface> ownedInstance = LifetimeScope.Resolve<Owned<IInterface>>();
+            Owned<IInterface> ownedInstance = LifetimeScope.ResolveRequiredService<Owned<IInterface>>();
 
             Assert.NotNull(ownedInstance);
             Assert.NotNull(ownedInstance.Value);
@@ -519,7 +544,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_IOwned()
         {
-            IOwned<IInterface> ownedInstance = LifetimeScope.Resolve<IOwned<IInterface>>();
+            IOwned<IInterface> ownedInstance = LifetimeScope.ResolveRequiredService<IOwned<IInterface>>();
 
             Assert.NotNull(ownedInstance);
             Assert.NotNull(ownedInstance.Value);
@@ -528,7 +553,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_DoesNotDisposed_OwnedComponent()
         {
-            Owned<IDisposableInterface> disposable = LifetimeScope.Resolve<Owned<IDisposableInterface>>();
+            Owned<IDisposableInterface> disposable = LifetimeScope.ResolveRequiredService<Owned<IDisposableInterface>>();
 
             Assert.False(disposable.Value.IsDisposed);
 
@@ -539,7 +564,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_DoesNotOwn_FuncResult()
         {
-            Func<IDisposableInterface> factory = LifetimeScope.Resolve<Func<IDisposableInterface>>();
+            Func<IDisposableInterface> factory = LifetimeScope.ResolveRequiredService<Func<IDisposableInterface>>();
             IDisposableInterface instance = factory();
 
             Assert.False(instance.IsDisposed);
@@ -551,7 +576,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Owns_FuncResult()
         {
-            var factory = LifetimeScope.Resolve<IOwned<Func<IDisposableInterface>>>();
+            var factory = LifetimeScope.ResolveRequiredService<IOwned<Func<IDisposableInterface>>>();
             IDisposableInterface instance = factory.Value();
 
             Assert.False(instance.IsDisposed);
@@ -565,7 +590,7 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             Assert.Throws<OwnedScopedComponentException>(() =>
             {
-                LifetimeScope.Resolve<IOwned<DisposableSingleton>>();
+                LifetimeScope.ResolveRequiredService<IOwned<DisposableSingleton>>();
             });
         }
 
@@ -574,7 +599,7 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             Assert.Throws<OwnedScopedComponentException>(() =>
             {
-                LifetimeScope.Resolve<IOwned<DisposableLifetimeScopedResource>>();
+                LifetimeScope.ResolveRequiredService<IOwned<DisposableLifetimeScopedResource>>();
             });
         }
     }
@@ -588,14 +613,14 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_CreatesInstance_NoParams()
         {
-            Class subject = LifetimeScope.Resolve<Class>();
+            Class subject = LifetimeScope.ResolveRequiredService<Class>();
             Assert.NotNull(subject);
         }
 
         [Fact]
         public void LifetimeScope_CreatesInstance_WithParams()
         {
-            ClassWithConstructor subject = LifetimeScope.Resolve<ClassWithConstructor>();
+            ClassWithConstructor subject = LifetimeScope.ResolveRequiredService<ClassWithConstructor>();
 
             Assert.NotNull(subject);
             Assert.NotNull(subject.a);
@@ -604,7 +629,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_CreatesInstance_ParameterlessConstructor()
         {
-            ClassWithEmptyConstructor subject = LifetimeScope.Resolve<ClassWithEmptyConstructor>();
+            ClassWithEmptyConstructor subject = LifetimeScope.ResolveRequiredService<ClassWithEmptyConstructor>();
 
             Assert.NotNull(subject);
             Assert.True(subject.constructorWasInvoked);
@@ -613,7 +638,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Calls_ConstructorWithTheMostParams()
         {
-            ClassWithManyConstructors subject = LifetimeScope.Resolve<ClassWithManyConstructors>();
+            ClassWithManyConstructors subject = LifetimeScope.ResolveRequiredService<ClassWithManyConstructors>();
 
             Assert.NotNull(subject);
             Assert.NotNull(subject.Ec1);
@@ -623,8 +648,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesContainer_ToSameInstance()
         {
-            IContainer c1 = LifetimeScope.Resolve<IContainer>();
-            IContainer c2 = LifetimeScope.Resolve<IContainer>();
+            IContainer c1 = LifetimeScope.ResolveRequiredService<IContainer>();
+            IContainer c2 = LifetimeScope.ResolveRequiredService<IContainer>();
 
             Assert.Equal(c1, c2);
         }
@@ -632,7 +657,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Throws_ResolveUnregisteredInterface()
         {
-            Assert.Throws<ResolveUnregisteredInterfaceException>(() => LifetimeScope.Resolve<IInterface>());
+            Assert.Throws<ResolveUnregisteredServiceException>(() => LifetimeScope.ResolveRequiredService<IInterface>());
         }
 
         [Fact]
@@ -640,12 +665,12 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                LifetimeScope.Resolve(typeof(int));
+                LifetimeScope.ResolveRequiredService(typeof(int));
             });
 
             Assert.Throws<ResolveException>(() =>
             {
-                LifetimeScope.Resolve<string>();
+                LifetimeScope.ResolveRequiredService<string>();
             });
         }
 
@@ -711,7 +736,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Disposes_IDisposables()
         {
-            var instance = LifetimeScope.Resolve<IDisposableInterface>();
+            var instance = LifetimeScope.ResolveRequiredService<IDisposableInterface>();
 
             Assert.False(instance.IsDisposed);
             LifetimeScope.Dispose();
@@ -724,8 +749,8 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
 
-            var instance = LifetimeScope.Resolve<Disposable>();
-            var subInstance = subscope.Resolve<Disposable>();
+            var instance = LifetimeScope.ResolveRequiredService<Disposable>();
+            var subInstance = subscope.ResolveRequiredService<Disposable>();
 
             Assert.False(subInstance.IsDisposed);
             subscope.Dispose();
@@ -751,7 +776,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Disposes_Singleton()
         {
-            var disposable = LifetimeScope.Resolve<DisposableSingleton>();
+            var disposable = LifetimeScope.ResolveRequiredService<DisposableSingleton>();
 
             Assert.False(disposable.IsDisposed);
             LifetimeScope.Dispose();
@@ -762,7 +787,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Disposes_LifetimeScope()
         {
-            var disposable = LifetimeScope.Resolve<DisposableLifetimeScopedResource>();
+            var disposable = LifetimeScope.ResolveRequiredService<DisposableLifetimeScopedResource>();
 
             Assert.False(disposable.IsDisposed);
             LifetimeScope.Dispose();
@@ -788,7 +813,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Initializes_Resolved_Component()
         {
-            var instance = LifetimeScope.Resolve<InitClass>();
+            var instance = LifetimeScope.ResolveRequiredService<InitClass>();
 
             Assert.True(instance.IsInitialized);
         }
@@ -796,7 +821,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Initilizes_FuncResult()
         {
-            var factory = LifetimeScope.Resolve<Func<InitClass>>();
+            var factory = LifetimeScope.ResolveRequiredService<Func<InitClass>>();
             var instance = factory();
 
             Assert.True(instance.IsInitialized);
@@ -805,7 +830,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Initializes_FactoryResult()
         {
-            var instance = (InitClass)LifetimeScope.Resolve<IInterface>();
+            var instance = (InitClass)LifetimeScope.ResolveRequiredService<IInterface>();
 
             Assert.True(instance.IsInitialized);
         }
@@ -813,13 +838,13 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_RegistersSingleton_Before_Initializing()
         {
-            LifetimeScope.Resolve<IInit>();
+            LifetimeScope.ResolveRequiredService<IInit>();
         }
 
         [Fact]
         public void LifetimeScope_Initializes_NestedTypes_Once()
         {
-            InitClass2 instance = (InitClass2)LifetimeScope.Resolve<IInit>();
+            InitClass2 instance = (InitClass2)LifetimeScope.ResolveRequiredService<IInit>();
 
             Assert.Equal(1, instance.InitClass.InitializationCount);
         }
@@ -850,7 +875,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
             public void InitializeComponent(ILifetimeScope lifetimeScope)
             {
-                lifetimeScope.Resolve<IInit>();
+                lifetimeScope.ResolveRequiredService<IInit>();
                 IsInitialized = true;
             }
 
@@ -872,7 +897,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Unregistered_Logger()
         {
-            var logger = LifetimeScope.Resolve<IService>();
+            var logger = LifetimeScope.ResolveRequiredService<IService>();
             Assert.IsType<Service>(logger);
         }
 
@@ -885,11 +910,11 @@ namespace CoreMVVM.IOC.Core.Tests
             builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
             IContainer container = builder.Build();
 
-            var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
+            var service = (ResolveLoggerService)container.ResolveRequiredService<IResolveUnregisteredInterfaceService>();
             service.Cache = true;
 
-            var logger1 = container.Resolve<IService>();
-            var logger2 = container.Resolve<IService>();
+            var logger1 = container.ResolveRequiredService<IService>();
+            var logger2 = container.ResolveRequiredService<IService>();
 
             // Assert that resolve service was only invoked once.
             Assert.Equal(1, service.CallCount);
@@ -907,11 +932,11 @@ namespace CoreMVVM.IOC.Core.Tests
             builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
             IContainer container = builder.Build();
 
-            var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
+            var service = (ResolveLoggerService)container.ResolveRequiredService<IResolveUnregisteredInterfaceService>();
             service.Cache = false;
 
-            container.Resolve<IService>();
-            container.Resolve<IService>();
+            container.ResolveRequiredService<IService>();
+            container.ResolveRequiredService<IService>();
 
             // Assert that resolve service was actually invoked twice.
             Assert.Equal(2, service.CallCount);

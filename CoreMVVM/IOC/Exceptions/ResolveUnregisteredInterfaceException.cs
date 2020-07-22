@@ -1,11 +1,11 @@
 ﻿namespace CoreMVVM.IOC
 {
     /// <summary>
-    /// Occurs when the attempting to resolve an interface with the resolver.
+    /// Occurs when the attempting to resolve an unregistered service.
     /// </summary>
-    public sealed class ResolveUnregisteredInterfaceException : IOCException
+    public sealed class ResolveUnregisteredServiceException : IOCException
     {
-        public ResolveUnregisteredInterfaceException(string message) : base(message)
+        public ResolveUnregisteredServiceException(string message) : base(message)
         {
         }
     }

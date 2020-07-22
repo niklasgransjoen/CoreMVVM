@@ -90,7 +90,7 @@ namespace CoreMVVM.Demo.ViewModels
             _isShowingDialog = true;
             ShowDialog2Command.RaiseCanExecute();
 
-            var dialog = _lifetimeScope.Resolve<DemoDialogViewModel>();
+            var dialog = _lifetimeScope.ResolveRequiredService<DemoDialogViewModel>();
             Window dialogView = _windowManager.ShowWindow(dialog);
 
             string result = await dialog.Task;

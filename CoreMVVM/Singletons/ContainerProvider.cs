@@ -48,16 +48,33 @@ namespace CoreMVVM
         /// Returns an instance from the given type.
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
-        public static T Resolve<T>() where T : class
+        /// <exception cref="ResolveUnregisteredServiceException">no service of type T exist.</exception>
+        public static T ResolveRequiredService<T>() where T : class
         {
-            return ContainerOrFallback().Resolve<T>();
+            return ContainerOrFallback().ResolveService<T>();
         }
 
         /// <summary>
         /// Returns an instance from the given type.
         /// </summary>
         /// <param name="type">The type to get an instance for.</param>
-        public static object Resolve(Type type) => ContainerOrFallback().Resolve(type);
+        /// <exception cref="ResolveUnregisteredServiceException">no service of type type exist.</exception>
+        public static object ResolveRequiredService(Type type) => ContainerOrFallback().ResolveService(type);
+
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <typeparam name="T">The type to get an instance for.</typeparam>
+        public static T ResolveService<T>() where T : class
+        {
+            return ContainerOrFallback().ResolveService<T>();
+        }
+
+        /// <summary>
+        /// Returns an instance from the given type.
+        /// </summary>
+        /// <param name="type">The type to get an instance for.</param>
+        public static object ResolveService(Type type) => ContainerOrFallback().ResolveService(type);
 
         #endregion ILifetimeScope
 

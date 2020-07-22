@@ -12,7 +12,7 @@ namespace CoreMVVM.IOC.Builder.Tests
             builder.Register<Impl2>().As<ISimple>();
             IContainer container = builder.Build();
 
-            var instance = container.Resolve<ISimple>();
+            var instance = container.ResolveRequiredService<ISimple>();
             Assert.IsType<Impl2>(instance);
         }
 

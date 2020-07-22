@@ -15,7 +15,8 @@ namespace CoreMVVM.Demo
     {
         protected override void OnStartupOverride(StartupEventArgs e)
         {
-            Container.Resolve<IWindowManager>().ShowWindow<MainWindowModel>();
+            Container.ResolveRequiredService<IWindowManager>()
+                .ShowWindow<MainWindowModel>();
         }
 
         protected override void RegisterComponents(ContainerBuilder builder)
@@ -33,7 +34,7 @@ namespace CoreMVVM.Demo
             var viewProvider = new ViewProvider();
             viewProvider.RegisterView<DialogWindowModel, DialogWindow>();
 
-            IViewLocator viewLocator = container.Resolve<IViewLocator>();
+            IViewLocator viewLocator = container.ResolveRequiredService<IViewLocator>();
             viewLocator.AddViewProvider(viewProvider);
         }
     }

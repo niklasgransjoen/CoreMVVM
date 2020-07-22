@@ -8,7 +8,7 @@ namespace CoreMVVM
     /// </summary>
     public static class StringParser
     {
-        private static readonly Lazy<IStringParser> _stringParser = ContainerProvider.Resolve<Lazy<IStringParser>>();
+        private static readonly Lazy<IStringParser> _stringParser = ContainerProvider.ResolveRequiredService<Lazy<IStringParser>>();
 
         public static IStringParser Core => _stringParser.Value;
 
@@ -88,7 +88,7 @@ namespace CoreMVVM
 
         private readonly struct ResourceService : IDisposable
         {
-            private static readonly Lazy<IResourceServiceProvider> _resourceServiceProvider = ContainerProvider.Resolve<Lazy<IResourceServiceProvider>>();
+            private static readonly Lazy<IResourceServiceProvider> _resourceServiceProvider = ContainerProvider.ResolveRequiredService<Lazy<IResourceServiceProvider>>();
 
             public ResourceService(object _)
             {

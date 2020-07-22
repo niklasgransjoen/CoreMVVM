@@ -19,7 +19,7 @@ namespace CoreMVVM.IOC.Core
         public LifetimeScope(ToolBox toolBox)
         {
             _toolBox = toolBox;
-            _resolveUnregisteredInterfaceService = Resolve<IResolveUnregisteredInterfaceService>();
+            _resolveUnregisteredInterfaceService = this.ResolveService<IResolveUnregisteredInterfaceService>();
         }
 
         public LifetimeScope(ToolBox toolBox, LifetimeScope parent)
@@ -59,33 +59,10 @@ namespace CoreMVVM.IOC.Core
             return childScope;
         }
 
-        /// <summary>
-        /// Returns an instance from the given type.
-        /// </summary>
-        /// <typeparam name="T">The type to get an instance for.</typeparam>
-        /// <exception cref="ResolveUnregisteredInterfaceException">T is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveException">Fails to construct type or one of its arguments.</exception>
-        public T Resolve<T>() where T : class
+        public object GetService(Type serviceType)
         {
-            return (T)Resolve(typeof(T), isOwned: false);
+            return Resolve(serviceType, isOwned: false);
         }
-
-        /// <summary>
-        /// Returns an instance from the given type.
-        /// </summary>
-        /// <param name="type">The type to get an instance for. Class or interface.</param>
-        /// <exception cref="ResolveUnregisteredInterfaceException">type is an unregistered or resolves to an interface.</exception>
-        /// <exception cref="ResolveException">Fails to construct type or one of its arguments.</exception>
-        /// <exception cref="ArgumentException">type is value type.</exception>
-        public object Resolve(Type type)
-        {
-            if (type.IsValueType)
-                throw new ArgumentException($"Cannot resolve value type '{type}'.");
-
-            return Resolve(type, isOwned: false);
-        }
-
-        object IServiceProvider.GetService(Type serviceType) => Resolve(serviceType);
 
         #endregion ILifetimeScope
 
@@ -235,6 +212,8 @@ namespace CoreMVVM.IOC.Core
             if (registration.Factory != null)
             {
                 object instance = registration.Factory(this);
+                if (instance is null)
+                    throw new ResolveException($"Factory for service '{registration.Type}' returned null.");
 
                 if (!isOwned)
                     RegisterDisposable(instance);
@@ -274,11 +253,14 @@ namespace CoreMVVM.IOC.Core
             // Check if type is unregistered interface.
             if (type.IsInterface)
             {
+                if (_resolveUnregisteredInterfaceService is null)
+                    return null;
+
                 var context = new ResolveUnregisteredInterfaceContext(type);
                 _resolveUnregisteredInterfaceService.Handle(context);
 
                 if (context.InterfaceImplementationType is null)
-                    throw new ResolveUnregisteredInterfaceException($"Failed to resolve unregistered interface '{type}'.");
+                    return null;
 
                 if (context.CacheImplementation)
                 {
@@ -295,7 +277,7 @@ namespace CoreMVVM.IOC.Core
                 var constructor = _toolBox.GetConstructor(type);
                 var parameters = _toolBox.GetParameterInfo(constructor);
 
-                object[] args = parameters.Select(param => Resolve(param.ParameterType, implementsIOwned))
+                object[] args = parameters.Select(param => Resolve(param.ParameterType, implementsIOwned) ?? throw new ResolveUnregisteredServiceException($"No service for type '{param.ParameterType}' has been registered."))
                                           .ToArray();
 
                 object instance = constructor.Invoke(args);

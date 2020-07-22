@@ -37,7 +37,7 @@ namespace CoreMVVM.Implementations
 
             Type viewType = ResolveViewType(viewModelType);
 
-            var viewModel = _container.Resolve(viewModelType);
+            var viewModel = _container.ResolveRequiredService(viewModelType);
             return CreateView(viewType, viewModel);
         }
 
@@ -81,9 +81,15 @@ namespace CoreMVVM.Implementations
                 return false;
             }
 
-            var viewModel = _container.Resolve(viewModelType);
-            view = CreateView(viewType, viewModel);
-            return true;
+            var viewModel = _container.ResolveService(viewModelType);
+            if (viewModel is null)
+            {
+                view = null;
+                return false;
+            }
+
+            view = TryCreateView(viewType, viewModel);
+            return !(view is null);
         }
 
         public bool TryResolveView(object viewModel, out object view)
@@ -98,8 +104,8 @@ namespace CoreMVVM.Implementations
                 return false;
             }
 
-            view = CreateView(viewType, viewModel);
-            return true;
+            view = TryCreateView(viewType, viewModel);
+            return !(view is null);
         }
 
         public bool TryResolveViewType(Type viewModelType, out Type viewType)
@@ -131,7 +137,7 @@ namespace CoreMVVM.Implementations
             if (!type.ImplementsInterface(typeof(IViewProvider)))
                 throw new ArgumentException($"Type '{type}' does not implement required interface '{typeof(IViewProvider)}'.", nameof(type));
 
-            var viewProvider = (IViewProvider)_container.Resolve(type);
+            var viewProvider = (IViewProvider)_container.ResolveRequiredService(type);
             AddViewProvider(viewProvider);
         }
 
@@ -186,7 +192,16 @@ namespace CoreMVVM.Implementations
 
         private object CreateView(Type viewType, object viewModel)
         {
-            object view = _container.Resolve(viewType);
+            object view = _container.ResolveRequiredService(viewType);
+
+            _onResolveActions.ForEach(a => a(viewModel, view));
+
+            return view;
+        }
+
+        private object TryCreateView(Type viewType, object viewModel)
+        {
+            object view = _container.ResolveService(viewType);
 
             _onResolveActions.ForEach(a => a(viewModel, view));
 

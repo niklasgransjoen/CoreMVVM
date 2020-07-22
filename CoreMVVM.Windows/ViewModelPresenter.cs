@@ -14,7 +14,7 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewModelPresenter : FrameworkElement
     {
-        private readonly Lazy<IViewLocator> _viewLocator = new Lazy<IViewLocator>(() => ContainerProvider.Resolve<IViewLocator>());
+        private readonly Lazy<IViewLocator> _viewLocator = ContainerProvider.ResolveRequiredService<Lazy<IViewLocator>>();
         private readonly Dictionary<Type, FrameworkElement> _cachedViews = new Dictionary<Type, FrameworkElement>();
 
         static ViewModelPresenter()
