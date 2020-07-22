@@ -872,8 +872,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Unregistered_Logger()
         {
-            var logger = LifetimeScope.Resolve<ILogger>();
-            Assert.IsType<ConsoleLogger>(logger);
+            var logger = LifetimeScope.Resolve<IService>();
+            Assert.IsType<Service>(logger);
         }
 
         #region Cache
@@ -888,8 +888,8 @@ namespace CoreMVVM.IOC.Core.Tests
             var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
             service.Cache = true;
 
-            var logger1 = container.Resolve<ILogger>();
-            var logger2 = container.Resolve<ILogger>();
+            var logger1 = container.Resolve<IService>();
+            var logger2 = container.Resolve<IService>();
 
             // Assert that resolve service was only invoked once.
             Assert.Equal(1, service.CallCount);
@@ -910,8 +910,8 @@ namespace CoreMVVM.IOC.Core.Tests
             var service = (ResolveLoggerService)container.Resolve<IResolveUnregisteredInterfaceService>();
             service.Cache = false;
 
-            container.Resolve<ILogger>();
-            container.Resolve<ILogger>();
+            container.Resolve<IService>();
+            container.Resolve<IService>();
 
             // Assert that resolve service was actually invoked twice.
             Assert.Equal(2, service.CallCount);
@@ -927,10 +927,19 @@ namespace CoreMVVM.IOC.Core.Tests
             public void Handle(ResolveUnregisteredInterfaceContext context)
             {
                 CallCount++;
-                context.SetInterfaceImplementationType(typeof(ConsoleLogger));
+                context.SetInterfaceImplementationType(typeof(Service));
                 context.CacheImplementation = Cache;
                 context.CacheScope = ComponentScope.Singleton;
             }
+        }
+
+        [FallbackImplementation(typeof(Service))]
+        private interface IService
+        {
+        }
+
+        private sealed class Service : IService
+        {
         }
     }
 

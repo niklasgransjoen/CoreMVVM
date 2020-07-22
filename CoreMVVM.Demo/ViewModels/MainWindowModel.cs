@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.Windows;
 using CoreMVVM.Windows.Threading;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Windows;
@@ -14,17 +15,20 @@ namespace CoreMVVM.Demo.ViewModels
         private readonly ILifetimeScope _lifetimeScope;
         private readonly IResourceService _resourceService;
         private readonly IWindowManager _windowManager;
+        private readonly ILogger<MainWindowModel> _logger;
 
         public MainWindowModel(
             SinglePageViewModel content,
             ILifetimeScope lifetimeScope,
             IResourceService resourceService,
-            IWindowManager windowManager)
+            IWindowManager windowManager,
+            ILogger<MainWindowModel> logger)
         {
             Content = content;
             _lifetimeScope = lifetimeScope;
             _resourceService = resourceService;
             _windowManager = windowManager;
+            _logger = logger;
 
             DebugCommand = new RelayCommand(OnDebug);
             LogCommand = new RelayCommand(OnLog);
@@ -44,22 +48,22 @@ namespace CoreMVVM.Demo.ViewModels
 
         private void OnDebug()
         {
-            LoggerHelper.Debug("${res:DebugAction}");
+            _logger.LogDebug("${res:DebugAction}");
         }
 
         private void OnLog()
         {
-            LoggerHelper.Log("${res:LogAction}");
+            _logger.LogInformation("${res:LogAction}");
         }
 
         private void OnError()
         {
-            LoggerHelper.Error("${res:ErrorAction}");
+            _logger.LogError("${res:ErrorAction}");
         }
 
         private void OnException()
         {
-            LoggerHelper.Exception("${res:ExceptionAction}", new Exception("Don't click the exception button, it will throw exceptions!"));
+            _logger.LogError(new Exception("Don't click the exception button, it will throw exceptions!"), "${res:ExceptionAction}");
         }
 
         #region ShowDialog 1

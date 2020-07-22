@@ -1,4 +1,5 @@
 ﻿using CoreMVVM.IOC;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -13,25 +14,32 @@ namespace CoreMVVM.Demo
 
         #region ILogger
 
-        public void Debug(string @event)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            AppendParagraph(@event, Brushes.Blue);
+            string message = formatter(state, exception);
+            switch (logLevel)
+            {
+                case LogLevel.Trace:
+                case LogLevel.Debug:
+                    AppendParagraph(message, Brushes.Blue);
+                    break;
+
+                case LogLevel.Information:
+                    AppendParagraph(message);
+                    break;
+
+                case LogLevel.Warning:
+                case LogLevel.Error:
+                    AppendParagraph(message, Brushes.DarkRed);
+                    break;
+            }
         }
 
-        public void Log(string @event)
-        {
-            AppendParagraph(@event);
-        }
+        public bool IsEnabled(LogLevel logLevel) => true;
 
-        public void Error(string error)
+        public IDisposable BeginScope<TState>(TState state)
         {
-            AppendParagraph(error, Brushes.DarkRed);
-        }
-
-        public void Exception(string message, Exception e)
-        {
-            AppendParagraph(message, Brushes.DarkRed);
-            AppendParagraph(e.ToString());
+            return Disposable.Instance;
         }
 
         #endregion ILogger
@@ -63,5 +71,19 @@ namespace CoreMVVM.Demo
             _paragraph.Inlines.Add(run);
             _paragraph.Inlines.Add(new LineBreak());
         }
+
+        #region Utility class
+
+        private sealed class Disposable : IDisposable
+        {
+            public static IDisposable Instance { get; } = new Disposable();
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion Utility class
     }
 }

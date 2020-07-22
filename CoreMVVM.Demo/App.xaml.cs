@@ -3,6 +3,7 @@ using CoreMVVM.Demo.Views;
 using CoreMVVM.IOC;
 using CoreMVVM.IOC.Builder;
 using CoreMVVM.Windows;
+using Microsoft.Extensions.Logging;
 using System.Windows;
 
 namespace CoreMVVM.Demo

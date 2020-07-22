@@ -313,7 +313,6 @@ namespace CoreMVVM.IOC.Core
             {
                 string message = $"Failed to construct instance of type '{type}'.";
 
-                LoggerHelper.Exception(message, e);
                 throw new ResolveException(message, e);
             }
         }
