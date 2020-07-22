@@ -173,15 +173,8 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public IContainer Build()
         {
-            // Registers the container as a singleton, so it always resolves to this instance.
-            RegisterSingleton<Container>().As<IContainer>().AsSelf();
-
             ToolBox toolBox = new ToolBox(_registrations);
             Container container = new Container(toolBox);
-
-            // And set this instance as the last created one, so this is the one that's returned upon a call to IContainer.Resolve().
-            IRegistration registration = _registrations[typeof(IContainer)];
-            container.ResolvedInstances[registration] = container;
 
             OnBuild?.Invoke(container);
 

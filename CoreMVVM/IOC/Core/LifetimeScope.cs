@@ -233,9 +233,9 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="IOCException">Construction fails.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
-            // Resolve ILifetimeScope
-            if (TryConstructILifetimeScope(type, out ILifetimeScope lifetimeScope))
-                return lifetimeScope;
+            // Resolve IServiceProvider or similar.
+            if (TryConstructServiceProvider(type, out var serviceProvider))
+                return serviceProvider;
 
             // Resolve Func<T> to factory.
             if (TryConstructFactory(type, isOwned, out Func<object> factory))
@@ -299,16 +299,29 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        private bool TryConstructILifetimeScope(Type type, out ILifetimeScope lifetimeScope)
+        private bool TryConstructServiceProvider(Type type, out IServiceProvider serviceProvider)
         {
-            if (type != typeof(ILifetimeScope))
+            if (type == typeof(IContainer))
             {
-                lifetimeScope = null;
-                return false;
+                if (_parent is null)
+                {
+                    serviceProvider = this;
+                }
+                else
+                {
+                    _parent.TryConstructServiceProvider(type, out serviceProvider);
+                }
+
+                return true;
+            }
+            if (type == typeof(ILifetimeScope) || type == typeof(IServiceProvider))
+            {
+                serviceProvider = this;
+                return true;
             }
 
-            lifetimeScope = this;
-            return true;
+            serviceProvider = null;
+            return false;
         }
 
         private bool TryConstructFactory(Type factoryType, bool isOwned, out Func<object> factory)
