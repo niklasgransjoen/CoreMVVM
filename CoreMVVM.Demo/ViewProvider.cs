@@ -8,11 +8,6 @@ namespace CoreMVVM.Demo
     {
         private readonly Dictionary<Type, Type> _registeredViews = new Dictionary<Type, Type>();
 
-        public bool FindView<TViewModel>(ViewProviderContext context)
-        {
-            return FindView(typeof(TViewModel), context);
-        }
-
         public bool FindView(Type viewModel, ViewProviderContext context)
         {
             if (viewModel is null)

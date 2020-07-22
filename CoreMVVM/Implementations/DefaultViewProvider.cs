@@ -7,11 +7,6 @@ namespace CoreMVVM.Implementations
     /// </summary>
     public sealed class DefaultViewProvider : IViewProvider
     {
-        public bool FindView<TViewModel>(ViewProviderContext context)
-        {
-            return FindView(typeof(TViewModel), context);
-        }
-
         public bool FindView(Type viewModel, ViewProviderContext context)
         {
             string viewTypeName = viewModel.FullName
