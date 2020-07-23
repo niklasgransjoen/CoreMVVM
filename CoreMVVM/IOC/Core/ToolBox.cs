@@ -34,10 +34,8 @@ namespace CoreMVVM.IOC.Core
 
         public IRegistration AddRegistration(Type component, Type type, ComponentScope scope)
         {
-            _registrations.AssertNoScopingConflicts(component, scope);
-
             // Make sure scopes components are only registered once.
-            if (scope != ComponentScope.None)
+            if (scope != ComponentScope.Transient)
             {
                 var previousRegistration = _registrations.Values.FirstOrDefault(r => r.Type == component);
                 if (previousRegistration != null)

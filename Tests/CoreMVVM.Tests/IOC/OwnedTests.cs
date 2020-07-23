@@ -11,7 +11,7 @@ namespace CoreMVVM.IOC.Tests
         public void Owned_Downcasts()
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.Register<Implementation>().As<IInterface>();
+            builder.RegisterTransient<Implementation>().As<IInterface>();
             IContainer container = builder.Build();
 
             IOwned<IInterface> instance = container.ResolveRequiredService<IOwned<IInterface>>();

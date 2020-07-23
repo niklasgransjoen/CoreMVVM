@@ -44,7 +44,7 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<Implementation>().As<IInterface>();
+            builder.RegisterTransient<Implementation>().As<IInterface>();
         }
 
         [Fact]
@@ -359,7 +359,7 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register(c => new ClassWithProperties
+            builder.RegisterTransient(c => new ClassWithProperties
             {
                 MyVal = 4,
             }).As<IInterface>();
@@ -444,8 +444,8 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<Implementation>().As<IInterface>();
-            builder.Register(c => (Class)null).AsSelf();
+            builder.RegisterTransient<Implementation>().As<IInterface>();
+            builder.RegisterTransient(c => (Class)null).AsSelf();
         }
 
         [Fact]
@@ -471,7 +471,7 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<Implementation>().As<IInterface>();
+            builder.RegisterTransient<Implementation>().As<IInterface>();
         }
 
         [Fact]
@@ -543,9 +543,9 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<Implementation>().As<IInterface>();
+            builder.RegisterTransient<Implementation>().As<IInterface>();
 
-            builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterTransient<Disposable>().As<IDisposableInterface>();
             builder.RegisterSingleton<DisposableSingleton>().AsSelf();
             builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
         }
@@ -746,7 +746,7 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<Disposable>().As<IDisposableInterface>();
+            builder.RegisterTransient<Disposable>().As<IDisposableInterface>();
             builder.RegisterSingleton<DisposableSingleton>().AsSelf();
             builder.RegisterLifetimeScope<DisposableLifetimeScopedResource>().AsSelf();
         }
@@ -822,8 +822,8 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.Register<InitClass>().AsSelf();
-            builder.Register(c => new InitClass()).As<IInterface>();
+            builder.RegisterTransient<InitClass>().AsSelf();
+            builder.RegisterTransient(c => new InitClass()).As<IInterface>();
 
             builder.RegisterSingleton<InitClass2>().As<IInit>();
         }

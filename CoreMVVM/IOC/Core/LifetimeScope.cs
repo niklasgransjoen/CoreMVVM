@@ -144,7 +144,7 @@ namespace CoreMVVM.IOC.Core
 
         private object ResolveFromRegistration(IRegistration registration, bool isOwned)
         {
-            if (registration.Scope == ComponentScope.None)
+            if (registration.Scope == ComponentScope.Transient)
             {
                 object component = ConstructFromRegistration(registration, isOwned);
                 if (component != null)

@@ -17,8 +17,8 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets or sets the scope of this registration.
         /// </summary>
-        /// <value>Default is <see cref="ComponentScope.None"/>.</value>
-        public ComponentScope Scope { get; set; } = ComponentScope.None;
+        /// <value>Default is <see cref="ComponentScope.Transient"/>.</value>
+        public ComponentScope Scope { get; set; } = ComponentScope.Transient;
 
         public Func<ILifetimeScope, object> Factory { get; set; }
     }

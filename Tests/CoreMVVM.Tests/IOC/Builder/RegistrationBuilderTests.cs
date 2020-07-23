@@ -8,8 +8,8 @@ namespace CoreMVVM.IOC.Builder.Tests
         public void RegistrationBuilder_OverridesOnDuplicate()
         {
             ContainerBuilder builder = new ContainerBuilder();
-            builder.Register<Impl1>().As<ISimple>();
-            builder.Register<Impl2>().As<ISimple>();
+            builder.RegisterTransient<Impl1>().As<ISimple>();
+            builder.RegisterTransient<Impl2>().As<ISimple>();
             IContainer container = builder.Build();
 
             var instance = container.ResolveRequiredService<ISimple>();
