@@ -26,7 +26,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterTransient(this ContainerBuilder builder, Type type)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
 
             return builder.Register(type, ComponentScope.Transient);
         }
@@ -56,7 +55,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterTransient(this ContainerBuilder builder, Type type, Func<ILifetimeScope, object> factory)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
             if (factory is null) throw new ArgumentNullException(nameof(factory));
 
             return builder.Register(type, ComponentScope.Transient, factory);
@@ -83,7 +81,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterLifetimeScope(this ContainerBuilder builder, Type type)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
 
             return builder.Register(type, ComponentScope.LifetimeScope);
         }
@@ -113,7 +110,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterLifetimeScope(this ContainerBuilder builder, Type type, Func<ILifetimeScope, object> factory)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
             if (factory is null) throw new ArgumentNullException(nameof(factory));
 
             return builder.Register(ComponentScope.LifetimeScope, factory);
@@ -140,7 +136,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterSingleton(this ContainerBuilder builder, Type type)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
 
             return builder.Register(type, ComponentScope.Singleton);
         }
@@ -170,7 +165,6 @@ namespace CoreMVVM.IOC.Builder
         public static IRegistrationBuilder RegisterSingleton(this ContainerBuilder builder, Type type, Func<ILifetimeScope, object> factory)
         {
             if (builder is null) throw new ArgumentNullException(nameof(builder));
-            if (type is null) throw new ArgumentNullException(nameof(type));
             if (factory is null) throw new ArgumentNullException(nameof(factory));
 
             return builder.Register(type, ComponentScope.Singleton, factory);

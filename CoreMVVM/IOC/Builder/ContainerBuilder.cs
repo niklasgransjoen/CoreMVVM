@@ -67,6 +67,9 @@ namespace CoreMVVM.IOC.Builder
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public IRegistrationBuilder Register(Type type, ComponentScope scope)
         {
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
+
             return new RegistrationBuilder(_registrations, type, scope);
         }
 
@@ -79,6 +82,9 @@ namespace CoreMVVM.IOC.Builder
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
         public IRegistrationBuilder Register(Type type, ComponentScope scope, Func<ILifetimeScope, object> factory)
         {
+            if (type is null)
+                throw new ArgumentNullException(nameof(type));
+
             return new RegistrationBuilder(_registrations, type, scope, factory);
         }
 
