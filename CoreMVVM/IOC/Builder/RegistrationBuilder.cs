@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.IOC.Core;
 using System;
-using System.Linq;
 
 namespace CoreMVVM.IOC.Builder
 {
@@ -9,32 +8,38 @@ namespace CoreMVVM.IOC.Builder
     /// </summary>
     internal class RegistrationBuilder : IRegistrationBuilder
     {
-        private readonly RegistrationCollection _registrations;
+        private readonly ToolBox _toolBox;
+        private readonly bool _overwriteFactory = false;
 
         #region Constructors
 
         public RegistrationBuilder(
-            RegistrationCollection registrations,
+            ToolBox toolBox,
             Type type,
             ComponentScope scope)
         {
-            _registrations = registrations;
-
+            _toolBox = toolBox;
             Type = type;
             Scope = scope;
+
+            // Factory is not explicitly set. Copy eventual factory from earlier registration.
+            _overwriteFactory = false;
         }
 
         public RegistrationBuilder(
-            RegistrationCollection registrations,
+            ToolBox toolBox,
             Type type,
             ComponentScope scope,
             Func<ILifetimeScope, object> factory)
         {
-            _registrations = registrations;
+            _toolBox = toolBox;
 
             Type = type;
             Scope = scope;
             Factory = factory;
+
+            // Factory is explicitly set (even if it may be null), replace old factory if there's an earlier registration.
+            _overwriteFactory = true;
         }
 
         #endregion Constructors
@@ -51,67 +56,34 @@ namespace CoreMVVM.IOC.Builder
 
         #region Methods
 
-        public IRegistrationBuilder As(Type type)
+        public IRegistrationBuilder As(Type serviceType)
         {
-            if (!type.IsAssignableFrom(Type))
-                throw new IncompatibleTypeException($"Component type '{Type}' does not inherit from or implement type '{type}'.");
-
-            // If scope is limited, try copying the registration of an earlier registration of Type.
-            if (Scope != ComponentScope.Transient)
-            {
-                if (TryCopyRegistration(type))
-                    return this;
-            }
-
-            // Default to creating a new registration.
-            _registrations[type] = new Registration(Type)
-            {
-                Scope = Scope,
-                Factory = Factory,
-            };
+            if (_overwriteFactory)
+                _toolBox.AddRegistration(Type, serviceType, Scope, Factory);
+            else
+                _toolBox.AddRegistration(Type, serviceType, Scope);
 
             return this;
         }
 
         #endregion Methods
-
-        #region Private methods
-
-        private bool TryCopyRegistration(Type type)
-        {
-            // Check if type has been registered already.
-            // All registrations of a type with scope limitations must share a registration.
-            IRegistration registration = _registrations.Values.FirstOrDefault(r => r.Type == Type);
-            if (registration is null)
-                return false;
-
-            // Copy instance from previous registration.
-            _registrations[type] = registration;
-
-            // Overwrite previous factory
-            registration.Factory = Factory;
-
-            return true;
-        }
-
-        #endregion Private methods
     }
 
     internal class RegistrationBuilder<T> : RegistrationBuilder, IRegistrationBuilder<T>
         where T : class
     {
         public RegistrationBuilder(
-            RegistrationCollection registrations,
-            ComponentScope scope) 
-            : base(registrations, typeof(T), scope)
+            ToolBox toolBox,
+            ComponentScope scope)
+            : base(toolBox, typeof(T), scope)
         {
         }
 
         public RegistrationBuilder(
-            RegistrationCollection registrations,
+            ToolBox toolBox,
             ComponentScope scope,
-            Func<ILifetimeScope, T> factory) 
-            : base(registrations, typeof(T), scope, factory)
+            Func<ILifetimeScope, T> factory)
+            : base(toolBox, typeof(T), scope, factory)
         {
         }
     }

@@ -8,7 +8,7 @@ namespace CoreMVVM.IOC.Builder
     /// </summary>
     public sealed class ContainerBuilder
     {
-        private readonly RegistrationCollection _registrations = new RegistrationCollection();
+        private readonly ToolBox _toolBox = new ToolBox();
 
         #region Constructors
 
@@ -43,7 +43,7 @@ namespace CoreMVVM.IOC.Builder
         public IRegistrationBuilder<T> Register<T>(ComponentScope scope)
             where T : class
         {
-            return new RegistrationBuilder<T>(_registrations, scope);
+            return new RegistrationBuilder<T>(_toolBox, scope);
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace CoreMVVM.IOC.Builder
         public IRegistrationBuilder<T> Register<T>(ComponentScope scope, Func<ILifetimeScope, T> factory)
             where T : class
         {
-            return new RegistrationBuilder<T>(_registrations, scope, factory);
+            return new RegistrationBuilder<T>(_toolBox, scope, factory);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            return new RegistrationBuilder(_registrations, type, scope);
+            return new RegistrationBuilder(_toolBox, type, scope);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace CoreMVVM.IOC.Builder
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            return new RegistrationBuilder(_registrations, type, scope, factory);
+            return new RegistrationBuilder(_toolBox, type, scope, factory);
         }
 
         /// <summary>
@@ -93,8 +93,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public IContainer Build()
         {
-            ToolBox toolBox = new ToolBox(_registrations);
-            Container container = new Container(toolBox);
+            Container container = new Container(_toolBox);
 
             OnBuild?.Invoke(container);
 

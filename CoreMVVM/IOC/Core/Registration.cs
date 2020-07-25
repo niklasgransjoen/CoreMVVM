@@ -7,18 +7,15 @@ namespace CoreMVVM.IOC.Core
     /// </summary>
     internal class Registration : IRegistration
     {
-        public Registration(Type type)
+        public Registration(Type type, ComponentScope scope)
         {
             Type = type;
+            Scope = scope;
         }
 
         public Type Type { get; }
 
-        /// <summary>
-        /// Gets or sets the scope of this registration.
-        /// </summary>
-        /// <value>Default is <see cref="ComponentScope.Transient"/>.</value>
-        public ComponentScope Scope { get; set; } = ComponentScope.Transient;
+        public ComponentScope Scope { get; }
 
         public Func<ILifetimeScope, object> Factory { get; set; }
     }

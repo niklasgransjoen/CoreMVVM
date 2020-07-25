@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreMVVM.IOC.Builder;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,19 +11,13 @@ namespace CoreMVVM.IOC.Core
     /// </summary>
     internal sealed class ToolBox
     {
-        private readonly RegistrationCollection _registrations = new RegistrationCollection();
+        private readonly Dictionary<Type, IRegistration> _registrations = new Dictionary<Type, IRegistration>();
 
         private readonly Dictionary<Type, ConstructorInfo> _constructors = new Dictionary<Type, ConstructorInfo>();
         private readonly Dictionary<ConstructorInfo, ParameterInfo[]> _parameters = new Dictionary<ConstructorInfo, ParameterInfo[]>();
 
         public ToolBox()
         {
-        }
-
-        public ToolBox(IReadOnlyDictionary<Type, IRegistration> registeredTypes)
-        {
-            foreach (var pair in registeredTypes)
-                _registrations[pair.Key] = pair.Value;
         }
 
         #region Methods
@@ -32,21 +27,34 @@ namespace CoreMVVM.IOC.Core
             return _registrations.TryGetValue(type, out registration);
         }
 
-        public IRegistration AddRegistration(Type component, Type type, ComponentScope scope)
+        public IRegistration AddRegistration(Type componentType, Type serviceType, ComponentScope scope)
         {
-            // Make sure scopes components are only registered once.
-            if (scope != ComponentScope.Transient)
+            if (!serviceType.IsAssignableFrom(componentType))
+                throw new IncompatibleTypeException($"Component type '{componentType}' does not inherit from or implement type '{serviceType}'.");
+
+            var registration = _registrations.Values.FirstOrDefault(r => r.Type == componentType && r.Scope == scope);
+            if (registration is null)
             {
-                var previousRegistration = _registrations.Values.FirstOrDefault(r => r.Type == component);
-                if (previousRegistration != null)
-                {
-                    _registrations[type] = previousRegistration;
-                    return previousRegistration;
-                }
+                registration = new Registration(componentType, scope);
             }
 
-            var registration = new Registration(component) { Scope = scope };
-            _registrations[type] = registration;
+            _registrations[serviceType] = registration;
+            return registration;
+        }
+
+        public IRegistration AddRegistration(Type componentType, Type serviceType, ComponentScope scope, Func<ILifetimeScope, object> factory)
+        {
+            if (!serviceType.IsAssignableFrom(componentType))
+                throw new IncompatibleTypeException($"Component type '{componentType}' does not inherit from or implement type '{serviceType}'.");
+
+            var registration = _registrations.Values.FirstOrDefault(r => r.Type == componentType && r.Scope == scope);
+            if (registration is null)
+            {
+                registration = new Registration(componentType, scope);
+            }
+
+            registration.Factory = factory;
+            _registrations[serviceType] = registration;
 
             return registration;
         }
@@ -60,6 +68,12 @@ namespace CoreMVVM.IOC.Core
 
             return AddConstructor(type);
         }
+
+        public ParameterInfo[] GetParameterInfo(ConstructorInfo constructor) => _parameters[constructor];
+
+        #endregion Methods
+
+        #region Private methods
 
         private ConstructorInfo AddConstructor(Type type)
         {
@@ -76,8 +90,6 @@ namespace CoreMVVM.IOC.Core
 
             return constructor;
         }
-
-        public ParameterInfo[] GetParameterInfo(ConstructorInfo constructor) => _parameters[constructor];
 
         private ParameterInfo[] AddParameterInfo(ConstructorInfo constructor)
         {
@@ -115,6 +127,6 @@ namespace CoreMVVM.IOC.Core
             }
         }
 
-        #endregion Methods
+        #endregion Private methods
     }
 }

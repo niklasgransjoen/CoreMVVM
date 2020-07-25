@@ -31,9 +31,9 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
-        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
+        /// <param name="serviceType">The service to register <see cref="Type"/> as a component of.</param>
         /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement type.</exception>
-        IRegistrationBuilder As(Type type);
+        IRegistrationBuilder As(Type serviceType);
 
         #endregion Methods
     }
