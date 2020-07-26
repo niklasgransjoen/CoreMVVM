@@ -19,7 +19,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_Owned()
         {
-            Owned<IInterface> ownedInstance = LifetimeScope.ResolveRequiredService<Owned<IInterface>>();
+            IOwned<IInterface> ownedInstance = LifetimeScope.ResolveRequiredService<IOwned<IInterface>>();
 
             Assert.NotNull(ownedInstance);
             Assert.NotNull(ownedInstance.Value);
@@ -37,7 +37,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_DoesNotDisposed_OwnedComponent()
         {
-            Owned<IDisposableInterface> disposable = LifetimeScope.ResolveRequiredService<Owned<IDisposableInterface>>();
+            IOwned<IDisposableInterface> disposable = LifetimeScope.ResolveRequiredService<IOwned<IDisposableInterface>>();
 
             Assert.False(disposable.Value.IsDisposed);
 
