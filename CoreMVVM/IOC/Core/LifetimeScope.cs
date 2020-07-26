@@ -112,24 +112,24 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Attempts to resolve the component from the toolbox's registrations.
         /// </summary>
-        private bool TryResolveRegisteredComponent(Type type, bool isOwned, out object component)
+        private bool TryResolveRegisteredComponent(Type serviceType, bool isOwned, out object component)
         {
-            if (!_toolBox.TryGetRegistration(type, out IRegistration registration))
+            if (!_toolBox.TryGetRegistration(serviceType, out IRegistration registration))
             {
                 component = null;
                 return false;
             }
 
-            component = ResolveFromRegistration(registration, isOwned);
+            component = ResolveFromRegistration(serviceType, registration, isOwned);
             return true;
         }
 
         /// <summary>
         /// Attempts to resolve the component by checking for a <see cref="ScopeAttribute"/>.
         /// </summary>
-        private bool TryResolveComponentByAttribute(Type type, bool isOwned, out object component)
+        private bool TryResolveComponentByAttribute(Type serviceType, bool isOwned, out object component)
         {
-            var attribute = type.GetCustomAttribute<ScopeAttribute>();
+            var attribute = serviceType.GetCustomAttribute<ScopeAttribute>();
             if (attribute is null)
             {
                 component = null;
@@ -137,16 +137,16 @@ namespace CoreMVVM.IOC.Core
             }
 
             // Register type as itself.
-            var registration = _toolBox.AddRegistration(type, type, attribute.Scope);
-            component = ResolveFromRegistration(registration, isOwned);
+            var registration = _toolBox.AddRegistration(serviceType, serviceType, attribute.Scope);
+            component = ResolveFromRegistration(serviceType, registration, isOwned);
             return true;
         }
 
-        private object ResolveFromRegistration(IRegistration registration, bool isOwned)
+        private object ResolveFromRegistration(Type serviceType, IRegistration registration, bool isOwned)
         {
             if (registration.Scope == ComponentScope.Transient)
             {
-                object component = ConstructFromRegistration(registration, isOwned);
+                object component = ConstructFromRegistration(serviceType, registration, isOwned);
                 if (component != null)
                     InitializeComponent(component);
 
@@ -156,14 +156,14 @@ namespace CoreMVVM.IOC.Core
             if (isOwned)
                 throw new OwnedScopedComponentException($"Attempted to own component of type '{registration.Type}', with scope '{registration.Scope}'. Scoped components cannot be owned.");
 
-            return ResolveScopedComponent(registration);
+            return ResolveScopedComponent(serviceType, registration);
         }
 
-        private object ResolveScopedComponent(IRegistration registration)
+        private object ResolveScopedComponent(Type serviceType, IRegistration registration)
         {
             // Singletons should only be resolved by root.
             if (registration.Scope == ComponentScope.Singleton && _parent != null)
-                return _parent.ResolveScopedComponent(registration);
+                return _parent.ResolveScopedComponent(serviceType, registration);
 
             lock (registration)
             {
@@ -179,7 +179,7 @@ namespace CoreMVVM.IOC.Core
 
                     try
                     {
-                        instance = ConstructFromRegistration(registration, isOwned: false);
+                        instance = ConstructFromRegistration(serviceType, registration, isOwned: false);
                         if (ResolvedInstances.ContainsKey(registration))
                         {
                             throw new ResolveException(
@@ -207,7 +207,7 @@ namespace CoreMVVM.IOC.Core
 
         #region Construct methods
 
-        private object ConstructFromRegistration(IRegistration registration, bool isOwned)
+        private object ConstructFromRegistration(Type serviceType, IRegistration registration, bool isOwned)
         {
             if (registration.Factory != null)
             {
@@ -221,7 +221,13 @@ namespace CoreMVVM.IOC.Core
                 return instance;
             }
 
-            return ConstructType(registration.Type, isOwned);
+            var concreteType = registration.Type;
+            if (concreteType.IsGenericTypeDefinition)
+            {
+                concreteType = concreteType.MakeGenericType(serviceType.GenericTypeArguments);
+            }
+
+            return ConstructType(concreteType, isOwned);
         }
 
         /// <summary>
@@ -272,7 +278,7 @@ namespace CoreMVVM.IOC.Core
                 if (context.CacheImplementation)
                 {
                     var registration = _toolBox.AddRegistration(context.InterfaceImplementationType, type, context.CacheScope);
-                    return ResolveFromRegistration(registration, isOwned);
+                    return ResolveFromRegistration(type, registration, isOwned);
                 }
 
                 return Resolve(context.InterfaceImplementationType, isOwned);
@@ -333,7 +339,7 @@ namespace CoreMVVM.IOC.Core
 
             foreach (var registration in registrations)
             {
-                list.Add(ResolveFromRegistration(registration, isOwned: false));
+                list.Add(ResolveFromRegistration(serviceType, registration, isOwned: false));
             }
 
             services = list;

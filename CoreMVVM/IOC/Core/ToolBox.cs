@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace CoreMVVM.IOC.Core
 {
@@ -32,6 +33,13 @@ namespace CoreMVVM.IOC.Core
                 return true;
             }
 
+            if (serviceType.IsGenericType &&
+                _registrations.TryGetValue(serviceType.GetGenericTypeDefinition(), out registrations))
+            {
+                registration = registrations[registrations.Count - 1];
+                return true;
+            }
+
             registration = null;
             return false;
         }
@@ -42,8 +50,29 @@ namespace CoreMVVM.IOC.Core
 
         public IReadOnlyList<IRegistration> GetRegistrations(Type serviceType)
         {
-            if (_registrations.TryGetValue(serviceType, out var registrations))
-                return registrations;
+            if (!serviceType.IsGenericType)
+            {
+                if (_registrations.TryGetValue(serviceType, out var registrations))
+                    return registrations;
+            }
+            else
+            {
+                _registrations.TryGetValue(serviceType, out var registrations);
+                _registrations.TryGetValue(serviceType.GetGenericTypeDefinition(), out var genericRegistrations);
+
+                if (registrations is null ^ genericRegistrations is null)
+                {
+                    return registrations ?? genericRegistrations;
+                }
+                else if (registrations != null && genericRegistrations != null)
+                {
+                    var result = new List<IRegistration>(registrations.Count + genericRegistrations.Count);
+                    result.AddRange(registrations);
+                    result.AddRange(genericRegistrations);
+
+                    return result;
+                }
+            }
 
 #if NET45
             return _emptyRegistrations;
@@ -54,8 +83,26 @@ namespace CoreMVVM.IOC.Core
 
         public IRegistration AddRegistration(Type componentType, Type serviceType, ComponentScope scope)
         {
-            if (!serviceType.IsAssignableFrom(componentType))
-                throw new IncompatibleTypeException($"Component type '{componentType}' does not inherit from or implement type '{serviceType}'.");
+            if (serviceType.IsGenericTypeDefinition && componentType.IsGenericTypeDefinition)
+            {
+                var concreteServiceType = componentType.GetGenericBaseType(serviceType);
+
+                var serviceGenericArguments = concreteServiceType.GetGenericArguments();
+                var componentGenericArguments = componentType.GetGenericArguments();
+
+                if (serviceGenericArguments.Length != componentGenericArguments.Length)
+                    throw new IncompatibleGenericTypeDefinitionException($"Generic service '${serviceType}' does not have the same generic argument count as implementation '${componentType}'.");
+
+                var incompatibleGenericArgument = serviceGenericArguments.Zip(componentGenericArguments, (t1, t2) => (t1, t2))
+                    .Any(pair => pair.t1 != pair.t2);
+                if (incompatibleGenericArgument)
+                {
+                    throw new IncompatibleGenericTypeDefinitionException($"Type arguments of generic service '${serviceType}' is not compatible with implementation '${componentType}'.");
+                }
+            }
+
+            if (!serviceType.IsAssignableFromGeneric(componentType))
+                throw new IncompatibleTypeException($"Component type '{componentType}' is not compatible with the service type '{serviceType}'.");
 
             if (!_registrationMap.TryGetValue((componentType, scope), out var registration))
             {
