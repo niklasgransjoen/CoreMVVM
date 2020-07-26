@@ -15,23 +15,23 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetTypes))]
         public void Builder_Registers(Type type)
         {
-            IRegistrationBuilder regBuilder = _builder.Register(type);
-            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.None);
+            IRegistrationBuilder regBuilder = _builder.RegisterTransient(type);
+            ValidateRegistrationBuilder(regBuilder, type, ComponentScope.Transient);
         }
 
         [Fact]
         public void Builder_Registers_Generics()
         {
-            IRegistrationBuilder regBuilder = _builder.Register<IInterface>();
-            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), ComponentScope.None);
+            IRegistrationBuilder regBuilder = _builder.RegisterTransient<IInterface>();
+            ValidateRegistrationBuilder(regBuilder, typeof(IInterface), ComponentScope.Transient);
         }
 
         [Theory]
         [MemberData(nameof(GetFactories))]
         public void Builder_Registers_Factories(Func<ILifetimeScope, object> factory)
         {
-            IRegistrationBuilder regBuilder = _builder.Register(factory);
-            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.None);
+            IRegistrationBuilder regBuilder = _builder.RegisterTransient(factory);
+            ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.Transient);
         }
 
         #endregion No scope
@@ -93,18 +93,9 @@ namespace CoreMVVM.IOC.Builder.Tests
         [Fact]
         public void Builder_ThrowsOn_ConflictingTypes()
         {
-            IRegistrationBuilder regBuilder = _builder.Register<Class>();
+            IRegistrationBuilder regBuilder = _builder.RegisterTransient<Class>();
 
             Assert.Throws<IncompatibleTypeException>(() => regBuilder.As<IInterface>());
-        }
-
-        [Theory]
-        [MemberData(nameof(GetConflictingBuilders))]
-        public void Builder_ThrowsOn_ConflictingScope(Action reg1, Action reg2)
-        {
-            reg1();
-
-            Assert.Throws<ScopingConflictException>(() => reg2());
         }
 
         #region Helpers
@@ -142,39 +133,6 @@ namespace CoreMVVM.IOC.Builder.Tests
                 yield return c => new Class();
                 yield return c => new Struct();
                 yield return c => new Implementation();
-            }
-        }
-
-        /// <summary>
-        /// Returns registrators that registrate <see cref="IInterface"/> in different scopes.
-        /// </summary>
-        public static IEnumerable<object[]> GetConflictingBuilders()
-        {
-            foreach (var (reg1, reg2) in getData())
-                yield return new object[] { reg1, reg2 };
-
-            static IEnumerable<(Action reg1, Action reg2)> getData()
-            {
-                foreach (var (builder1, scope1) in getRegistrators())
-                {
-                    foreach (var (builder2, scope2) in getRegistrators())
-                    {
-                        if (scope1 == scope2)
-                            continue;
-
-                        ContainerBuilder b = new ContainerBuilder();
-                        yield return (() => builder1(b), () => builder2(b));
-                    }
-                }
-            }
-
-            static IEnumerable<(Action<ContainerBuilder> builder, ComponentScope scope)> getRegistrators()
-            {
-                Type t = typeof(IInterface);
-
-                yield return (b => b.Register(t).AsSelf(), ComponentScope.None);
-                yield return (b => b.RegisterSingleton(t).AsSelf(), ComponentScope.Singleton);
-                yield return (b => b.RegisterLifetimeScope(t).AsSelf(), ComponentScope.LifetimeScope);
             }
         }
 

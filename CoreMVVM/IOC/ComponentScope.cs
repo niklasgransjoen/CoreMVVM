@@ -8,16 +8,16 @@
         /// <summary>
         /// The component has no scope. New instance per call to resolve.
         /// </summary>
-        None,
-
-        /// <summary>
-        /// The component is only constructed once throughout the lifetime of the container.
-        /// </summary>
-        Singleton,
+        Transient = 0,
 
         /// <summary>
         /// The component is only constructed once throughout the lifetime of the lifetime scope.
         /// </summary>
-        LifetimeScope,
+        LifetimeScope = 1,
+
+        /// <summary>
+        /// The component is only constructed once throughout the lifetime of the container.
+        /// </summary>
+        Singleton = 2,
     }
 }

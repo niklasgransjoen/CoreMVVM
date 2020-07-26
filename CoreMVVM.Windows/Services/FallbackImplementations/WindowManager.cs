@@ -1,9 +1,7 @@
-﻿using CoreMVVM.IOC;
-using System.Windows;
+﻿using System.Windows;
 
-namespace CoreMVVM.Windows
+namespace CoreMVVM.Windows.FallbackImplementations
 {
-    [Scope(ComponentScope.Singleton)]
     public class WindowManager : IWindowManager
     {
         private readonly IViewLocator _viewLocator;

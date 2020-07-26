@@ -5,6 +5,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
+#if !NET45
+
+using Microsoft.Extensions.Logging;
+
+#endif
+
 namespace CoreMVVM.Windows
 {
     public abstract class WindowsApplication : Application
@@ -15,9 +21,11 @@ namespace CoreMVVM.Windows
 
         protected WindowsApplication()
         {
+#if !NET45
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             DispatcherUnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
+#endif
         }
 
         protected sealed override void OnStartup(StartupEventArgs e)
@@ -61,27 +69,43 @@ namespace CoreMVVM.Windows
             ContainerProvider.Container = container;
         }
 
+#if !NET45
+
         #region UnhandledException
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
+
             if (e.ExceptionObject is Exception exception)
-                LoggerHelper.Exception("UnhandledException", exception);
+                logger.LogError(exception, "Unhandled Exception");
             else
-                LoggerHelper.Error($"Unhandled exception: {e.ExceptionObject}.");
+                logger.LogError($"Unhandled exception: {e.ExceptionObject}.");
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            LoggerHelper.Exception("DispatcherUnhandledException", e.Exception);
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
+
+            logger.LogError(e.Exception, "DispatcherUnhandledException", e.Exception);
         }
 
         private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
-            LoggerHelper.Exception("UnobservedTaskException", e.Exception);
+            var logger = Container.ResolveService<ILogger<WindowsApplication>>();
+            if (logger is null)
+                return;
+
+            logger.LogError(e.Exception, "UnobservedTaskException");
         }
 
         #endregion UnhandledException
+
+#endif
 
         #endregion Listeners
     }

@@ -10,9 +10,9 @@ namespace CoreMVVM.IOC.Core
         Type Type { get; }
 
         /// <summary>
-        /// Gets or sets the scope of this registration.
+        /// Gets the scope of this registration.
         /// </summary>
-        ComponentScope Scope { get; set; }
+        ComponentScope Scope { get; }
 
         /// <summary>
         /// Gets or sets the factory of the registration.

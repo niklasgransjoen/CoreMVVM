@@ -15,22 +15,16 @@ namespace CoreMVVM
         /// <summary>
         /// Gets the view for the view model of a given type.
         /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
+        /// <exception cref="ResolveException">the view model or view cannot be resolved by the IOC container.</exception>
         /// <exception cref="ViewNotFoundException">no view found of the given view model type.</exception>
-        object ResolveView<TViewModel>() where TViewModel : class;
+        object ResolveView(Type viewModelType);
 
         /// <summary>
         /// Gets the view for the given view model.
         /// </summary>
+        /// <exception cref="ResolveException">the view cannot be resolved by the IOC container.</exception>
         /// <exception cref="ViewNotFoundException">no view found of the given view model type.</exception>
         object ResolveView(object viewModel);
-
-        /// <summary>
-        /// Gets the view type for the given view model.
-        /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        /// <exception cref="ViewNotFoundException">no view found of the given view model type.</exception>
-        Type ResolveViewType<TViewModel>();
 
         /// <summary>
         /// Gets the view type for the given view model.
@@ -45,19 +39,12 @@ namespace CoreMVVM
         /// <summary>
         /// Gets the view for the view model of a given type.
         /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        bool TryResolveView<TViewModel>(out object view) where TViewModel : class;
+        bool TryResolveView(Type viewModelType, out object view);
 
         /// <summary>
         /// Gets the view for the given view model.
         /// </summary>
         bool TryResolveView(object viewModel, out object view);
-
-        /// <summary>
-        /// Gets the view type for the given view model.
-        /// </summary>
-        /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        bool TryResolveViewType<TViewModel>(out Type viewType);
 
         /// <summary>
         /// Gets the view type for the given view model.
@@ -75,11 +62,13 @@ namespace CoreMVVM
         /// <summary>
         /// Adds a view provider to the view locator.
         /// </summary>
-        /// <typeparam name="TViewProvider">The type of the provider.</typeparam>
+        /// <param name="type">The type of the provider.</param>
+        /// <exception cref="ResolveException">the view provider cannot be resolved by the IOC container.</exception>
+        /// <exception cref="ArgumentException">type does not implement <see cref="IViewProvider"/>.</exception>
         /// <remarks>
         /// View providers are used to locate views belonging to a given view model.
         /// </remarks>
-        void AddViewProvider<TViewProvider>() where TViewProvider : class, IViewProvider;
+        void AddViewProvider(Type type);
 
         /// <summary>
         /// Adds a view provider to the view locator.

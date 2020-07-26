@@ -2,23 +2,28 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net45;net48</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <LangVersion>8.0</LangVersion>
+    <PackageId>Viv.CoreMVVM.Windows</PackageId>
     <Authors>Niklas Gransjøen</Authors>
     <Description>A simple, lightweight MVVM library for .NET Standard made with Inversion of Control (IoC) in mind, with no external dependencies.</Description>
     <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/niklasgransjoen/CoreMVVM</RepositoryUrl>
-    <Version>1.4.0</Version>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>MVVM</PackageTags>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\CoreMVVM.Windows.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\$(TargetFramework)\CoreMVVM.Windows.xml</DocumentationFile>
   </PropertyGroup>
 
   <!-- .NET Core 3.0 references, compilation flags and build options -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
     <ProjectReference Include="..\CoreMVVM\CoreMVVM.csproj" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1'">
-    <UseWPF>true</UseWPF>
     <DefineConstants>NETCORE</DefineConstants>
   </PropertyGroup>
 
@@ -40,6 +45,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System.Xaml" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
     <ProjectReference Include="..\CoreMVVM\CoreMVVM.csproj">
       <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>

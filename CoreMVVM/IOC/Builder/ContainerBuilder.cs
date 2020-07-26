@@ -8,7 +8,7 @@ namespace CoreMVVM.IOC.Builder
     /// </summary>
     public sealed class ContainerBuilder
     {
-        private readonly RegistrationCollection _registrations = new RegistrationCollection();
+        private readonly ToolBox _toolBox = new ToolBox();
 
         #region Constructors
 
@@ -17,7 +17,8 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public ContainerBuilder()
         {
-            RegisterSingleton<FallbackImplementations.UnregisteredInterfaceFallbackService>().As<IResolveUnregisteredInterfaceService>();
+            Register<FallbackImplementations.UnregisteredInterfaceFallbackService>(ComponentScope.Singleton)
+                .As<IResolveUnregisteredInterfaceService>();
         }
 
         #endregion Constructors
@@ -33,155 +34,66 @@ namespace CoreMVVM.IOC.Builder
 
         #region Methods
 
-        #region No scope
-
         /// <summary>
         /// Registers a component.
         /// </summary>
-        /// <typeparam name="T">The type of the component to register.</typeparam>
+        /// <typeparam name="T">The type of component to register.</typeparam>
+        /// <param name="scope">The scope to register the component in.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder Register<T>() => Register(typeof(T));
-
-        /// <summary>
-        /// Registers a component.
-        /// </summary>
-        /// <param name="type">The type of the component to register.</param>
-        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
-        public IRegistrationBuilder Register(Type type)
+        public IRegistrationBuilder<T> Register<T>(ComponentScope scope)
+            where T : class
         {
-            if (type is null)
-                throw new ArgumentNullException(nameof(type));
-
-            _registrations.AssertNoScopingConflicts(type, ComponentScope.None);
-
-            return RegistrationBuilder.Create(_registrations, type);
+            return new RegistrationBuilder<T>(_toolBox, scope);
         }
 
         /// <summary>
         /// Registers a component.
         /// </summary>
         /// <typeparam name="T">The type of component to register.</typeparam>
-        /// <param name="factory">A factory to use for constructing this component.</param>
+        /// <param name="scope">The scope to register the component in.</param>
+        /// <param name="factory">The factory to create the service with.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder Register<T>(Func<ILifetimeScope, T> factory) where T : class
+        public IRegistrationBuilder<T> Register<T>(ComponentScope scope, Func<ILifetimeScope, T> factory)
+            where T : class
         {
-            if (factory is null)
-                throw new ArgumentNullException(nameof(factory));
-
-            _registrations.AssertNoScopingConflicts<T>(ComponentScope.None);
-
-            return RegistrationBuilder.Create(_registrations, factory);
+            return new RegistrationBuilder<T>(_toolBox, scope, factory);
         }
 
-        #endregion No scope
-
-        #region Singleton
-
         /// <summary>
-        /// Registers a component as a singleton.
-        /// </summary>
-        /// <typeparam name="T">The type of the component to register.</typeparam>
-        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterSingleton<T>() => RegisterSingleton(typeof(T));
-
-        /// <summary>
-        /// Registers a component as a singleton.
+        /// Registers a component.
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
+        /// <param name="scope">The scope to register the component in.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterSingleton(Type type)
+        public IRegistrationBuilder Register(Type type, ComponentScope scope)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            _registrations.AssertNoScopingConflicts(type, ComponentScope.Singleton);
-
-            return RegistrationBuilder.CreateSingleton(_registrations, type);
+            return new RegistrationBuilder(_toolBox, type, scope);
         }
 
         /// <summary>
-        /// Registers a component as a singleton.
-        /// </summary>
-        /// <typeparam name="T">The type of component to register.</typeparam>
-        /// <param name="factory">A factory to use for constructing this component.</param>
-        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterSingleton<T>(Func<ILifetimeScope, T> factory) where T : class
-        {
-            if (factory is null)
-                throw new ArgumentNullException(nameof(factory));
-
-            _registrations.AssertNoScopingConflicts<T>(ComponentScope.Singleton);
-
-            return RegistrationBuilder.CreateSingleton(_registrations, factory);
-        }
-
-        #endregion Singleton
-
-        #region Lifetime scope
-
-        /// <summary>
-        /// Registers a component with a lifetime scope.
-        /// </summary>
-        /// <typeparam name="T">The type of the component to register.</typeparam>
-        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterLifetimeScope<T>() => RegisterLifetimeScope(typeof(T));
-
-        /// <summary>
-        /// Registers a component with a lifetime scope.
+        /// Registers a component.
         /// </summary>
         /// <param name="type">The type of the component to register.</param>
+        /// <param name="scope">The scope to register the component in.</param>
+        /// <param name="factory">The factory to create the service with.</param>
         /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">type is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterLifetimeScope(Type type)
+        public IRegistrationBuilder Register(Type type, ComponentScope scope, Func<ILifetimeScope, object> factory)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            _registrations.AssertNoScopingConflicts(type, ComponentScope.LifetimeScope);
-
-            return RegistrationBuilder.CreateLifetimeScope(_registrations, type);
+            return new RegistrationBuilder(_toolBox, type, scope, factory);
         }
-
-        /// <summary>
-        /// Registers a component with a lifetime scope.
-        /// </summary>
-        /// <typeparam name="T">The type of component to register.</typeparam>
-        /// <param name="factory">A factory to use for constructing this component.</param>
-        /// <remarks>No registration occurs by calling this method, the component must be registered using the returned builder.</remarks>
-        /// <exception cref="ScopingConflictException">T is already registered with a different scope.</exception>
-        public IRegistrationBuilder RegisterLifetimeScope<T>(Func<ILifetimeScope, T> factory) where T : class
-        {
-            if (factory is null)
-                throw new ArgumentNullException(nameof(factory));
-
-            _registrations.AssertNoScopingConflicts<T>(ComponentScope.LifetimeScope);
-
-            return RegistrationBuilder.CreateLifetimeScope(_registrations, factory);
-        }
-
-        #endregion Lifetime scope
 
         /// <summary>
         /// Constructs a container with all the registered components and services.
         /// </summary>
         public IContainer Build()
         {
-            // Registers the container as a singleton, so it always resolves to this instance.
-            RegisterSingleton<Container>().As<IContainer>().AsSelf();
-
-            ToolBox toolBox = new ToolBox(_registrations);
-            Container container = new Container(toolBox);
-
-            // And set this instance as the last created one, so this is the one that's returned upon a call to IContainer.Resolve().
-            IRegistration registration = _registrations[typeof(IContainer)];
-            container.ResolvedInstances[registration] = container;
+            Container container = new Container(_toolBox);
 
             OnBuild?.Invoke(container);
 

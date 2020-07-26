@@ -2,16 +2,19 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netstandard2.0;net45</TargetFrameworks>
+    <LangVersion>8.0</LangVersion>
+    <PackageId>Viv.CoreMVVM</PackageId>
     <Authors>Niklas Gransjøen</Authors>
     <Description>A simple, lightweight MVVM library for .NET Standard made with Inversion of Control (IoC) in mind, with no external dependencies.</Description>
     <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/niklasgransjoen/CoreMVVM</RepositoryUrl>
-    <Version>1.4.0</Version>
-    <LangVersion>8.0</LangVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>MVVM</PackageTags>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\CoreMVVM.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\$(TargetFramework)\CoreMVVM.xml</DocumentationFile>
   </PropertyGroup>
 
   <!-- .NET Standard 2.1 references, compilation flags and build options -->
@@ -28,4 +31,7 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
     <DefineConstants>NET45</DefineConstants>
   </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
 </Project>

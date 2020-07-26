@@ -2,6 +2,9 @@
 
 namespace CoreMVVM.IOC.Builder
 {
+    /// <summary>
+    /// Service used for building registrations.
+    /// </summary>
     public interface IRegistrationBuilder
     {
         #region Properties
@@ -28,22 +31,17 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers <see cref="Type"/> as a component of a given type.
         /// </summary>
-        /// <typeparam name="T">The type to register <see cref="Type"/> as a component of.</typeparam>
-        /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement T.</exception>
-        IRegistrationBuilder As<T>();
-
-        /// <summary>
-        /// Registers <see cref="Type"/> as a component of a given type.
-        /// </summary>
-        /// <param name="type">The type to register <see cref="Type"/> as a component of.</param>
+        /// <param name="serviceType">The service to register <see cref="Type"/> as a component of.</param>
         /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement type.</exception>
-        IRegistrationBuilder As(Type type);
-
-        /// <summary>
-        /// Registers <see cref="Type"/> as a component of itself.
-        /// </summary>
-        IRegistrationBuilder AsSelf();
+        IRegistrationBuilder As(Type serviceType);
 
         #endregion Methods
+    }
+
+    /// <summary>
+    /// Service used for building registrations.
+    /// </summary>
+    public interface IRegistrationBuilder<T> : IRegistrationBuilder
+    {
     }
 }

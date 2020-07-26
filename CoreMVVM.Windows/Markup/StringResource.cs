@@ -46,7 +46,7 @@ namespace CoreMVVM.Windows.Markup
                 if (DesignHelper.IsDesignMode)
                     return;
 
-                _resourceService = ContainerProvider.Resolve<IResourceService>();
+                _resourceService = ContainerProvider.ResolveRequiredService<IResourceService>();
                 _resourceService.OnCurrentCultureChanged += OnCurrentCultureChanged;
             }
 

@@ -4,7 +4,7 @@
     /// A wrapper for allerting CoreMVVM that a created instance should not belong to the <see cref="ILifetimeScope"/>.
     /// </summary>
     /// <typeparam name="T">The type of the wrapped value.</typeparam>
-    public sealed class Owned<T> : IOwned<T>
+    internal sealed class Owned<T> : IOwned<T>
     {
         public Owned(T value)
         {

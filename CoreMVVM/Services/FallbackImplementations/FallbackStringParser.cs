@@ -17,8 +17,6 @@ namespace CoreMVVM.FallbackImplementations
             }
             catch (FormatException e)
             {
-                LoggerHelper.Exception("StringParser.Format", e);
-
                 return parsedValue;
             }
         }
