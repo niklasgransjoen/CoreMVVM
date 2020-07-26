@@ -1,5 +1,4 @@
-﻿using CoreMVVM.Extentions;
-using CoreMVVM.Implementations;
+﻿using CoreMVVM.Implementations;
 using CoreMVVM.IOC;
 using System;
 using System.Collections.Generic;
@@ -140,7 +139,7 @@ namespace CoreMVVM.Windows
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (!type.ImplementsGenericInterface(typeof(IViewProvider)))
+            if (!typeof(IViewProvider).IsAssignableFrom(type))
                 throw new ArgumentException($"Type '{type}' does not implement required interface '{typeof(IViewProvider)}'.", nameof(type));
 
             var viewProvider = (IViewProvider)_container.ResolveRequiredService(type);

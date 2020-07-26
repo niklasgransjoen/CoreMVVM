@@ -1,5 +1,4 @@
-﻿using CoreMVVM.Extentions;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -251,9 +250,12 @@ namespace CoreMVVM.IOC.Core
                 return lazyInstance;
 
             // Switch out any IOwned<> (or implementation) with Owned<>
-            bool implementsIOwned = type.ImplementsGenericInterface(typeof(IOwned<>));
-            if (implementsIOwned)
+            bool implementsIOwned = false;
+            if (type.IsGenericType && typeof(IOwned<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+            {
                 type = typeof(Owned<>).MakeGenericType(type.GenericTypeArguments);
+                implementsIOwned = true;
+            }
 
             // Check if type is unregistered interface.
             if (type.IsInterface)

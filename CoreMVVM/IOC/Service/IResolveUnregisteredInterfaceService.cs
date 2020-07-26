@@ -1,5 +1,4 @@
-﻿using CoreMVVM.Extentions;
-using System;
+﻿using System;
 
 namespace CoreMVVM.IOC
 {
@@ -65,7 +64,7 @@ namespace CoreMVVM.IOC
         /// <param name="interfaceImplementationType">The type to resolve to in place of <see cref="InterfaceType"/>. Must implement <see cref="InterfaceType"/>.</param>
         public void SetInterfaceImplementationType(Type interfaceImplementationType)
         {
-            if (!interfaceImplementationType.ImplementsInterface(InterfaceType))
+            if (!InterfaceType.IsAssignableFrom(interfaceImplementationType))
                 throw new ArgumentException($"Type '{interfaceImplementationType}' does not implement interface '{InterfaceType}'.", nameof(interfaceImplementationType));
 
             if (!interfaceImplementationType.IsClass || interfaceImplementationType.IsAbstract)
