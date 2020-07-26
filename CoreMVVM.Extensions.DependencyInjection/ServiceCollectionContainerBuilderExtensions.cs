@@ -31,11 +31,12 @@ namespace CoreMVVM.Extensions.DependencyInjection
 
                 if (service.ImplementationFactory != null)
                 {
-                    builder.Register(service.ImplementationType, componentScope, service.ImplementationFactory).As(service.ServiceType);
+                    var implementationType = service.ImplementationFactory.GetType().GetGenericArguments()[1];
+                    builder.Register(implementationType, componentScope, service.ImplementationFactory).As(service.ServiceType);
                 }
                 else if (service.ImplementationInstance != null)
                 {
-                    builder.Register(service.ImplementationType, componentScope, c => service.ImplementationInstance).As(service.ServiceType);
+                    builder.Register(service.ImplementationInstance.GetType(), componentScope, c => service.ImplementationInstance).As(service.ServiceType);
                 }
                 else
                 {
