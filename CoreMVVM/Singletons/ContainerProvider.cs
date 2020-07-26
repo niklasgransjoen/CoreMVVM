@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.IOC;
 using CoreMVVM.IOC.Builder;
 using System;
+using System.Collections.Generic;
 
 namespace CoreMVVM
 {
@@ -49,32 +50,36 @@ namespace CoreMVVM
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
         /// <exception cref="ResolveUnregisteredServiceException">no service of type T exist.</exception>
-        public static T ResolveRequiredService<T>() where T : class
-        {
-            return ContainerOrFallback().ResolveService<T>();
-        }
+        public static T ResolveRequiredService<T>() where T : class => ContainerOrFallback().ResolveService<T>();
 
         /// <summary>
         /// Returns an instance from the given type.
         /// </summary>
-        /// <param name="type">The type to get an instance for.</param>
+        /// <param name="serviceType">The type to get an instance for.</param>
         /// <exception cref="ResolveUnregisteredServiceException">no service of type type exist.</exception>
-        public static object ResolveRequiredService(Type type) => ContainerOrFallback().ResolveService(type);
+        public static object ResolveRequiredService(Type serviceType) => ContainerOrFallback().ResolveService(serviceType);
 
         /// <summary>
         /// Returns an instance from the given type.
         /// </summary>
         /// <typeparam name="T">The type to get an instance for.</typeparam>
-        public static T ResolveService<T>() where T : class
-        {
-            return ContainerOrFallback().ResolveService<T>();
-        }
+        public static T ResolveService<T>() where T : class => ContainerOrFallback().ResolveService<T>();
 
         /// <summary>
         /// Returns an instance from the given type.
         /// </summary>
-        /// <param name="type">The type to get an instance for.</param>
-        public static object ResolveService(Type type) => ContainerOrFallback().ResolveService(type);
+        /// <param name="serviceType">The type to get an instance for.</param>
+        public static object ResolveService(Type serviceType) => ContainerOrFallback().ResolveService(serviceType);
+
+        /// <summary>
+        /// Returns a sequence of services of the given type.
+        /// </summary>
+        public static IEnumerable<object> ResolveServices(Type serviceType) => ContainerOrFallback().ResolveServices(serviceType);
+
+        /// <summary>
+        /// Returns a sequence of services of the given type.
+        /// </summary>
+        public static IEnumerable<T> ResolveServices<T>() where T : class => ContainerOrFallback().ResolveServices<T>();
 
         #endregion ILifetimeScope
 

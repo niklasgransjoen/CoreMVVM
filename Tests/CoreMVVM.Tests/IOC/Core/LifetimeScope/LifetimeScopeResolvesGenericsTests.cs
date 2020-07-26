@@ -7,7 +7,7 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected override void RegisterComponents(ContainerBuilder builder)
         {
-            builder.RegisterTransient(typeof(Service<>)).As(typeof(IService<>));
+            builder.RegisterLifetimeScope(typeof(Service<>)).As(typeof(IService<>));
         }
 
         [Fact]
