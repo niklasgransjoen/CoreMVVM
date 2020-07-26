@@ -1,5 +1,6 @@
 ﻿using CoreMVVM.Extentions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -233,6 +234,10 @@ namespace CoreMVVM.IOC.Core
         /// <exception cref="IOCException">Construction fails.</exception>
         private object ConstructType(Type type, bool isOwned)
         {
+            // Resolve IEnumerable<T> to a sequence of services
+            if (TryConstructIEnumerable(type, out var serviceSequence))
+                return serviceSequence;
+
             // Resolve IServiceProvider or similar.
             if (TryConstructServiceProvider(type, out var serviceProvider))
                 return serviceProvider;
@@ -297,6 +302,40 @@ namespace CoreMVVM.IOC.Core
 
                 throw new ResolveException(message, e);
             }
+        }
+
+        private bool TryConstructIEnumerable(Type type, out IEnumerable services)
+        {
+            if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+            {
+                services = null;
+                return false;
+            }
+
+            var serviceType = type.GenericTypeArguments[0];
+            Type listType = typeof(List<>).MakeGenericType(serviceType);
+
+            var listConstructor = _toolBox.GetConstructor(listType, validateParameters: false, constructorSelector: ctors => ctors.Single(ctor =>
+            {
+                var parameters = ctor.GetParameters();
+                if (parameters.Length != 1)
+                    return false;
+
+                return parameters[0].ParameterType == typeof(int);
+            }));
+
+            var registrations = _toolBox.GetRegistrations(serviceType);
+
+            var serviceCount = registrations.Count;
+            var list = (IList)listConstructor.Invoke(new object[] { serviceCount });
+
+            foreach (var registration in registrations)
+            {
+                list.Add(ResolveFromRegistration(registration, isOwned: false));
+            }
+
+            services = list;
+            return true;
         }
 
         private bool TryConstructServiceProvider(Type type, out IServiceProvider serviceProvider)
