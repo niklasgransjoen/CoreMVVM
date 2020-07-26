@@ -33,7 +33,7 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets a collection of resolved instances with limited scoping.
         /// </summary>
-        public Dictionary<IRegistration, object> ResolvedInstances { get; } = new Dictionary<IRegistration, object>();
+        public Dictionary<(Type concreteType, IRegistration registration), object> ResolvedInstances { get; } = new Dictionary<(Type, IRegistration), object>();
 
         #endregion Properties
 
@@ -168,7 +168,8 @@ namespace CoreMVVM.IOC.Core
             lock (registration)
             {
                 // Result from scoped components are saved for future resolves.
-                if (!ResolvedInstances.TryGetValue(registration, out object instance))
+                var concreteType = registration.GetConcreteType(serviceType);
+                if (!ResolvedInstances.TryGetValue((concreteType, registration), out object instance))
                 {
                     if (!_resolvingScopedComponents.Add(registration))
                     {
@@ -180,14 +181,14 @@ namespace CoreMVVM.IOC.Core
                     try
                     {
                         instance = ConstructFromRegistration(serviceType, registration, isOwned: false);
-                        if (ResolvedInstances.ContainsKey(registration))
+                        if (ResolvedInstances.ContainsKey((concreteType, registration)))
                         {
                             throw new ResolveException(
                                 $"Recursive pattern on scoped components detected. " +
                                 $"This was detected while resolving service '{registration.Type}'.");
                         }
 
-                        ResolvedInstances.Add(registration, instance);
+                        ResolvedInstances.Add((concreteType, registration), instance);
                         if (instance != null)
                         {
                             InitializeComponent(instance);
@@ -221,12 +222,7 @@ namespace CoreMVVM.IOC.Core
                 return instance;
             }
 
-            var concreteType = registration.Type;
-            if (concreteType.IsGenericTypeDefinition)
-            {
-                concreteType = concreteType.MakeGenericType(serviceType.GenericTypeArguments);
-            }
-
+            var concreteType = registration.GetConcreteType(serviceType);
             return ConstructType(concreteType, isOwned);
         }
 
