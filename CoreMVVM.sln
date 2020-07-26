@@ -7,13 +7,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM", "CoreMVVM\CoreMV
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DFAF0354-4F12-462B-A888-6A5EC1CAB08D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Tests", "tests\CoreMVVM.Tests\CoreMVVM.Tests.csproj", "{A25715D1-B936-4ABD-9AA2-85B4B464C8C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM.Tests", "tests\CoreMVVM.Tests\CoreMVVM.Tests.csproj", "{A25715D1-B936-4ABD-9AA2-85B4B464C8C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Windows", "CoreMVVM.Windows\CoreMVVM.Windows.csproj", "{AA514477-AC1E-4E5F-B33F-7F07BF467058}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM.Windows", "CoreMVVM.Windows\CoreMVVM.Windows.csproj", "{AA514477-AC1E-4E5F-B33F-7F07BF467058}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM.Windows.Tests", "Tests\CoreMVVM.Windows.Tests\CoreMVVM.Windows.Tests.csproj", "{2012E610-4AC2-42A4-834E-51C5813151D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Demo", "CoreMVVM.Demo\CoreMVVM.Demo.csproj", "{70F47626-2CBE-4175-B2BE-037C1434984E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreMVVM.Demo", "CoreMVVM.Demo\CoreMVVM.Demo.csproj", "{70F47626-2CBE-4175-B2BE-037C1434984E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMVVM.Extensions.DependencyInjection", "CoreMVVM.Extensions.DependencyInjection\CoreMVVM.Extensions.DependencyInjection.csproj", "{4B6E1A21-18BC-4504-A774-5279F11AB208}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,10 @@ Global
 		{70F47626-2CBE-4175-B2BE-037C1434984E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70F47626-2CBE-4175-B2BE-037C1434984E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70F47626-2CBE-4175-B2BE-037C1434984E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B6E1A21-18BC-4504-A774-5279F11AB208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B6E1A21-18BC-4504-A774-5279F11AB208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B6E1A21-18BC-4504-A774-5279F11AB208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B6E1A21-18BC-4504-A774-5279F11AB208}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
