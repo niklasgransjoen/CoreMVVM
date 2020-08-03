@@ -1,4 +1,5 @@
 ﻿using System;
+using CoreMVVM.IOC;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +15,6 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewModelPresenter : FrameworkElement
     {
-        private readonly Lazy<IViewLocator> _viewLocator = ContainerProvider.ResolveRequiredService<Lazy<IViewLocator>>();
         private readonly Dictionary<Type, FrameworkElement> _cachedViews = new Dictionary<Type, FrameworkElement>();
 
         static ViewModelPresenter()
@@ -193,17 +193,9 @@ namespace CoreMVVM.Windows
 
         private void UpdateView()
         {
-            if (ViewModel is null)
-            {
-                View = null;
-                return;
-            }
+          
 
-            if (DesignerProperties.GetIsInDesignMode(this))
-            {
-                View = new TextBlock(new Run(ViewModel.GetType().FullName));
-                return;
-            }
+            
 
             View = ResolveView(ViewModel);
         }
@@ -215,12 +207,17 @@ namespace CoreMVVM.Windows
         /// </summary>
         private FrameworkElement ResolveView(object viewModel)
         {
+            if (viewModel is null)
+            {
+                return null;
+            }
+
             if (!CacheViews)
             {
                 return getView();
             }
 
-            Type viewModelType = ViewModel.GetType();
+            Type viewModelType = viewModel.GetType();
             if (_cachedViews.TryGetValue(viewModelType, out FrameworkElement view))
             {
                 view.DataContext = viewModel;
@@ -235,7 +232,19 @@ namespace CoreMVVM.Windows
 
             FrameworkElement getView()
             {
-                object rawView = _viewLocator.Value.ResolveView(viewModel);
+                if (DesignerProperties.GetIsInDesignMode(this))
+                {
+                    return new TextBlock(new Run(viewModel.GetType().FullName));
+                }
+
+                var serviceProvider = ControlServiceProvider.GetServiceProvider(this);
+                if (serviceProvider is null)
+                    return new TextBlock(new Run(viewModel.GetType().FullName));
+
+                using var subScope = serviceProvider.BeginLifetimeScope();
+                var viewLocator = subScope.ResolveRequiredService<IViewLocator>();
+
+                object rawView = viewLocator.ResolveView(viewModel);
                 if (rawView is FrameworkElement frameworkElement)
                     return frameworkElement;
 

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace CoreMVVM.Windows.FallbackImplementations
 {
@@ -13,52 +14,44 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #region IWindowManager
 
-        /// <summary>
-        /// Shows a window for the given view model type.
-        /// </summary>
-        /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-        /// <param name="owner">The owner of the returned window.</param>
-        public Window ShowWindow<TViewModel>(Window owner = null) where TViewModel : class
+        public Window ShowWindow(Type viewModelType, Window owner = null)
         {
-            Window window = GetWindow<TViewModel>(owner);
+            if (viewModelType is null)
+                throw new ArgumentNullException(nameof(viewModelType));
+
+            Window window = GetWindow(viewModelType, owner);
             window.Show();
 
             return window;
         }
 
-        /// <summary>
-        /// Shows a window for the given view model type.
-        /// </summary>
-        /// <param name="viewModel">The view model.</param>
-        /// <param name="owner">The owner of the returned window.</param>
         public Window ShowWindow(object viewModel, Window owner = null)
         {
+            if (viewModel is null)
+                throw new ArgumentNullException(nameof(viewModel));
+
             Window window = GetWindow(viewModel, owner);
             window.Show();
 
             return window;
         }
 
-        /// <summary>
-        /// Shows a window for the given view model type as a dialog.
-        /// </summary>
-        /// <typeparam name="TViewModel">The type of the view model.</typeparam>
-        /// <param name="owner">The owner of the returned window.</param>
-        public Window ShowDialog<TViewModel>(Window owner = null) where TViewModel : class
+        public Window ShowDialog(Type viewModelType, Window owner = null)
         {
-            Window window = GetWindow<TViewModel>(owner);
+            if (viewModelType is null)
+                throw new ArgumentNullException(nameof(viewModelType));
+
+            Window window = GetWindow(viewModelType, owner);
             window.ShowDialog();
 
             return window;
         }
 
-        /// <summary>
-        /// Shows a window for the given view model type as a dialog.
-        /// </summary>
-        /// <param name="viewModel">The view model.</param>
-        /// <param name="owner">The owner of the returned window.</param>
         public Window ShowDialog(object viewModel, Window owner = null)
         {
+            if (viewModel is null)
+                throw new ArgumentNullException(nameof(viewModel));
+
             Window window = GetWindow(viewModel, owner);
             window.ShowDialog();
 
@@ -67,19 +60,24 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #endregion IWindowManager
 
-        private Window GetWindow<TViewModel>(Window owner) where TViewModel : class
+        private Window GetWindow(Type viewModelType, Window owner)
         {
-            Window window = (Window)_viewLocator.ResolveView<TViewModel>();
-            window.Owner = owner;
-
-            return window;
+            var window = _viewLocator.ResolveView(viewModelType);
+            return CastAndAssignOwner(viewModelType, window, owner);
         }
 
         private Window GetWindow(object viewModel, Window owner)
         {
-            var window = (Window)_viewLocator.ResolveView(viewModel);
-            window.Owner = owner;
+            var window = _viewLocator.ResolveView(viewModel);
+            return CastAndAssignOwner(viewModel.GetType(), window, owner);
+        }
 
+        private Window CastAndAssignOwner(Type viewModelType, object view, Window owner)
+        {
+            if (!(view is Window window))
+                throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");
+
+            window.Owner = owner;
             return window;
         }
     }

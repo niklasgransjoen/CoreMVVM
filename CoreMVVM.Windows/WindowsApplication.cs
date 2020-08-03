@@ -28,6 +28,8 @@ namespace CoreMVVM.Windows
 #endif
         }
 
+        #region Startup & Exit
+
         protected sealed override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -38,7 +40,7 @@ namespace CoreMVVM.Windows
 
             RegisterComponents(builder);
             builder.OnBuild += OnContainerBuilt;
-            _container = builder.Build();
+            builder.Build();
 
             OnStartupOverride(e);
         }
@@ -52,8 +54,6 @@ namespace CoreMVVM.Windows
             base.OnExit(e);
         }
 
-        protected abstract void RegisterComponents(ContainerBuilder builder);
-
         protected virtual void OnStartupOverride(StartupEventArgs e)
         {
         }
@@ -62,12 +62,44 @@ namespace CoreMVVM.Windows
         {
         }
 
-        #region Listeners
+        #endregion Startup & Exit
+
+        #region ShowWindow
+
+        protected void ShowWindow(Type viewModelType)
+        {
+            using var subScope = Container.BeginLifetimeScope();
+            var windowManager = subScope.ResolveRequiredService<IWindowManager>();
+
+            MainWindow = windowManager.ShowWindow(viewModelType);
+            ControlServiceProvider.SetServiceProvider(MainWindow, Container);
+        }
+
+        protected void ShowWindow<TViewModel>()
+            where TViewModel : class
+        {
+            ShowWindow(typeof(TViewModel));
+        }
+
+        #endregion ShowWindow
+
+        #region IOC
 
         private void OnContainerBuilt(IContainer container)
         {
-            ContainerProvider.Container = container;
+            _container = container;
+            OnContainerBuiltOverride(container);
         }
+
+        protected abstract void RegisterComponents(ContainerBuilder builder);
+
+        protected virtual void OnContainerBuiltOverride(IContainer container)
+        {
+        }
+
+        #endregion IOC
+
+        #region Listeners
 
 #if !NET45
 

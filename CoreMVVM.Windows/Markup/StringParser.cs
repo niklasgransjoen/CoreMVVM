@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
@@ -9,7 +11,7 @@ namespace CoreMVVM.Windows.Markup
     /// </summary>
     public sealed class StringParser : MarkupExtension
     {
-        private static readonly StringParserBinder _binder = new StringParserBinder();
+        private static StringParserBinder _binder;
 
         public StringParser()
         {
@@ -28,6 +30,19 @@ namespace CoreMVVM.Windows.Markup
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
+            if (DesignHelper.IsDesignMode)
+                return $"!{Value}!";
+
+            if (_binder is null)
+            {
+                var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
+                if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
+                    return null;
+
+                var lifetimeScope = ControlServiceProvider.RequireServiceProvider(dependencyObject);
+                _binder = lifetimeScope.ResolveRequiredService<StringParserBinder>();
+            }
+
             Binding binding = new Binding($"[{Value}]")
             {
                 Mode = BindingMode.OneWay,
@@ -39,25 +54,17 @@ namespace CoreMVVM.Windows.Markup
 
         private sealed class StringParserBinder : BaseModel
         {
-            public StringParserBinder()
-            {
-                if (DesignHelper.IsDesignMode)
-                    return;
+            private readonly IStringParser _stringParser;
+            private readonly IResourceService _resourceService;
 
-                var resourceService = ContainerProvider.ResolveRequiredService<IResourceService>();
-                resourceService.OnCurrentCultureChanged += OnCurrentCultureChanged;
+            public StringParserBinder(IStringParser stringParser, IResourceService resourceService)
+            {
+                _stringParser = stringParser;
+                _resourceService = resourceService;
+                _resourceService.OnCurrentCultureChanged += OnCurrentCultureChanged;
             }
 
-            public string this[string key]
-            {
-                get
-                {
-                    if (DesignHelper.IsDesignMode)
-                        return $"!{key}!";
-
-                    return CoreMVVM.StringParser.Parse(key);
-                }
-            }
+            public string this[string value] => _stringParser.Parse(value);
 
             private void OnCurrentCultureChanged(object sender, EventArgs e)
             {

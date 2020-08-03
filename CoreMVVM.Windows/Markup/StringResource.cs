@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
@@ -9,7 +11,7 @@ namespace CoreMVVM.Windows.Markup
     /// </summary>
     public sealed class StringResource : MarkupExtension
     {
-        private static readonly StringResourceBinder _binder = new StringResourceBinder();
+        private static StringResourceBinder _binder;
 
         public StringResource()
         {
@@ -28,6 +30,19 @@ namespace CoreMVVM.Windows.Markup
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
+            if (DesignHelper.IsDesignMode)
+                return $"${{res:{Key}}}";
+
+            if (_binder is null)
+            {
+                var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
+                if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
+                    return null;
+
+                var lifetimeScope = ControlServiceProvider.RequireServiceProvider(dependencyObject);
+                _binder = lifetimeScope.ResolveRequiredService<StringResourceBinder>();
+            }
+
             Binding binding = new Binding($"[{Key}]")
             {
                 Mode = BindingMode.OneWay,
@@ -41,12 +56,9 @@ namespace CoreMVVM.Windows.Markup
         {
             private readonly IResourceService _resourceService;
 
-            public StringResourceBinder()
+            public StringResourceBinder(IResourceService resourceService)
             {
-                if (DesignHelper.IsDesignMode)
-                    return;
-
-                _resourceService = ContainerProvider.ResolveRequiredService<IResourceService>();
+                _resourceService = resourceService;
                 _resourceService.OnCurrentCultureChanged += OnCurrentCultureChanged;
             }
 
@@ -54,9 +66,6 @@ namespace CoreMVVM.Windows.Markup
             {
                 get
                 {
-                    if (DesignHelper.IsDesignMode)
-                        return $"${{res:{key}}}";
-
                     string resource = _resourceService.GetString(key);
                     return resource ?? $"${{res:{key}}}";
                 }

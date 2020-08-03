@@ -62,7 +62,7 @@ namespace CoreMVVM.Windows
             if (_viewCache.TryGetValue(viewModelType, out var viewType))
                 return viewType;
 
-            var result = LocateViewType((provider, context) => provider.FindView(viewModelType, context));
+            var result = LocateViewType(viewModelType);
             if (result is null)
             {
                 throw new ViewNotFoundException($"No view found for view model of type '{viewModelType}'.");
@@ -118,7 +118,7 @@ namespace CoreMVVM.Windows
             if (_viewCache.TryGetValue(viewModelType, out viewType))
                 return true;
 
-            var result = LocateViewType((provider, context) => provider.FindView(viewModelType, context));
+            var result = LocateViewType(viewModelType);
             if (result is null)
             {
                 viewType = null;
@@ -177,17 +177,15 @@ namespace CoreMVVM.Windows
 
         #region Helpers
 
-        private ViewProviderContext LocateViewType(Func<IViewProvider, ViewProviderContext, bool> locator)
+        private ViewProviderContext LocateViewType(Type viewModelType)
         {
-            ViewProviderContext context = new ViewProviderContext();
+            ViewProviderContext context = new ViewProviderContext(viewModelType);
             foreach (var viewProvider in Enumerable.Reverse(_viewProviders))
             {
                 // Keep going until a provider finds the view.
-                if (!locator(viewProvider, context))
-                    continue;
-
+                viewProvider.FindView(context);
                 if (context.ViewType is null)
-                    throw new InvalidOperationException($"View provider '{viewProvider.GetType()}' returned true, but no view was provided.");
+                    continue;
 
                 return context;
             }
