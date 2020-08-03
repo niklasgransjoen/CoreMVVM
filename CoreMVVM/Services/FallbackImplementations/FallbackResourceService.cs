@@ -9,7 +9,7 @@ namespace CoreMVVM.FallbackImplementations
     {
         private CultureInfo _cultureInfo = CultureInfo.CurrentUICulture;
 
-        public event EventHandler OnCurrentCultureChanged;
+        public event EventHandler? OnCurrentCultureChanged;
 
         public CultureInfo CurrentCulture
         {
@@ -24,14 +24,14 @@ namespace CoreMVVM.FallbackImplementations
             }
         }
 
-        public string GetString(string key)
+        public string? GetString(string key)
         {
             return null;
         }
 
 #if NETCORE
 
-        public string GetString(ReadOnlySpan<char> key)
+        public string? GetString(ReadOnlySpan<char> key)
         {
             return null;
         }

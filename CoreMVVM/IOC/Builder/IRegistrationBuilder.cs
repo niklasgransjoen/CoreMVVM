@@ -22,7 +22,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Gets the factory being registered. May be null.
         /// </summary>
-        Func<ILifetimeScope, object> Factory { get; }
+        Func<ILifetimeScope, object>? Factory { get; }
 
         #endregion Properties
 

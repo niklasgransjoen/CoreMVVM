@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CoreMVVM
 {
@@ -39,7 +40,7 @@ namespace CoreMVVM
         /// Gets the view for the view model of a given type.
         /// </summary>
         /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        public static bool TryResolveView<TViewModel>(this IViewLocator viewLocator, out object view)
+        public static bool TryResolveView<TViewModel>(this IViewLocator viewLocator, [NotNullWhen(true)] out object? view)
             where TViewModel : class
         {
             if (viewLocator is null)
@@ -52,7 +53,7 @@ namespace CoreMVVM
         /// Gets the view type for the given view model.
         /// </summary>
         /// <typeparam name="TViewModel">The type of view model to get the view for.</typeparam>
-        public static bool TryResolveViewType<TViewModel>(this IViewLocator viewLocator, out Type viewType)
+        public static bool TryResolveViewType<TViewModel>(this IViewLocator viewLocator, [NotNullWhen(true)] out Type? viewType)
             where TViewModel : class
         {
             if (viewLocator is null)

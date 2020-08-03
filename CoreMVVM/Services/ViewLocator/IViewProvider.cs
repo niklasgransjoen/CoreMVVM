@@ -35,7 +35,7 @@ namespace CoreMVVM
         /// <summary>
         /// Gets the resolved view type.
         /// </summary>
-        public Type ViewType { get; private set; }
+        public Type? ViewType { get; private set; }
 
         /// <summary>
         /// Gets a value indicating if the resolved view type should be cached.

@@ -7,7 +7,7 @@
     {
         #region Constructors
 
-        private ValidationResult(string propertyName, bool isSuccess, string errorMessage)
+        private ValidationResult(string propertyName, bool isSuccess, string? errorMessage)
         {
             PropertyName = propertyName;
             IsSuccess = isSuccess;
@@ -41,7 +41,7 @@
         /// <summary>
         /// Gets the error message of this validation result. Null if validation was successful.
         /// </summary>
-        public string ErrorMessage { get; }
+        public string? ErrorMessage { get; }
 
         #endregion Properties
     }

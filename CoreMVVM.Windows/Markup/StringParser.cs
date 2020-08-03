@@ -11,7 +11,7 @@ namespace CoreMVVM.Windows.Markup
     /// </summary>
     public sealed class StringParser : MarkupExtension
     {
-        private static StringParserBinder _binder;
+        private static StringParserBinder? _binder;
 
         public StringParser()
         {
@@ -28,7 +28,7 @@ namespace CoreMVVM.Windows.Markup
         [ConstructorArgument("value")]
         public string Value { get; set; } = string.Empty;
 
-        public override object ProvideValue(IServiceProvider serviceProvider)
+        public override object? ProvideValue(IServiceProvider serviceProvider)
         {
             if (DesignHelper.IsDesignMode)
                 return $"!{Value}!";
@@ -37,7 +37,7 @@ namespace CoreMVVM.Windows.Markup
             {
                 var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
                 if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
-                    return null;
+                    return $"!{Value}!";
 
                 var lifetimeScope = ControlServiceProvider.RequireServiceProvider(dependencyObject);
                 _binder = lifetimeScope.ResolveRequiredService<StringParserBinder>();
@@ -66,7 +66,7 @@ namespace CoreMVVM.Windows.Markup
 
             public string this[string value] => _stringParser.Parse(value);
 
-            private void OnCurrentCultureChanged(object sender, EventArgs e)
+            private void OnCurrentCultureChanged(object? sender, EventArgs e)
             {
                 RaisePropertyChanged(Binding.IndexerName);
             }

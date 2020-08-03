@@ -1,5 +1,5 @@
-﻿using System;
-using CoreMVVM.IOC;
+﻿using CoreMVVM.IOC;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -131,9 +131,9 @@ namespace CoreMVVM.Windows
 
         #region Properties
 
-        private FrameworkElement _view;
+        private FrameworkElement? _view;
 
-        private FrameworkElement View
+        private FrameworkElement? View
         {
             get => _view;
             set
@@ -163,7 +163,7 @@ namespace CoreMVVM.Windows
 
         protected override int VisualChildrenCount => View is null ? 0 : 1;
 
-        protected override Visual GetVisualChild(int index)
+        protected override Visual? GetVisualChild(int index)
         {
             return _view;
         }
@@ -193,10 +193,6 @@ namespace CoreMVVM.Windows
 
         private void UpdateView()
         {
-          
-
-            
-
             View = ResolveView(ViewModel);
         }
 
@@ -205,7 +201,7 @@ namespace CoreMVVM.Windows
         /// <summary>
         /// Resolve the view the given view model.
         /// </summary>
-        private FrameworkElement ResolveView(object viewModel)
+        private FrameworkElement? ResolveView(object viewModel)
         {
             if (viewModel is null)
             {
@@ -218,7 +214,7 @@ namespace CoreMVVM.Windows
             }
 
             Type viewModelType = viewModel.GetType();
-            if (_cachedViews.TryGetValue(viewModelType, out FrameworkElement view))
+            if (_cachedViews.TryGetValue(viewModelType, out var view))
             {
                 view.DataContext = viewModel;
             }

@@ -21,7 +21,7 @@ namespace CoreMVVM
         /// <summary>
         /// Occurs when the dialog is closed.
         /// </summary>
-        public event Action Closed;
+        public event Action? Closed;
 
         #endregion Events
 
@@ -63,7 +63,7 @@ namespace CoreMVVM
         /// <summary>
         /// Occurs when the dialog is closed.
         /// </summary>
-        public event Action Closed;
+        public event Action? Closed;
 
         #endregion Events
 

@@ -11,7 +11,7 @@ namespace CoreMVVM.Windows.Markup
     /// </summary>
     public sealed class StringResource : MarkupExtension
     {
-        private static StringResourceBinder _binder;
+        private static StringResourceBinder? _binder;
 
         public StringResource()
         {
@@ -37,7 +37,7 @@ namespace CoreMVVM.Windows.Markup
             {
                 var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
                 if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
-                    return null;
+                    return $"${{res:{Key}}}";
 
                 var lifetimeScope = ControlServiceProvider.RequireServiceProvider(dependencyObject);
                 _binder = lifetimeScope.ResolveRequiredService<StringResourceBinder>();
@@ -66,12 +66,12 @@ namespace CoreMVVM.Windows.Markup
             {
                 get
                 {
-                    string resource = _resourceService.GetString(key);
+                    string? resource = _resourceService.GetString(key);
                     return resource ?? $"${{res:{key}}}";
                 }
             }
 
-            private void OnCurrentCultureChanged(object sender, EventArgs e)
+            private void OnCurrentCultureChanged(object? sender, EventArgs e)
             {
                 RaisePropertyChanged(Binding.IndexerName);
             }

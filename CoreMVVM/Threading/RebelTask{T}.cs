@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.CompilerServices;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -18,6 +19,7 @@ namespace CoreMVVM.Threading
     [DebuggerStepThrough]
     public readonly struct RebelTask<TResult> : INotifyCompletion, IEquatable<RebelTask<TResult>>
     {
+        [AllowNull]
         private readonly TResult _result;
 
         #region Constructors
@@ -53,7 +55,7 @@ namespace CoreMVVM.Threading
         /// <summary>
         /// Gets the task object of this RebelTask.
         /// </summary>
-        public Task<TResult> Task { get; }
+        public Task<TResult>? Task { get; }
 
         #endregion Properties
 
@@ -62,12 +64,12 @@ namespace CoreMVVM.Threading
         /// </summary>
         public void Start()
         {
-            Task.Start();
+            Task?.Start();
         }
 
         public void Start(TaskScheduler taskScheduler)
         {
-            Task.Start(taskScheduler);
+            Task?.Start(taskScheduler);
         }
 
         /// <summary>
@@ -107,7 +109,7 @@ namespace CoreMVVM.Threading
             if (IsCompleted)
                 continuation();
             else
-                Task.ConfigureAwait(false).GetAwaiter().OnCompleted(continuation);
+                Task!.ConfigureAwait(false).GetAwaiter().OnCompleted(continuation);
         }
 
         /// <summary>
@@ -147,19 +149,10 @@ namespace CoreMVVM.Threading
 
         public bool Equals(RebelTask<TResult> other)
         {
-            if (Task != null && other.Task != null)
-                return Task == other.Task;
-
-            if (Task == null ^ other.Task == null)
-                return false;
-
-            if (_result == null && other._result == null)
-                return true;
-
-            if (_result == null ^ other._result == null)
-                return false;
-
-            return _result.Equals(other._result);
+            if (Task is null && other.Task is null)
+                return Equals(_result, other._result);
+            else
+                return Equals(Task, other.Task);
         }
 
         public override int GetHashCode()

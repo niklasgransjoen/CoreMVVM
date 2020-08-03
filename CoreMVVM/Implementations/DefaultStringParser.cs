@@ -33,7 +33,7 @@ namespace CoreMVVM.Implementations
                 throw new ArgumentNullException(nameof(value));
 
             int pos = 0;
-            StringBuilder output = null; // don't use StringBuilder if input is a single property
+            StringBuilder? output = null; // don't use StringBuilder if input is a single property
             do
             {
                 int oldPos = pos;
@@ -77,10 +77,10 @@ namespace CoreMVVM.Implementations
                 {
 #if NETCORE
                     ReadOnlySpan<char> property = value.AsSpan(pos + 2, end - pos - 2);
-                    string val = GetValue(resourceService, property, args);
+                    string? val = GetValue(resourceService, property, args);
 #else
                     string property = value.Substring(pos + 2, end - pos - 2);
-                    string val = GetValue(resourceService, property, args);
+                    string? val = GetValue(resourceService, property, args);
 #endif
                     if (val is null)
                     {
@@ -99,7 +99,7 @@ namespace CoreMVVM.Implementations
             return output.ToString();
         }
 
-        public static string GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args)
+        public static string? GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args)
         {
             if (propertyName is null) throw new ArgumentNullException(nameof(propertyName));
 
@@ -114,7 +114,7 @@ namespace CoreMVVM.Implementations
                     var resourceKey = propertyName.Substring(4);
 #endif
 
-                    string resource = resourceService.GetString(resourceKey);
+                    string? resource = resourceService.GetString(resourceKey);
                     if (resource is null)
                         return null;
 
@@ -136,7 +136,7 @@ namespace CoreMVVM.Implementations
 
 #if NETCORE
 
-        public static string GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args)
+        public static string? GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args)
         {
             // Prioritize prefixed properties.
             if (propertyName.IndexOf(':') != -1)
@@ -144,7 +144,7 @@ namespace CoreMVVM.Implementations
                 if (propertyName.StartsWith("res:", StringComparison.OrdinalIgnoreCase))
                 {
                     var resourceKey = propertyName.Slice(4);
-                    string resource = resourceService.GetString(resourceKey);
+                    string? resource = resourceService.GetString(resourceKey);
                     if (resource is null)
                         return null;
 
@@ -185,14 +185,14 @@ namespace CoreMVVM.Implementations
             return Parse(_resourceService, value, args);
         }
 
-        public string GetValue(string propertyName, params StringTagPair[] args)
+        public string? GetValue(string propertyName, params StringTagPair[] args)
         {
             return GetValue(_resourceService, propertyName, args);
         }
 
 #if NETCORE
 
-        public string GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args)
+        public string? GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args)
         {
             return GetValue(_resourceService, propertyName, args);
         }

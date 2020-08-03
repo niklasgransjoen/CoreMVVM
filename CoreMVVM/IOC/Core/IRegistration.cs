@@ -17,6 +17,6 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets or sets the factory of the registration.
         /// </summary>
-        Func<ILifetimeScope, object> Factory { get; set; }
+        Func<ILifetimeScope, object>? Factory { get; set; }
     }
 }

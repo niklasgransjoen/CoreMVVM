@@ -9,7 +9,7 @@ namespace CoreMVVM
         /// Gets the default value of this type.
         /// </summary>
         /// <exception cref="ArgumentNullException">type is null.</exception>
-        public static object GetDefault(this Type type)
+        public static object? GetDefault(this Type type)
         {
             if (type is null)
                 throw new ArgumentNullException(nameof(type));
@@ -76,7 +76,7 @@ namespace CoreMVVM
         /// <param name="genericTypeDefinition">The generic type defintion of the exact type to locate.</param>
         /// <returns>The located type, or null if no such type could be found.</returns>
         /// <exception cref="ArgumentException">genericTypeDefinition is not a generic type definition.</exception>
-        public static Type GetGenericBaseType(this Type type, Type genericTypeDefinition)
+        public static Type? GetGenericBaseType(this Type type, Type genericTypeDefinition)
         {
             if (type is null) throw new ArgumentNullException(nameof(type));
             if (genericTypeDefinition is null) throw new ArgumentNullException(nameof(genericTypeDefinition));

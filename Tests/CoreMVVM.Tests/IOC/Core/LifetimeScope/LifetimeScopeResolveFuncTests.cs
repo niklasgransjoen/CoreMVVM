@@ -10,7 +10,7 @@ namespace CoreMVVM.IOC.Core.Tests
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.RegisterTransient<Implementation>().As<IInterface>();
-            builder.RegisterTransient(c => (Class)null).AsSelf();
+            builder.RegisterTransient(c => (Class)null!).AsSelf();
         }
 
         [Fact]

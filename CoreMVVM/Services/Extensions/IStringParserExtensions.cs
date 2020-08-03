@@ -19,12 +19,12 @@ namespace CoreMVVM
         /// <summary>
         /// Resolves a resource. The resource is then parsed, before it's returned. Returns null if no match is found.
         /// </summary>
-        public static string GetResource(this IStringParser stringParser, IResourceService resourceService, string key, params StringTagPair[] args)
+        public static string? GetResource(this IStringParser stringParser, IResourceService resourceService, string key, params StringTagPair[] args)
         {
             if (stringParser is null)
                 throw new ArgumentNullException(nameof(stringParser));
 
-            string resource = resourceService.GetString(key);
+            string? resource = resourceService.GetString(key);
             if (resource is null)
                 return null;
 
@@ -36,12 +36,12 @@ namespace CoreMVVM
         /// <summary>
         /// Resolves a resource. The resource is then parsed, before it's returned. Returns null if no match is found.
         /// </summary>
-        public static string GetResource(this IStringParser stringParser, IResourceService resourceService, ReadOnlySpan<char> key, params StringTagPair[] args)
+        public static string? GetResource(this IStringParser stringParser, IResourceService resourceService, ReadOnlySpan<char> key, params StringTagPair[] args)
         {
             if (stringParser is null)
                 throw new ArgumentNullException(nameof(stringParser));
 
-            string resource = resourceService.GetString(key);
+            string? resource = resourceService.GetString(key);
             if (resource is null)
                 return null;
 

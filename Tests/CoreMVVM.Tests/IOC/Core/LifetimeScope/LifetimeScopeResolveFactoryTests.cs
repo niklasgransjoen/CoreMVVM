@@ -45,7 +45,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         private class SingletonWithProperties
         {
-            public string Str { get; set; }
+            public string? Str { get; set; }
         }
     }
 }

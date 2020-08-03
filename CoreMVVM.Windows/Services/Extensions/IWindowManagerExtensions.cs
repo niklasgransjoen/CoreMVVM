@@ -10,7 +10,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        public static Window ShowWindow<TViewModel>(this IWindowManager windowManager, Window owner = null) where TViewModel : class
+        public static Window ShowWindow<TViewModel>(this IWindowManager windowManager, Window? owner = null) where TViewModel : class
         {
             if (windowManager is null)
                 throw new ArgumentNullException(nameof(windowManager));
@@ -23,7 +23,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <typeparam name="TViewModel">The type of the view model.</typeparam>
         /// <param name="owner">The owner of the returned window.</param>
-        public static Window ShowDialog<TViewModel>(this IWindowManager windowManager, Window owner = null) where TViewModel : class
+        public static Window ShowDialog<TViewModel>(this IWindowManager windowManager, Window? owner = null) where TViewModel : class
         {
             if (windowManager is null)
                 throw new ArgumentNullException(nameof(windowManager));

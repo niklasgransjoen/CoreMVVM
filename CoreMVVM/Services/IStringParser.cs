@@ -22,14 +22,14 @@ namespace CoreMVVM
         /// <summary>
         /// Attempts to resolve the given property. Returns null if no match is found.
         /// </summary>
-        string GetValue(string propertyName, params StringTagPair[] args);
+        string? GetValue(string propertyName, params StringTagPair[] args);
 
 #if NETCORE
 
         /// <summary>
         /// Attempts to resolve the given property. Returns null if no match is found.
         /// </summary>
-        string GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args);
+        string? GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args);
 
 #endif
     }

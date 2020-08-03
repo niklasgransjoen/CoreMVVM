@@ -26,7 +26,7 @@ namespace CoreMVVM.Validation
         /// <param name="validationModel">A reference to the instance to validate.</param>
         /// <param name="propertyName">The name of the property to validate. Can be null.</param>
         /// <exception cref="ArgumentNullException">validationModel is null.</exception>
-        public ValidationContext(object validationModel, string propertyName)
+        public ValidationContext(object validationModel, string? propertyName)
         {
             ValidationModel = validationModel ?? throw new ArgumentNullException(nameof(validationModel));
             PropertyName = propertyName;
@@ -42,7 +42,7 @@ namespace CoreMVVM.Validation
         /// <summary>
         /// Gets the name of the property to validate. Null if all properties should be validated.
         /// </summary>
-        public string PropertyName { get; }
+        public string? PropertyName { get; }
 
         #endregion Properties
 

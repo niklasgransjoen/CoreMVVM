@@ -14,7 +14,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #region IWindowManager
 
-        public Window ShowWindow(Type viewModelType, Window owner = null)
+        public Window ShowWindow(Type viewModelType, Window? owner = null)
         {
             if (viewModelType is null)
                 throw new ArgumentNullException(nameof(viewModelType));
@@ -25,7 +25,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
             return window;
         }
 
-        public Window ShowWindow(object viewModel, Window owner = null)
+        public Window ShowWindow(object viewModel, Window? owner = null)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
@@ -36,7 +36,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
             return window;
         }
 
-        public Window ShowDialog(Type viewModelType, Window owner = null)
+        public Window ShowDialog(Type viewModelType, Window? owner = null)
         {
             if (viewModelType is null)
                 throw new ArgumentNullException(nameof(viewModelType));
@@ -47,7 +47,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
             return window;
         }
 
-        public Window ShowDialog(object viewModel, Window owner = null)
+        public Window ShowDialog(object viewModel, Window? owner = null)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
@@ -60,19 +60,19 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #endregion IWindowManager
 
-        private Window GetWindow(Type viewModelType, Window owner)
+        private Window GetWindow(Type viewModelType, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModelType);
             return CastAndAssignOwner(viewModelType, window, owner);
         }
 
-        private Window GetWindow(object viewModel, Window owner)
+        private Window GetWindow(object viewModel, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModel);
             return CastAndAssignOwner(viewModel.GetType(), window, owner);
         }
 
-        private Window CastAndAssignOwner(Type viewModelType, object view, Window owner)
+        private Window CastAndAssignOwner(Type viewModelType, object view, Window? owner)
         {
             if (!(view is Window window))
                 throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");

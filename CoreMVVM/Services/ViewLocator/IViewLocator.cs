@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.Implementations;
 using CoreMVVM.IOC;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CoreMVVM
 {
@@ -39,17 +40,17 @@ namespace CoreMVVM
         /// <summary>
         /// Gets the view for the view model of a given type.
         /// </summary>
-        bool TryResolveView(Type viewModelType, out object view);
+        bool TryResolveView(Type viewModelType, [NotNullWhen(true)] out object? view);
 
         /// <summary>
         /// Gets the view for the given view model.
         /// </summary>
-        bool TryResolveView(object viewModel, out object view);
+        bool TryResolveView(object viewModel, [NotNullWhen(true)] out object? view);
 
         /// <summary>
         /// Gets the view type for the given view model.
         /// </summary>
-        bool TryResolveViewType(Type viewModelType, out Type viewType);
+        bool TryResolveViewType(Type viewModelType, [NotNullWhen(true)] out Type? viewType);
 
         #endregion TryResolveView
 

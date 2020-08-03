@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1;netstandard2.0;</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
     <PackageId>Viv.CoreMVVM.Extensions.DependencyInjection</PackageId>
     <Authors>Niklas Gransjøen</Authors>
     <Description>Integration with Microsoft.Extensions.DependencyInjection.</Description>

@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.IOC;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace CoreMVVM.Implementations
@@ -63,18 +64,18 @@ namespace CoreMVVM.Implementations
             }
 
             if (result.CacheView)
-                _viewCache[viewModelType] = result.ViewType;
+                _viewCache[viewModelType] = result.ViewType!;
 
-            return result.ViewType;
+            return result.ViewType!;
         }
 
         #endregion ResolveView
 
         #region TryResolveView
 
-        public bool TryResolveView(Type viewModelType, out object view)
+        public bool TryResolveView(Type viewModelType, [NotNullWhen(true)] out object? view)
         {
-            if (!TryResolveViewType(viewModelType, out Type viewType))
+            if (!TryResolveViewType(viewModelType, out var viewType))
             {
                 view = null;
                 return false;
@@ -91,13 +92,13 @@ namespace CoreMVVM.Implementations
             return !(view is null);
         }
 
-        public bool TryResolveView(object viewModel, out object view)
+        public bool TryResolveView(object viewModel, [NotNullWhen(true)] out object? view)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
 
             Type viewModelType = viewModel.GetType();
-            if (!TryResolveViewType(viewModelType, out Type viewType))
+            if (!TryResolveViewType(viewModelType, out var viewType))
             {
                 view = null;
                 return false;
@@ -107,7 +108,7 @@ namespace CoreMVVM.Implementations
             return !(view is null);
         }
 
-        public bool TryResolveViewType(Type viewModelType, out Type viewType)
+        public bool TryResolveViewType(Type viewModelType, [NotNullWhen(true)] out Type? viewType)
         {
             if (_viewCache.TryGetValue(viewModelType, out viewType))
                 return true;
@@ -120,9 +121,9 @@ namespace CoreMVVM.Implementations
             }
 
             if (result.CacheView)
-                _viewCache[viewModelType] = result.ViewType;
+                _viewCache[viewModelType] = result.ViewType!;
 
-            viewType = result.ViewType;
+            viewType = result.ViewType!;
             return true;
         }
 
@@ -171,7 +172,7 @@ namespace CoreMVVM.Implementations
 
         #region Helpers
 
-        private ViewProviderContext LocateViewType(Type viewModelType)
+        private ViewProviderContext? LocateViewType(Type viewModelType)
         {
             ViewProviderContext context = new ViewProviderContext(viewModelType);
             foreach (var viewProvider in Enumerable.Reverse(_viewProviders))

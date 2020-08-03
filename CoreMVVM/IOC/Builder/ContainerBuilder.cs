@@ -28,7 +28,7 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Occurs when the container is built.
         /// </summary>
-        public event Action<IContainer> OnBuild;
+        public event Action<IContainer>? OnBuild;
 
         #endregion Events
 

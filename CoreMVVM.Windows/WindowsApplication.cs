@@ -15,7 +15,7 @@ namespace CoreMVVM.Windows
 {
     public abstract class WindowsApplication : Application
     {
-        private IContainer _container;
+        private IContainer? _container;
 
         protected IContainer Container => _container ?? throw new NotInitializedException();
 
@@ -126,7 +126,7 @@ namespace CoreMVVM.Windows
             logger.LogError(e.Exception, "DispatcherUnhandledException", e.Exception);
         }
 
-        private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             var logger = Container.ResolveService<ILogger<WindowsApplication>>();
             if (logger is null)
