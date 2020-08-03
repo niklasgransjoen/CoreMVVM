@@ -58,6 +58,22 @@ namespace CoreMVVM.Threading.Tests
             Assert.Equal(boolExp, boolRes);
         }
 
+        [Fact]
+        public async Task RebelTask_Supports_Default()
+        {
+            var task = default(RebelTask);
+            await task;
+        }
+
+        [Fact]
+        public async Task GenericRebelTask_Supports_Default()
+        {
+            var task = default(RebelTask<int>);
+            int result = await task;
+
+            Assert.Equal(0, result);
+        }
+
         #region Tools
 
         private RebelTask Await1()
