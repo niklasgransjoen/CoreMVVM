@@ -1,14 +1,17 @@
-﻿using System;
+﻿using CoreMVVM.IOC;
+using System;
 using System.Windows;
 
 namespace CoreMVVM.Windows.FallbackImplementations
 {
     public class WindowManager : IWindowManager
     {
+        private readonly ILifetimeScope _lifetimeScope;
         private readonly IViewLocator _viewLocator;
 
-        public WindowManager(IViewLocator viewLocator)
+        public WindowManager(ILifetimeScope lifetimeScope, IViewLocator viewLocator)
         {
+            _lifetimeScope = lifetimeScope;
             _viewLocator = viewLocator;
         }
 
@@ -63,21 +66,23 @@ namespace CoreMVVM.Windows.FallbackImplementations
         private Window GetWindow(Type viewModelType, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModelType);
-            return CastAndAssignOwner(viewModelType, window, owner);
+            return InitializeWindow(viewModelType, window, owner);
         }
 
         private Window GetWindow(object viewModel, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModel);
-            return CastAndAssignOwner(viewModel.GetType(), window, owner);
+            return InitializeWindow(viewModel.GetType(), window, owner);
         }
 
-        private Window CastAndAssignOwner(Type viewModelType, object view, Window? owner)
+        private Window InitializeWindow(Type viewModelType, object view, Window? owner)
         {
             if (!(view is Window window))
                 throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");
 
+            ControlServiceProvider.SetServiceProvider(window, _lifetimeScope);
             window.Owner = owner;
+
             return window;
         }
     }

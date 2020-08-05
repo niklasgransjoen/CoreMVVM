@@ -72,7 +72,6 @@ namespace CoreMVVM.Windows
             var windowManager = subScope.ResolveRequiredService<IWindowManager>();
 
             MainWindow = windowManager.ShowWindow(viewModelType);
-            ControlServiceProvider.SetServiceProvider(MainWindow, Container);
         }
 
         protected void ShowWindow<TViewModel>()
