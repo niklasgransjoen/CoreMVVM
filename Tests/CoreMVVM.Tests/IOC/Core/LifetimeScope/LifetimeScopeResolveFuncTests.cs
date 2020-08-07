@@ -30,5 +30,16 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             Assert.Throws<ResolveException>(() => LifetimeScope.ResolveRequiredService<Class>());
         }
+
+        [Fact]
+        public void LifetimeScope_Returns_Null_On_Invalid_Factory()
+        {
+            var factory = LifetimeScope.ResolveService<Func<IService>>();
+            Assert.Null(factory);
+        }
+
+        private interface IService
+        {
+        }
     }
 }
