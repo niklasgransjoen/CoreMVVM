@@ -1,13 +1,13 @@
-﻿using CoreMVVM.IOC.Builder;
+﻿using CoreMVVM.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace CoreMVVM.Extensions.DependencyInjection
+namespace CoreMVVM.IOC.Builder
 {
     /// <summary>
     /// Extension methods for <see cref="IServiceCollection"/>.
     /// </summary>
-    public static class ServiceCollectionContainerBuilderExtensions
+    public static class IServiceCollectionExtensions
     {
         /// <summary>
         /// Creates an IServiceProvider, using CoreMVVM's IOC.
@@ -19,16 +19,16 @@ namespace CoreMVVM.Extensions.DependencyInjection
 
             var builder = new ContainerBuilder();
 
-            // For handling scoping.
-            builder.RegisterSingleton<ServiceScopeFactory>()
-                    .AsSelf()
-                    .As<IServiceScopeFactory>();
-
             builder.CopyFromServiceCollection(services);
+
+            // For handling scoping.
+            builder.RegisterSingleton<CoreMVVMServiceScopeFactory>()
+                .AsSelf()
+                .As<IServiceScopeFactory>();
 
             // Return the factory's provider, as it supports scoping.
             return builder.Build()
-                .GetRequiredService<ServiceScopeFactory>()
+                .GetRequiredService<CoreMVVMServiceScopeFactory>()
                 .ServiceProvider;
         }
     }

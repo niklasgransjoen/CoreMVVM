@@ -6,13 +6,26 @@ using System.Collections.Generic;
 namespace CoreMVVM.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Factory for creating service scopes.
+    /// Implementation for using <see cref="IServiceScopeFactory"/>. with CoreMVVM's container.
     /// </summary>
-    internal sealed class ServiceScopeFactory : IServiceScopeFactory
+    /// <remarks>
+    /// Usage:
+    /// <code>
+    /// var builder = new ContainerBuilder();<br/>
+    /// ...<br/>
+    /// builder.RegisterSingleton&lt;CoreMVVMServiceScopeFactory&gt;().As&lt;IServiceScopeFactory&gt;();<br/>
+    /// ...<br/>
+    /// // Get a service provider that supports scopes.<br/>
+    /// var serviceProvider = builder.Build()<br/>
+    ///     .ResolveRequiredService&lt;IServiceScopeFactory&gt;()<br/>
+    ///     .ServiceProvider;
+    /// </code>
+    /// </remarks>
+    public sealed class CoreMVVMServiceScopeFactory : IServiceScopeFactory
     {
-        private ScopeableILifetimeScope _scopeableILifetimeScope;
+        private readonly ScopeableILifetimeScope _scopeableILifetimeScope;
 
-        public ServiceScopeFactory(IContainer container)
+        public CoreMVVMServiceScopeFactory(IContainer container)
         {
             _scopeableILifetimeScope = new ScopeableILifetimeScope(container);
         }
@@ -79,6 +92,9 @@ namespace CoreMVVM.Extensions.DependencyInjection
 
             public object GetService(Type serviceType)
             {
+                if (serviceType == typeof(IServiceProvider))
+                    return this;
+
                 return CurrentScope.GetService(serviceType);
             }
         }
