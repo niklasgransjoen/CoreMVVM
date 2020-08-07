@@ -14,7 +14,7 @@ namespace CoreMVVM.Tests.Validation
             _validationModel.ErrorsChanged += Model_ErrorsChanged;
         }
 
-        private void Model_ErrorsChanged(object sender, System.ComponentModel.DataErrorsChangedEventArgs e)
+        private void Model_ErrorsChanged(object? sender, System.ComponentModel.DataErrorsChangedEventArgs e)
         {
             _errorsChangedCount++;
         }
@@ -63,10 +63,10 @@ namespace CoreMVVM.Tests.Validation
 
         private sealed class ValidationModel : BaseValidationModel
         {
-            private object _simpleProperty;
+            private object? _simpleProperty;
 
             [AlwaysFalseValidation]
-            public object SimpleProperty
+            public object? SimpleProperty
             {
                 get => _simpleProperty;
                 set => SetProperty(ref _simpleProperty, value);

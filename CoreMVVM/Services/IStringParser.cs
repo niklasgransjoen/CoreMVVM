@@ -6,40 +6,30 @@ namespace CoreMVVM
     /// <summary>
     /// Service providing functionality to the <see cref="StringParser"/> singleton service.
     /// </summary>
-    [FallbackImplementation(typeof(FallbackImplementations.FallbackStringParser))]
+    [FallbackImplementation(typeof(Implementations.DefaultStringParser))]
     public interface IStringParser
     {
         /// <summary>
         /// Parser the given value, then formats it with the given arguments.
         /// </summary>
-        string Format(IResourceService resourceService, IFormatProvider formatProvider, string value, params object[] args);
+        string Format(IFormatProvider formatProvider, string value, params object[] args);
 
         /// <summary>
         /// Parses the given string.
         /// </summary>
-        string Parse(IResourceService resourceService, string value, params StringTagPair[] args);
+        string Parse(string value, params StringTagPair[] args);
 
         /// <summary>
         /// Attempts to resolve the given property. Returns null if no match is found.
         /// </summary>
-        string GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args);
-
-        /// <summary>
-        /// Resolves a resource. The resource is then parsed, before it's removed. Returns null if not match is found.
-        /// </summary>
-        string GetResource(IResourceService resourceService, string key, params StringTagPair[] args);
+        string? GetValue(string propertyName, params StringTagPair[] args);
 
 #if NETCORE
 
         /// <summary>
         /// Attempts to resolve the given property. Returns null if no match is found.
         /// </summary>
-        string GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args);
-
-        /// <summary>
-        /// Resolves a resource. The resource is then parsed, before it's removed. Returns null if not match is found.
-        /// </summary>
-        string GetResource(IResourceService resourceService, ReadOnlySpan<char> key, params StringTagPair[] args);
+        string? GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args);
 
 #endif
     }

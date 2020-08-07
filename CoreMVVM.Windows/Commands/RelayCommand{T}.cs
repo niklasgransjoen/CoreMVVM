@@ -12,10 +12,10 @@ namespace CoreMVVM.Windows
 
         #region Fields
 
-        private readonly Action<T> _execute = null;
-        private readonly Func<T, bool> _canExecute = null;
+        private readonly Action<T> _execute;
+        private readonly Func<T, bool>? _canExecute = null;
 
-        private event EventHandler _canExecuteChanged;
+        private event EventHandler? _canExecuteChanged;
 
         #endregion Fields
 

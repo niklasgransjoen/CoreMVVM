@@ -49,7 +49,7 @@ namespace CoreMVVM.Windows.Threading.Tests
                 Dispatcher.PushFrame(frame);
             }
 
-            private static object ExitFrame(object frame)
+            private static object? ExitFrame(object frame)
             {
                 ((DispatcherFrame)frame).Continue = false;
                 return null;

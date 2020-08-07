@@ -13,7 +13,6 @@ namespace CoreMVVM.IOC.Core.Tests
             IContainer container = builder.Build();
 
             LifetimeScope = container;
-            ContainerProvider.Container = container;
         }
 
         protected ILifetimeScope LifetimeScope { get; }

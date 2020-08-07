@@ -17,6 +17,6 @@ namespace CoreMVVM.IOC.Core
 
         public ComponentScope Scope { get; }
 
-        public Func<ILifetimeScope, object> Factory { get; set; }
+        public Func<ILifetimeScope, object>? Factory { get; set; }
     }
 }

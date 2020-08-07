@@ -27,11 +27,11 @@ namespace CoreMVVM
         /// <summary>
         /// Performs a resource lookup. Returns null if key is not found.
         /// </summary>
-        string GetString(string key);
+        string? GetString(string key);
 
 #if NETCORE
 
-        string GetString(ReadOnlySpan<char> key);
+        string? GetString(ReadOnlySpan<char> key);
 
 #endif
     }

@@ -13,16 +13,16 @@ namespace CoreMVVM
         /// with the specified message.
         /// </summary>
         /// <param name="memberName">The name of the uninitialized member.</param>
-        public NotInitializedException([CallerMemberName] string memberName = null)
+        public NotInitializedException([CallerMemberName] string? memberName = null)
         {
             Message = $"Attempted to read uninitialized member '{memberName}'.";
-            MemberName = memberName;
+            MemberName = memberName ?? string.Empty;
         }
 
-        public NotInitializedException(string message, [CallerMemberName] string memberName = null)
+        public NotInitializedException(string message, [CallerMemberName] string? memberName = null)
         {
             Message = message;
-            MemberName = memberName;
+            MemberName = memberName ?? string.Empty;
         }
 
         /// <summary>

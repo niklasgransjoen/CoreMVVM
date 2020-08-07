@@ -10,7 +10,7 @@ namespace CoreMVVM.IOC.Core.Tests
         protected override void RegisterComponents(ContainerBuilder builder)
         {
             builder.RegisterTransient<Implementation>().As<IInterface>();
-            builder.RegisterTransient(c => (Class)null).AsSelf();
+            builder.RegisterTransient(c => (Class)null!).AsSelf();
         }
 
         [Fact]
@@ -29,6 +29,17 @@ namespace CoreMVVM.IOC.Core.Tests
         public void LifetimeScope_Handles_NullReturningFunc()
         {
             Assert.Throws<ResolveException>(() => LifetimeScope.ResolveRequiredService<Class>());
+        }
+
+        [Fact]
+        public void LifetimeScope_Returns_Null_On_Invalid_Factory()
+        {
+            var factory = LifetimeScope.ResolveService<Func<IService>>();
+            Assert.Null(factory);
+        }
+
+        private interface IService
+        {
         }
     }
 }

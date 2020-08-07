@@ -15,7 +15,7 @@ namespace CoreMVVM.Windows
 {
     public abstract class WindowsApplication : Application
     {
-        private IContainer _container;
+        private IContainer? _container;
 
         protected IContainer Container => _container ?? throw new NotInitializedException();
 
@@ -28,6 +28,8 @@ namespace CoreMVVM.Windows
 #endif
         }
 
+        #region Startup & Exit
+
         protected sealed override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -38,7 +40,7 @@ namespace CoreMVVM.Windows
 
             RegisterComponents(builder);
             builder.OnBuild += OnContainerBuilt;
-            _container = builder.Build();
+            builder.Build();
 
             OnStartupOverride(e);
         }
@@ -52,8 +54,6 @@ namespace CoreMVVM.Windows
             base.OnExit(e);
         }
 
-        protected abstract void RegisterComponents(ContainerBuilder builder);
-
         protected virtual void OnStartupOverride(StartupEventArgs e)
         {
         }
@@ -62,12 +62,43 @@ namespace CoreMVVM.Windows
         {
         }
 
-        #region Listeners
+        #endregion Startup & Exit
+
+        #region ShowWindow
+
+        protected void ShowWindow(Type viewModelType)
+        {
+            using var subScope = Container.BeginLifetimeScope();
+            var windowManager = subScope.ResolveRequiredService<IWindowManager>();
+
+            MainWindow = windowManager.ShowWindow(viewModelType);
+        }
+
+        protected void ShowWindow<TViewModel>()
+            where TViewModel : class
+        {
+            ShowWindow(typeof(TViewModel));
+        }
+
+        #endregion ShowWindow
+
+        #region IOC
 
         private void OnContainerBuilt(IContainer container)
         {
-            ContainerProvider.Container = container;
+            _container = container;
+            OnContainerBuiltOverride(container);
         }
+
+        protected abstract void RegisterComponents(ContainerBuilder builder);
+
+        protected virtual void OnContainerBuiltOverride(IContainer container)
+        {
+        }
+
+        #endregion IOC
+
+        #region Listeners
 
 #if !NET45
 
@@ -94,7 +125,7 @@ namespace CoreMVVM.Windows
             logger.LogError(e.Exception, "DispatcherUnhandledException", e.Exception);
         }
 
-        private void OnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             var logger = Container.ResolveService<ILogger<WindowsApplication>>();
             if (logger is null)

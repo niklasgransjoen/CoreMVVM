@@ -40,7 +40,7 @@ namespace CoreMVVM.IOC
         /// <summary>
         /// Gets the type to resolve to. Is a non-abstract, non-static class that implements <see cref="InterfaceType"/>.
         /// </summary>
-        public Type InterfaceImplementationType { get; private set; }
+        public Type? InterfaceImplementationType { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the value of <see cref="InterfaceImplementationType"/> should be cached.

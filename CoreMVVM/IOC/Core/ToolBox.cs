@@ -1,6 +1,7 @@
 ﻿using CoreMVVM.IOC.Builder;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices.ComTypes;
@@ -24,7 +25,7 @@ namespace CoreMVVM.IOC.Core
 
         #region Methods
 
-        public bool TryGetRegistration(Type serviceType, out IRegistration registration)
+        public bool TryGetRegistration(Type serviceType, [NotNullWhen(true)] out IRegistration? registration)
         {
             bool result = _registrations.TryGetValue(serviceType, out var registrations);
             if (result)
@@ -62,7 +63,7 @@ namespace CoreMVVM.IOC.Core
 
                 if (registrations is null ^ genericRegistrations is null)
                 {
-                    return registrations ?? genericRegistrations;
+                    return registrations ?? genericRegistrations!;
                 }
                 else if (registrations != null && genericRegistrations != null)
                 {
@@ -86,6 +87,8 @@ namespace CoreMVVM.IOC.Core
             if (serviceType.IsGenericTypeDefinition && componentType.IsGenericTypeDefinition)
             {
                 var concreteServiceType = componentType.GetGenericBaseType(serviceType);
+                if (concreteServiceType is null)
+                    throw new IncompatibleGenericTypeDefinitionException($"Component '{componentType}' is not compatible with service '{serviceType}'.");
 
                 var serviceGenericArguments = concreteServiceType.GetGenericArguments();
                 var componentGenericArguments = componentType.GetGenericArguments();
@@ -120,7 +123,7 @@ namespace CoreMVVM.IOC.Core
             return registration;
         }
 
-        public IRegistration AddRegistration(Type componentType, Type serviceType, ComponentScope scope, Func<ILifetimeScope, object> factory)
+        public IRegistration AddRegistration(Type componentType, Type serviceType, ComponentScope scope, Func<ILifetimeScope, object>? factory)
         {
             var registration = AddRegistration(componentType, serviceType, scope);
             registration.Factory = factory;
@@ -128,7 +131,7 @@ namespace CoreMVVM.IOC.Core
             return registration;
         }
 
-        public ConstructorInfo GetConstructor(Type type, bool validateParameters = true, Func<IEnumerable<ConstructorInfo>, ConstructorInfo> constructorSelector = null)
+        public ConstructorInfo GetConstructor(Type type, bool validateParameters = true, Func<IEnumerable<ConstructorInfo>, ConstructorInfo>? constructorSelector = null)
         {
             if (_constructors.TryGetValue(type, out var constructor))
             {
@@ -185,7 +188,7 @@ namespace CoreMVVM.IOC.Core
 
         private static void ValidateParameters(Type type, ParameterInfo[] parameters)
         {
-            List<ResolveException> exceptions = null;
+            List<ResolveException>? exceptions = null;
             foreach (var parameter in parameters)
             {
                 if (parameter.ParameterType.IsValueType)

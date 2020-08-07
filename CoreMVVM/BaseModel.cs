@@ -13,7 +13,7 @@ namespace CoreMVVM
         /// <summary>
         /// Occurs when the value of a property changes.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         #endregion Events
 
@@ -29,7 +29,7 @@ namespace CoreMVVM
         /// <param name="propertyName">The name of the property. Leave as null when calling from the property's setter.</param>
         /// <returns>True if the property changed.</returns>
         /// <remarks>Uses the default EqualityComparer of the type of the property.</remarks>
-        protected virtual bool SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
+        protected virtual bool SetProperty<T>(ref T property, T value, [CallerMemberName] string? propertyName = null)
         {
             if (Equals(property, value))
                 return false;
@@ -43,12 +43,12 @@ namespace CoreMVVM
         /// Invokes the <see cref="PropertyChanged"/> event on a property.
         /// </summary>
         /// <param name="name">The name of the property to invoke the event on.</param>
-        protected void RaisePropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void RaisePropertyChanged(string? name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on the calling member (should be a property).
         /// </summary>
-        protected void RaiseThisPropertyChanged([CallerMemberName] string propertyName = null) => RaisePropertyChanged(propertyName);
+        protected void RaiseThisPropertyChanged([CallerMemberName] string? propertyName = null) => RaisePropertyChanged(propertyName);
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on all properties.

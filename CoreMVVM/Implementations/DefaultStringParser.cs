@@ -1,33 +1,39 @@
-﻿using CoreMVVM.IOC;
-using System;
-using System.Linq;
+﻿using System;
 using System.Text;
 
-namespace CoreMVVM.FallbackImplementations
+namespace CoreMVVM.Implementations
 {
-    [Scope(ComponentScope.Singleton)]
-    public sealed class FallbackStringParser : IStringParser
+    /// <summary>
+    /// Default implementation of <see cref="IStringParser"/>.
+    /// </summary>
+    public sealed class DefaultStringParser : IStringParser
     {
-        public string Format(IResourceService resourceService, IFormatProvider formatProvider, string value, params object[] args)
+        #region Core
+
+        /**
+         * The core logic of the default string parser.
+         */
+
+        public static string Format(IResourceService resourceService, IFormatProvider formatProvider, string value, params object[] args)
         {
             string parsedValue = Parse(resourceService, value);
             try
             {
                 return string.Format(formatProvider, parsedValue, args);
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 return parsedValue;
             }
         }
 
-        public string Parse(IResourceService resourceService, string value, params StringTagPair[] args)
+        public static string Parse(IResourceService resourceService, string value, params StringTagPair[] args)
         {
             if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
             int pos = 0;
-            StringBuilder output = null; // don't use StringBuilder if input is a single property
+            StringBuilder? output = null; // don't use StringBuilder if input is a single property
             do
             {
                 int oldPos = pos;
@@ -71,10 +77,10 @@ namespace CoreMVVM.FallbackImplementations
                 {
 #if NETCORE
                     ReadOnlySpan<char> property = value.AsSpan(pos + 2, end - pos - 2);
-                    string val = GetValue(resourceService, property, args);
+                    string? val = GetValue(resourceService, property, args);
 #else
-                        string property = value.Substring(pos + 2, end - pos - 2);
-                        string val = GetValue(resourceService, property, args);
+                    string property = value.Substring(pos + 2, end - pos - 2);
+                    string? val = GetValue(resourceService, property, args);
 #endif
                     if (val is null)
                     {
@@ -93,7 +99,7 @@ namespace CoreMVVM.FallbackImplementations
             return output.ToString();
         }
 
-        public string GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args)
+        public static string? GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args)
         {
             if (propertyName is null) throw new ArgumentNullException(nameof(propertyName));
 
@@ -103,46 +109,20 @@ namespace CoreMVVM.FallbackImplementations
                 if (propertyName.StartsWith("res:", StringComparison.OrdinalIgnoreCase))
                 {
 #if NETCORE
-                    return GetResource(resourceService, propertyName.AsSpan(4), args);
+                    var resourceKey = propertyName.AsSpan(4);
 #else
-                        return GetResource(resourceService, propertyName.Substring(4), args);
+                    var resourceKey = propertyName.Substring(4);
 #endif
+
+                    string? resource = resourceService.GetString(resourceKey);
+                    if (resource is null)
+                        return null;
+
+                    return Parse(resourceService, resource, args);
                 }
             }
-            else if (args != null)
-            {
-                var result = args.FirstOrDefault(pair => pair.Tag == propertyName);
-                if (result != default)
-                {
-                    return result.Value ?? string.Empty;
-                }
-            }
 
-            return null;
-        }
-
-        public string GetResource(IResourceService resourceService, string key, params StringTagPair[] args)
-        {
-            string resource = resourceService.GetString(key);
-            if (resource is null)
-                return null;
-
-            return Parse(resourceService, resource, args);
-        }
-
-#if NETCORE
-
-        public string GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args)
-        {
-            // Prioritize prefixed properties.
-            if (propertyName.IndexOf(':') != -1)
-            {
-                if (propertyName.StartsWith("res:", StringComparison.OrdinalIgnoreCase))
-                {
-                    return GetResource(resourceService, propertyName.Slice(4), args);
-                }
-            }
-            else if (args != null)
+            if (args != null)
             {
                 foreach (var pair in args)
                 {
@@ -154,13 +134,67 @@ namespace CoreMVVM.FallbackImplementations
             return null;
         }
 
-        public string GetResource(IResourceService resourceService, ReadOnlySpan<char> key, params StringTagPair[] args)
-        {
-            string resource = resourceService.GetString(key);
-            if (resource is null)
-                return null;
+#if NETCORE
 
-            return Parse(resourceService, resource, args);
+        public static string? GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args)
+        {
+            // Prioritize prefixed properties.
+            if (propertyName.IndexOf(':') != -1)
+            {
+                if (propertyName.StartsWith("res:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var resourceKey = propertyName.Slice(4);
+                    string? resource = resourceService.GetString(resourceKey);
+                    if (resource is null)
+                        return null;
+
+                    return Parse(resourceService, resource, args);
+                }
+            }
+
+            if (args != null)
+            {
+                foreach (var pair in args)
+                {
+                    if (pair.Tag == propertyName)
+                        return pair.Value ?? string.Empty;
+                }
+            }
+
+            return null;
+        }
+
+#endif
+
+        #endregion Core
+
+        private readonly IResourceService _resourceService;
+
+        public DefaultStringParser(IResourceService resourceService)
+        {
+            _resourceService = resourceService;
+        }
+
+        public string Format(IFormatProvider formatProvider, string value, params object[] args)
+        {
+            return Format(_resourceService, formatProvider, value, args);
+        }
+
+        public string Parse(string value, params StringTagPair[] args)
+        {
+            return Parse(_resourceService, value, args);
+        }
+
+        public string? GetValue(string propertyName, params StringTagPair[] args)
+        {
+            return GetValue(_resourceService, propertyName, args);
+        }
+
+#if NETCORE
+
+        public string? GetValue(ReadOnlySpan<char> propertyName, params StringTagPair[] args)
+        {
+            return GetValue(_resourceService, propertyName, args);
         }
 
 #endif

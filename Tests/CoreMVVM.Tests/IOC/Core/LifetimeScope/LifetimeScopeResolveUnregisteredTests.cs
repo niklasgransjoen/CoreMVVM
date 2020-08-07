@@ -63,7 +63,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         internal class ClassWithConstructor
         {
-            public Class a;
+            public Class? a;
 
             public ClassWithConstructor()
             {
@@ -102,8 +102,8 @@ namespace CoreMVVM.IOC.Core.Tests
                 Ec2 = ec2;
             }
 
-            public Class Ec1 { get; }
-            public Class Ec2 { get; }
+            public Class? Ec1 { get; }
+            public Class? Ec2 { get; }
         }
     }
 }

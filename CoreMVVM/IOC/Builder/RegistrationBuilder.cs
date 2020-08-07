@@ -50,7 +50,7 @@ namespace CoreMVVM.IOC.Builder
 
         public ComponentScope Scope { get; }
 
-        public Func<ILifetimeScope, object> Factory { get; }
+        public Func<ILifetimeScope, object>? Factory { get; }
 
         #endregion Properties
 

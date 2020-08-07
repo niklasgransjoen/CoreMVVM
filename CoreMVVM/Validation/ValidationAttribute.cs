@@ -22,7 +22,7 @@ namespace CoreMVVM.Validation
         /// </summary>
         /// <remarks>When this value is null, a default error message is used instead.</remarks>
         /// <value>Default is null.</value>
-        protected virtual string ErrorMessage { get; set; }
+        protected virtual string? ErrorMessage { get; set; }
 
         #endregion Properties
 
@@ -43,7 +43,7 @@ namespace CoreMVVM.Validation
                 return ValidationResult.Success(propertyName);
             else
             {
-                string message = ErrorMessage;
+                string? message = ErrorMessage;
                 if (message is null)
                     message = $"Invalid value for property {propertyName}.";
 
