@@ -1,19 +1,23 @@
 ﻿using System;
-using System.Windows.Input;
 
-namespace CoreMVVM.Windows
+namespace CoreMVVM.Input
 {
-    public class RelayCommand : ICommandExt
+    public class RelayCommand<T> : ICommandExt
     {
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
-        public static RelayCommand Empty { get; } = new RelayCommand(() => { });
+        public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
 
         #region Fields
 
-        private readonly Action<object> _execute;
-        private readonly Func<object, bool>? _canExecute = null;
+        /// <summary>
+        /// Local copy of <see cref="RelayCommand.CanExecuteChangedSubscriptionForwarder"/>, so that we subscribe and unsubscribe from the same instance.
+        /// </summary>
+        private readonly ICommandCanExecuteChangedSubscriptionForwarder? _subscriptionForwarder = RelayCommand.CanExecuteChangedSubscriptionForwarder;
+
+        private readonly Action<T> _execute;
+        private readonly Func<T, bool>? _canExecute = null;
 
         private event EventHandler? _canExecuteChanged;
 
@@ -39,7 +43,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         /// <param name="execute">The execution logic.</param>
         /// <exception cref="ArgumentNullException">execute is null.</exception>
-        public RelayCommand(Action<object> execute)
+        public RelayCommand(Action<T> execute)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
         }
@@ -65,7 +69,7 @@ namespace CoreMVVM.Windows
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action execute, Func<object, bool> canExecute)
+        public RelayCommand(Action execute, Func<T, bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -80,7 +84,7 @@ namespace CoreMVVM.Windows
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action<object> execute, Func<bool> canExecute)
+        public RelayCommand(Action<T> execute, Func<bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -95,7 +99,7 @@ namespace CoreMVVM.Windows
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
+        public RelayCommand(Action<T> execute, Func<T, bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -115,13 +119,13 @@ namespace CoreMVVM.Windows
         {
             add
             {
-                CommandManager.RequerySuggested += value;
                 _canExecuteChanged += value;
+                _subscriptionForwarder?.Subscribe(value);
             }
             remove
             {
-                CommandManager.RequerySuggested -= value;
                 _canExecuteChanged -= value;
+                _subscriptionForwarder?.Unsubscribe(value);
             }
         }
 
@@ -130,20 +134,29 @@ namespace CoreMVVM.Windows
         /// </summary>
         public bool CanExecute(object parameter)
         {
-            return _canExecute?.Invoke(parameter) ?? true;
+            return _canExecute?.Invoke((T)parameter) ?? true;
         }
 
-        /// <summary>
+        ///<summary>
         /// Executes this command.
-        /// </summary>
+        ///</summary>
         public void Execute(object parameter)
         {
-            _execute(parameter);
+            _execute((T)parameter);
         }
 
         #endregion ICommand Members
 
         public void RaiseCanExecute()
+        {
+            var scheduler = RelayCommand.CanExecuteChangedScheduler;
+            if (scheduler is null)
+                RaiseCanExecute_Internal();
+            else
+                scheduler.Schedule(RaiseCanExecute_Internal);
+        }
+
+        private void RaiseCanExecute_Internal()
         {
             _canExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
