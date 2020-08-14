@@ -68,8 +68,7 @@ namespace CoreMVVM.Windows
 
         protected void ShowWindow(Type viewModelType)
         {
-            using var subScope = Container.BeginLifetimeScope();
-            var windowManager = subScope.ResolveRequiredService<IWindowManager>();
+            var windowManager = Container.ResolveRequiredService<IWindowManager>();
 
             MainWindow = windowManager.ShowWindow(viewModelType);
         }
