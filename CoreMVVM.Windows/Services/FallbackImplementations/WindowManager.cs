@@ -3,6 +3,9 @@ using System.Windows;
 
 namespace CoreMVVM.Windows.FallbackImplementations
 {
+    /// <summary>
+    /// Default implementation of <see cref="IWindowManager"/>.
+    /// </summary>
     public class WindowManager : IWindowManager
     {
         private readonly IViewLocator _viewLocator;
@@ -14,46 +17,32 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #region IWindowManager
 
-        public virtual Window ShowWindow(Type viewModelType, Window? owner = null)
+        public virtual Window Show(Type viewModelType, WindowType windowType, Window? owner = null)
         {
             if (viewModelType is null)
                 throw new ArgumentNullException(nameof(viewModelType));
 
             Window window = GetWindow(viewModelType, owner);
-            window.Show();
+
+            if (windowType == WindowType.Dialog)
+                window.ShowDialog();
+            else
+                window.Show();
 
             return window;
         }
 
-        public virtual Window ShowWindow(object viewModel, Window? owner = null)
+        public virtual Window Show(object viewModel, WindowType windowType, Window? owner = null)
         {
             if (viewModel is null)
                 throw new ArgumentNullException(nameof(viewModel));
 
             Window window = GetWindow(viewModel, owner);
-            window.Show();
 
-            return window;
-        }
-
-        public virtual Window ShowDialog(Type viewModelType, Window? owner = null)
-        {
-            if (viewModelType is null)
-                throw new ArgumentNullException(nameof(viewModelType));
-
-            Window window = GetWindow(viewModelType, owner);
-            window.ShowDialog();
-
-            return window;
-        }
-
-        public virtual Window ShowDialog(object viewModel, Window? owner = null)
-        {
-            if (viewModel is null)
-                throw new ArgumentNullException(nameof(viewModel));
-
-            Window window = GetWindow(viewModel, owner);
-            window.ShowDialog();
+            if (windowType == WindowType.Dialog)
+                window.ShowDialog();
+            else
+                window.Show();
 
             return window;
         }
