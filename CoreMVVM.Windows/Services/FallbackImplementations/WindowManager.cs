@@ -1,17 +1,14 @@
-﻿using CoreMVVM.IOC;
-using System;
+﻿using System;
 using System.Windows;
 
 namespace CoreMVVM.Windows.FallbackImplementations
 {
     public class WindowManager : IWindowManager
     {
-        private readonly ILifetimeScope _lifetimeScope;
         private readonly IViewLocator _viewLocator;
 
-        public WindowManager(ILifetimeScope lifetimeScope, IViewLocator viewLocator)
+        public WindowManager(IViewLocator viewLocator)
         {
-            _lifetimeScope = lifetimeScope;
             _viewLocator = viewLocator;
         }
 
@@ -63,24 +60,29 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         #endregion IWindowManager
 
+        /// <summary>
+        /// Resolves the window for the given view model type.
+        /// </summary>
         protected virtual Window GetWindow(Type viewModelType, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModelType);
-            return InitializeWindow(viewModelType, window, owner);
+            return CastWindowAndAssignOwner(viewModelType, window, owner);
         }
 
+        /// <summary>
+        /// Resolves the window for the given view model.
+        /// </summary>
         protected virtual Window GetWindow(object viewModel, Window? owner)
         {
             var window = _viewLocator.ResolveView(viewModel);
-            return InitializeWindow(viewModel.GetType(), window, owner);
+            return CastWindowAndAssignOwner(viewModel.GetType(), window, owner);
         }
 
-        protected virtual Window InitializeWindow(Type viewModelType, object view, Window? owner)
+        private Window CastWindowAndAssignOwner(Type viewModelType, object view, Window? owner)
         {
             if (!(view is Window window))
                 throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");
 
-            ControlServiceProvider.SetServiceProvider(window, _lifetimeScope);
             window.Owner = owner;
 
             return window;

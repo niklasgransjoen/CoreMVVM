@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using CoreMVVM.IOC;
+using System.Windows;
 
 namespace CoreMVVM.Windows
 {
