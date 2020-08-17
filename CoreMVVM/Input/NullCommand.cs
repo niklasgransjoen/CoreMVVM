@@ -8,6 +8,9 @@ namespace CoreMVVM
     /// </summary>
     public sealed class NullCommand : ICommand
     {
+        /// <summary>
+        /// Singleton instance.
+        /// </summary>
         public static readonly ICommand Instance = new NullCommand();
 
         private NullCommand()
