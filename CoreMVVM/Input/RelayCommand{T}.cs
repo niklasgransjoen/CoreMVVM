@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Windows.Input;
 
 namespace CoreMVVM.Input
 {
+    /// <summary>
+    /// A default generic implementation of <see cref="ICommand"/>.
+    /// </summary>
     public class RelayCommand<T> : ICommandExt
     {
         /// <summary>
@@ -151,14 +155,14 @@ namespace CoreMVVM.Input
         {
             var scheduler = RelayCommand.CanExecuteChangedScheduler;
             if (scheduler is null)
-                RaiseCanExecute_Internal();
+                invoke();
             else
-                scheduler.Schedule(RaiseCanExecute_Internal);
-        }
+                scheduler.Schedule(invoke);
 
-        private void RaiseCanExecute_Internal()
-        {
-            _canExecuteChanged?.Invoke(this, EventArgs.Empty);
+            void invoke()
+            {
+                _canExecuteChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

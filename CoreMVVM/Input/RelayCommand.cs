@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Windows.Input;
 
 namespace CoreMVVM.Input
 {
+    /// <summary>
+    /// A default implementation of <see cref="ICommand"/>.
+    /// </summary>
     public class RelayCommand : ICommandExt
     {
         /// <summary>
@@ -28,8 +32,8 @@ namespace CoreMVVM.Input
         /// </summary>
         private readonly ICommandCanExecuteChangedSubscriptionForwarder? _subscriptionForwarder = CanExecuteChangedSubscriptionForwarder;
 
-        private readonly Action<object> _execute;
-        private readonly Func<object, bool>? _canExecute = null;
+        private readonly Action<object?> _execute;
+        private readonly Func<object?, bool>? _canExecute = null;
 
         private event EventHandler? _canExecuteChanged;
 
@@ -55,7 +59,7 @@ namespace CoreMVVM.Input
         /// </summary>
         /// <param name="execute">The execution logic.</param>
         /// <exception cref="ArgumentNullException">execute is null.</exception>
-        public RelayCommand(Action<object> execute)
+        public RelayCommand(Action<object?> execute)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
         }
@@ -81,7 +85,7 @@ namespace CoreMVVM.Input
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action execute, Func<object, bool> canExecute)
+        public RelayCommand(Action execute, Func<object?, bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -96,7 +100,7 @@ namespace CoreMVVM.Input
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action<object> execute, Func<bool> canExecute)
+        public RelayCommand(Action<object?> execute, Func<bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -111,7 +115,7 @@ namespace CoreMVVM.Input
         /// <param name="execute">The execution logic.</param>
         /// <param name="canExecute">The execution status logic.</param>
         /// <exception cref="ArgumentNullException">execute or canExecute is null.</exception>
-        public RelayCommand(Action<object> execute, Func<object, bool> canExecute)
+        public RelayCommand(Action<object?> execute, Func<object?, bool> canExecute)
         {
             if (execute is null) throw new ArgumentNullException(nameof(execute));
             if (canExecute is null) throw new ArgumentNullException(nameof(canExecute));
@@ -144,7 +148,7 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Returns a value indicating if this command can be executed.
         /// </summary>
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
             return _canExecute?.Invoke(parameter) ?? true;
         }
@@ -152,7 +156,7 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Executes this command.
         /// </summary>
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             _execute(parameter);
         }
@@ -163,14 +167,14 @@ namespace CoreMVVM.Input
         {
             var scheduler = CanExecuteChangedScheduler;
             if (scheduler is null)
-                RaiseCanExecute_Internal();
+                invoke();
             else
-                scheduler.Schedule(RaiseCanExecute_Internal);
-        }
+                scheduler.Schedule(invoke);
 
-        private void RaiseCanExecute_Internal()
-        {
-            _canExecuteChanged?.Invoke(this, EventArgs.Empty);
+            void invoke()
+            {
+                _canExecuteChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
