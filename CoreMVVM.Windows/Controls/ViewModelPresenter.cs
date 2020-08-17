@@ -233,7 +233,7 @@ namespace CoreMVVM.Windows
                     return new TextBlock(new Run(viewModel.GetType().FullName));
                 }
 
-                var serviceProvider = ControlServiceProvider.GetServiceProvider(this);
+                var serviceProvider = this.GetServiceProvider();
                 if (serviceProvider is null)
                     return new TextBlock(new Run(viewModel.GetType().FullName));
 

@@ -19,7 +19,7 @@ namespace CoreMVVM.Windows
         {
             if (view is DependencyObject o)
             {
-                ControlServiceProvider.SetServiceProvider(o, _lifetimeScope);
+                o.SetServiceProvider(_lifetimeScope);
             }
         }
     }
