@@ -13,7 +13,9 @@ namespace CoreMVVM.IOC.Builder
             if (builder is null)
                 throw new ArgumentNullException(nameof(builder));
 
-            builder.RegisterSingleton<WindowsViewLocator>().As<IViewLocator>();
+            builder.RegisterTransient<ViewSetServiceProvider>().As<IViewInitializer>();
+            builder.RegisterTransient<ViewDataContextInitializer>().As<IViewInitializer>();
+            builder.RegisterTransient<ViewComponentInitializer>().As<IViewInitializer>();
 
             builder.OnBuild -= OnContainerBuilt;
             builder.OnBuild += OnContainerBuilt;

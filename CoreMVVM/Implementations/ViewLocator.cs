@@ -7,23 +7,24 @@ using System.Linq;
 namespace CoreMVVM.Implementations
 {
     /// <summary>
-    /// The default implementation of the <see cref="IViewLocator"/> service.
+    /// Default implementation of the <see cref="IViewLocator"/> service.
     /// </summary>
-    [Scope(ComponentScope.Singleton)]
     public sealed class ViewLocator : IViewLocator
     {
-        private readonly List<IViewProvider> _viewProviders = new List<IViewProvider>();
-
         private readonly Dictionary<Type, Type> _viewCache = new Dictionary<Type, Type>();
-        private readonly List<Action<object, object>> _onResolveActions = new List<Action<object, object>>();
 
-        private readonly IContainer _container;
+        private readonly ILifetimeScope _lifetimeScope;
+        private readonly IViewProvider[] _viewProviders;
+        private readonly IEnumerable<IViewInitializer> _viewInitializers;
 
-        public ViewLocator(IContainer container, DefaultViewProvider viewProvider)
+        public ViewLocator(ILifetimeScope lifetimeScope, IEnumerable<IViewProvider> viewProviders, IEnumerable<IViewInitializer> viewInitializers)
         {
-            _container = container;
+            _lifetimeScope = lifetimeScope;
 
-            _viewProviders.Add(viewProvider);
+            // Reverse, so resolve is done in reverse order of registrations.
+            _viewProviders = viewProviders.Reverse().ToArray();
+
+            _viewInitializers = viewInitializers;
         }
 
         #region IViewLocator
@@ -37,7 +38,7 @@ namespace CoreMVVM.Implementations
 
             Type viewType = ResolveViewType(viewModelType);
 
-            var viewModel = _container.ResolveRequiredService(viewModelType);
+            var viewModel = _lifetimeScope.ResolveRequiredService(viewModelType);
             return CreateView(viewType, viewModel);
         }
 
@@ -81,7 +82,7 @@ namespace CoreMVVM.Implementations
                 return false;
             }
 
-            var viewModel = _container.ResolveService(viewModelType);
+            var viewModel = _lifetimeScope.ResolveService(viewModelType);
             if (viewModel is null)
             {
                 view = null;
@@ -129,53 +130,14 @@ namespace CoreMVVM.Implementations
 
         #endregion TryResolveView
 
-        public void AddViewProvider(Type type)
-        {
-            if (type is null)
-                throw new ArgumentNullException(nameof(type));
-
-            if (!typeof(IViewProvider).IsAssignableFrom(type))
-                throw new ArgumentException($"Type '{type}' does not implement required interface '{typeof(IViewProvider)}'.", nameof(type));
-
-            var viewProvider = (IViewProvider)_container.ResolveRequiredService(type);
-            AddViewProvider(viewProvider);
-        }
-
-        public void AddViewProvider(IViewProvider viewProvider)
-        {
-            if (viewProvider is null)
-                throw new ArgumentNullException(nameof(viewProvider));
-
-            _viewProviders.Add(viewProvider);
-        }
-
         #endregion IViewLocator
-
-        #region Methods
-
-        /// <summary>
-        /// Adds an action that gets performed on the resolved view before it's returned.
-        /// </summary>
-        /// <param name="action">The action to perform. The first argument is the view model, the second is the view.</param>
-        /// <remarks>
-        /// Actions are executed in the order they are added.
-        /// </remarks>
-        public void AddOnResolve(Action<object, object> action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            _onResolveActions.Add(action);
-        }
-
-        #endregion Methods
 
         #region Helpers
 
         private ViewProviderContext? LocateViewType(Type viewModelType)
         {
             ViewProviderContext context = new ViewProviderContext(viewModelType);
-            foreach (var viewProvider in Enumerable.Reverse(_viewProviders))
+            foreach (var viewProvider in _viewProviders)
             {
                 // Keep going until a provider finds the view.
                 viewProvider.FindView(context);
@@ -190,18 +152,26 @@ namespace CoreMVVM.Implementations
 
         private object CreateView(Type viewType, object viewModel)
         {
-            object view = _container.ResolveRequiredService(viewType);
+            object view = _lifetimeScope.ResolveRequiredService(viewType);
 
-            _onResolveActions.ForEach(a => a(viewModel, view));
+            foreach (var initializer in _viewInitializers)
+            {
+                initializer.InitView(viewModel, view);
+            }
 
             return view;
         }
 
-        private object TryCreateView(Type viewType, object viewModel)
+        private object? TryCreateView(Type viewType, object viewModel)
         {
-            object view = _container.ResolveService(viewType);
+            object? view = _lifetimeScope.ResolveService(viewType);
+            if (view is null)
+                return null;
 
-            _onResolveActions.ForEach(a => a(viewModel, view));
+            foreach (var initializer in _viewInitializers)
+            {
+                initializer.InitView(viewModel, view);
+            }
 
             return view;
         }

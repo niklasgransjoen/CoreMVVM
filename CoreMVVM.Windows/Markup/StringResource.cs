@@ -39,7 +39,7 @@ namespace CoreMVVM.Windows.Markup
                 if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
                     return $"${{res:{Key}}}";
 
-                var lifetimeScope = ControlServiceProvider.RequireServiceProvider(dependencyObject);
+                var lifetimeScope = dependencyObject.RequireServiceProvider();
                 _binder = lifetimeScope.ResolveRequiredService<StringResourceBinder>();
             }
 

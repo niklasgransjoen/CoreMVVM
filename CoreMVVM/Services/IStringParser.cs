@@ -4,7 +4,7 @@ using System;
 namespace CoreMVVM
 {
     /// <summary>
-    /// Service providing functionality to the <see cref="StringParser"/> singleton service.
+    /// Service for localized strings.
     /// </summary>
     [FallbackImplementation(typeof(Implementations.DefaultStringParser))]
     public interface IStringParser

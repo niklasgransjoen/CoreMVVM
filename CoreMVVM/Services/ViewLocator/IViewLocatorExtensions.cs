@@ -61,21 +61,5 @@ namespace CoreMVVM
 
             return viewLocator.TryResolveViewType(typeof(TViewModel), out viewType);
         }
-
-        /// <summary>
-        /// Adds a view provider to the view locator.
-        /// </summary>
-        /// <typeparam name="TViewProvider">The type of the provider.</typeparam>
-        /// <remarks>
-        /// View providers are used to locate views belonging to a given view model.
-        /// </remarks>
-        public static void AddViewProvider<TViewProvider>(this IViewLocator viewLocator)
-            where TViewProvider : class, IViewProvider
-        {
-            if (viewLocator is null)
-                throw new ArgumentNullException(nameof(viewLocator));
-
-            viewLocator.AddViewProvider(typeof(TViewProvider));
-        }
     }
 }

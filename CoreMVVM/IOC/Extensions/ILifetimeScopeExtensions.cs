@@ -38,7 +38,7 @@ namespace CoreMVVM.IOC
         /// </summary>
         /// <exception cref="ArgumentNullException">provider or serviceType is null.</exception>
         /// <returns>The resolved service, or null if none exist.</returns>
-        public static object ResolveService(this IServiceProvider provider, Type serviceType)
+        public static object? ResolveService(this IServiceProvider provider, Type serviceType)
         {
             if (provider is null) throw new ArgumentNullException(nameof(provider));
             if (serviceType is null) throw new ArgumentNullException(nameof(serviceType));
@@ -51,10 +51,10 @@ namespace CoreMVVM.IOC
         /// </summary>
         /// <returns>The resolved service, or null if none exist.</returns>
         /// <exception cref="ArgumentNullException">provider is null.</exception>
-        public static T ResolveService<T>(this IServiceProvider provider)
+        public static T? ResolveService<T>(this IServiceProvider provider)
             where T : class
         {
-            return (T)ResolveService(provider, typeof(T));
+            return (T?)ResolveService(provider, typeof(T));
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace CoreMVVM.IOC
         public static IEnumerable<T> ResolveServices<T>(this IServiceProvider provider)
             where T : class
         {
-            return ResolveService<IEnumerable<T>>(provider);
+            return ResolveService<IEnumerable<T>>(provider)!;
         }
     }
 }

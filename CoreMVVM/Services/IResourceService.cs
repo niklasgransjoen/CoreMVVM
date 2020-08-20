@@ -7,10 +7,6 @@ namespace CoreMVVM
     /// <summary>
     /// Implements functionality for a service that looks up resource strings.
     /// </summary>
-    /// <remarks>
-    /// If this service is implemented as a non-singleton, a custom implementation of <see cref="IResourceServiceProvider"/> should also be registered.
-    /// The fallback implementation assumes a singleton pattern of the <see cref="IResourceService"/>.
-    /// </remarks>
     [FallbackImplementation(typeof(FallbackImplementations.FallbackResourceService))]
     public interface IResourceService
     {
@@ -31,19 +27,11 @@ namespace CoreMVVM
 
 #if NETCORE
 
-        string? GetString(ReadOnlySpan<char> key);
+        /// <summary>
+        /// Performs a resource lookup. Returns null if key is not found.
+        /// </summary>
+        public string? GetString(ReadOnlySpan<char> key) => GetString(key.ToString());
 
 #endif
-    }
-
-    /// <summary>
-    /// Service for resolving and potentially freeing instances of <see cref="IResourceService"/>.
-    /// </summary>
-    [FallbackImplementation(typeof(FallbackImplementations.FallbackResourceServiceProvider))]
-    public interface IResourceServiceProvider
-    {
-        IResourceService GetResourceService();
-
-        void FreeResourceService(IResourceService resourceService);
     }
 }

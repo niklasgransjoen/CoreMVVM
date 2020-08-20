@@ -118,6 +118,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
             lock (_scheduleLock)
             {
+                _timer.Start();
                 _scheduledActions.Add(action);
             }
         }
@@ -127,6 +128,8 @@ namespace CoreMVVM.Windows.FallbackImplementations
             Action[] scheduledActionsCopy;
             lock (_scheduleLock)
             {
+                _timer.Stop();
+
                 scheduledActionsCopy = _scheduledActions.ToArray();
                 _scheduledActions.Clear();
             }

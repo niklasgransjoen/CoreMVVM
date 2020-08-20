@@ -12,7 +12,7 @@ namespace CoreMVVM.IOC.Core
     {
         private readonly ToolBox _toolBox;
         private readonly LifetimeScope? _parent;
-        private readonly IResolveUnregisteredInterfaceService _resolveUnregisteredInterfaceService;
+        private readonly IResolveUnregisteredInterfaceService? _resolveUnregisteredInterfaceService;
 
         private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
         private readonly HashSet<IRegistration> _resolvingScopedComponents = new HashSet<IRegistration>();
