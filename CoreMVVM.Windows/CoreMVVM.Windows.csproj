@@ -20,9 +20,16 @@
     <DocumentationFile>bin\Release\$(TargetFramework)\CoreMVVM.Windows.xml</DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <!-- .NET Core 3.0 references, compilation flags and build options -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
     <ProjectReference Include="..\CoreMVVM\CoreMVVM.csproj" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1'">
@@ -31,10 +38,6 @@
 
   <!-- .NET 4.5 references, compilation flags and build options -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
     <ProjectReference Include="..\CoreMVVM\CoreMVVM.csproj" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
@@ -43,11 +46,7 @@
 
   <!-- .NET 4.8 references, compilation flags and build options -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
     <ProjectReference Include="..\CoreMVVM\CoreMVVM.csproj">
       <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
