@@ -7,6 +7,10 @@ namespace CoreMVVM.IOC
     /// </summary>
     public sealed class ResolveException : IOCException
     {
+        public ResolveException()
+        {
+        }
+
         public ResolveException(string message) : base(message)
         {
         }

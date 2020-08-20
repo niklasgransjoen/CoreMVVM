@@ -22,6 +22,9 @@ namespace CoreMVVM.Windows
         /// </summary>
         public static void AssureDataTemplateExists(Type viewModelType, Type viewType)
         {
+            if (viewModelType is null) throw new ArgumentNullException(nameof(viewModelType));
+            if (viewType is null) throw new ArgumentNullException(nameof(viewType));
+
             if (_resolvedViewModels.Contains(viewModelType))
                 return;
 

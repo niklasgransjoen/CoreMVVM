@@ -106,6 +106,9 @@ namespace CoreMVVM.Threading
 
         public void OnCompleted(Action continuation)
         {
+            if (continuation is null)
+                throw new ArgumentNullException(nameof(continuation));
+
             if (IsCompleted)
                 continuation();
             else

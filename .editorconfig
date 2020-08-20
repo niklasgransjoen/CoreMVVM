@@ -49,3 +49,18 @@ dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
 
 dotnet_naming_rule.interfaces_begins_with_i.style = interface_pascal_case
 dotnet_naming_rule.interfaces_begins_with_i.severity = suggestion
+
+# CA1030: Use events where appropriate
+dotnet_diagnostic.CA1030.severity = none
+
+# CA1062: Validate arguments of public methods
+dotnet_diagnostic.CA1062.severity = error
+
+
+# Temp suppress xml warnings
+
+# CS1591: Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS1591.severity = none
+
+# CS1573: Parameter has no matching param tag in the XML comment (but other parameters do)
+dotnet_diagnostic.CS1573.severity = none

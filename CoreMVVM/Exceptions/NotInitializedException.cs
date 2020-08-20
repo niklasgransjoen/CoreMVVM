@@ -8,6 +8,12 @@ namespace CoreMVVM
     /// </summary>
     public sealed class NotInitializedException : Exception
     {
+        public NotInitializedException()
+        {
+            Message = "Class, instance, or property not initialized.";
+            MemberName = string.Empty;
+        }
+
         /// <summary>
         /// Creates a new instance of the <see cref="NotInitializedException"/> class,
         /// with the specified message.
@@ -23,6 +29,12 @@ namespace CoreMVVM
         {
             Message = message;
             MemberName = memberName ?? string.Empty;
+        }
+
+        public NotInitializedException(string message, Exception innerException) : base(message, innerException)
+        {
+            Message = message;
+            MemberName = string.Empty;
         }
 
         /// <summary>

@@ -152,6 +152,9 @@ namespace CoreMVVM.Threading
 
         public static RebelTask WhenAll(IReadOnlyCollection<RebelTask> tasks)
         {
+            if (tasks is null)
+                throw new ArgumentNullException(nameof(tasks));
+
             if (tasks.Count == 0)
                 return CompletedTask;
 
@@ -170,13 +173,16 @@ namespace CoreMVVM.Threading
 
         public static RebelTask<TResult[]> WhenAll<TResult>(IReadOnlyCollection<RebelTask<TResult>> tasks)
         {
-#if NET45
+            if (tasks is null)
+                throw new ArgumentNullException(nameof(tasks));
             if (tasks.Count == 0)
+            {
+#if NET45
                 return FromResult(new TResult[0]);
 #else
-            if (tasks.Count == 0)
                 return FromResult(Array.Empty<TResult>());
 #endif
+            }
 
             return WhenAll(tasks.AsEnumerable());
         }

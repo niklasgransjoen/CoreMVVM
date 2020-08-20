@@ -7,7 +7,15 @@ namespace CoreMVVM.IOC.Builder
     /// </summary>
     public class IncompatibleTypeException : InvalidOperationException
     {
+        public IncompatibleTypeException()
+        {
+        }
+
         public IncompatibleTypeException(string message) : base(message)
+        {
+        }
+
+        public IncompatibleTypeException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }

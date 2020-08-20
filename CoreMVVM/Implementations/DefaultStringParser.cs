@@ -101,6 +101,9 @@ namespace CoreMVVM.Implementations
 
         public static string? GetValue(IResourceService resourceService, string propertyName, params StringTagPair[] args)
         {
+            if (resourceService is null)
+                throw new ArgumentNullException(nameof(resourceService));
+
             if (propertyName is null) throw new ArgumentNullException(nameof(propertyName));
 
             // Prioritize prefixed properties.
@@ -138,6 +141,9 @@ namespace CoreMVVM.Implementations
 
         public static string? GetValue(IResourceService resourceService, ReadOnlySpan<char> propertyName, params StringTagPair[] args)
         {
+            if (resourceService is null)
+                throw new ArgumentNullException(nameof(resourceService));
+
             // Prioritize prefixed properties.
             if (propertyName.IndexOf(':') != -1)
             {

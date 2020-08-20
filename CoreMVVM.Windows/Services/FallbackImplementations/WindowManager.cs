@@ -63,11 +63,14 @@ namespace CoreMVVM.Windows.FallbackImplementations
         /// </summary>
         protected virtual Window GetWindow(object viewModel, Window? owner)
         {
+            if (viewModel is null) throw new ArgumentNullException(nameof(viewModel));
+            if (owner is null) throw new ArgumentNullException(nameof(owner));
+
             var window = _viewLocator.ResolveView(viewModel);
             return CastWindowAndAssignOwner(viewModel.GetType(), window, owner);
         }
 
-        private Window CastWindowAndAssignOwner(Type viewModelType, object view, Window? owner)
+        private static Window CastWindowAndAssignOwner(Type viewModelType, object view, Window? owner)
         {
             if (!(view is Window window))
                 throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");

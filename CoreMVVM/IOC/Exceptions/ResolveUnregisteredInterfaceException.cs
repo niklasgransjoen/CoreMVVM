@@ -5,7 +5,15 @@
     /// </summary>
     public sealed class ResolveUnregisteredServiceException : IOCException
     {
+        public ResolveUnregisteredServiceException()
+        {
+        }
+
         public ResolveUnregisteredServiceException(string message) : base(message)
+        {
+        }
+
+        public ResolveUnregisteredServiceException(string message, System.Exception innerException) : base(message, innerException)
         {
         }
     }

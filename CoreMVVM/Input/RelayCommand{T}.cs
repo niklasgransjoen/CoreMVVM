@@ -8,10 +8,12 @@ namespace CoreMVVM.Input
     /// </summary>
     public class RelayCommand<T> : ICommandExt
     {
+#pragma warning disable CA1000 // Do not declare static members on generic types
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
         public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
+#pragma warning restore CA1000 // Do not declare static members on generic types
 
         #region Fields
 
@@ -21,7 +23,7 @@ namespace CoreMVVM.Input
         private readonly ICommandCanExecuteChangedSubscriptionForwarder? _subscriptionForwarder = RelayCommand.CanExecuteChangedSubscriptionForwarder;
 
         private readonly Action<T> _execute;
-        private readonly Func<T, bool>? _canExecute = null;
+        private readonly Func<T, bool>? _canExecute;
 
         private event EventHandler? _canExecuteChanged;
 

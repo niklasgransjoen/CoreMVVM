@@ -9,7 +9,7 @@ namespace CoreMVVM.IOC.Builder
     internal class RegistrationBuilder : IRegistrationBuilder
     {
         private readonly ToolBox _toolBox;
-        private readonly bool _overwriteFactory = false;
+        private readonly bool _overwriteFactory;
 
         #region Constructors
 

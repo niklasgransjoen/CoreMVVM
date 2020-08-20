@@ -33,7 +33,7 @@ namespace CoreMVVM.Input
         private readonly ICommandCanExecuteChangedSubscriptionForwarder? _subscriptionForwarder = CanExecuteChangedSubscriptionForwarder;
 
         private readonly Action<object?> _execute;
-        private readonly Func<object?, bool>? _canExecute = null;
+        private readonly Func<object?, bool>? _canExecute;
 
         private event EventHandler? _canExecuteChanged;
 
