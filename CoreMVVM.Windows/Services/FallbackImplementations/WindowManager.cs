@@ -64,7 +64,6 @@ namespace CoreMVVM.Windows.FallbackImplementations
         protected virtual Window GetWindow(object viewModel, Window? owner)
         {
             if (viewModel is null) throw new ArgumentNullException(nameof(viewModel));
-            if (owner is null) throw new ArgumentNullException(nameof(owner));
 
             var window = _viewLocator.ResolveView(viewModel);
             return CastWindowAndAssignOwner(viewModel.GetType(), window, owner);
