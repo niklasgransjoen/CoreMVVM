@@ -24,17 +24,17 @@ namespace CoreMVVM
         /// Invokes <see cref="PropertyChanged"/> if the value was different.
         /// </summary>
         /// <typeparam name="T">The type of the property.</typeparam>
-        /// <param name="property">A reference to the field of the property.</param>
+        /// <param name="backingField">A reference to the backing field of the property.</param>
         /// <param name="value">The new value of the property.</param>
         /// <param name="propertyName">The name of the property. Leave as null when calling from the property's setter.</param>
         /// <returns>True if the property changed.</returns>
         /// <remarks>Uses the default EqualityComparer of the type of the property.</remarks>
-        protected virtual bool SetProperty<T>(ref T property, T value, [CallerMemberName] string? propertyName = null)
+        protected virtual bool SetProperty<T>(ref T backingField, T value, [CallerMemberName] string? propertyName = null)
         {
-            if (Equals(property, value))
+            if (Equals(backingField, value))
                 return false;
 
-            property = value;
+            backingField = value;
             RaisePropertyChanged(propertyName);
             return true;
         }

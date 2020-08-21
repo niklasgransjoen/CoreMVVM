@@ -40,7 +40,7 @@ namespace CoreMVVM.Extensions.DependencyInjection
         private sealed class ServiceScope : IServiceScope
         {
             private readonly ScopeableILifetimeScope _scopeableILifetimeScope;
-            private bool _isDisposed = false;
+            private bool _isDisposed;
 
             public ServiceScope(ScopeableILifetimeScope scopeableILifetimeScope)
             {

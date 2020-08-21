@@ -64,6 +64,9 @@ namespace CoreMVVM.IOC
         /// <param name="interfaceImplementationType">The type to resolve to in place of <see cref="InterfaceType"/>. Must implement <see cref="InterfaceType"/>.</param>
         public void SetInterfaceImplementationType(Type interfaceImplementationType)
         {
+            if (interfaceImplementationType is null)
+                throw new ArgumentNullException(nameof(interfaceImplementationType));
+
             if (!InterfaceType.IsAssignableFrom(interfaceImplementationType))
                 throw new ArgumentException($"Type '{interfaceImplementationType}' does not implement interface '{InterfaceType}'.", nameof(interfaceImplementationType));
 

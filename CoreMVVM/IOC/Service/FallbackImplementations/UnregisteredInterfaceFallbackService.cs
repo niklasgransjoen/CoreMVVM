@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace CoreMVVM.IOC.FallbackImplementations
 {
@@ -13,6 +14,9 @@ namespace CoreMVVM.IOC.FallbackImplementations
         /// </summary>
         public void Handle(ResolveUnregisteredInterfaceContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             var attribute = context.InterfaceType.GetCustomAttribute<FallbackImplementationAttribute>();
             if (attribute != null)
             {

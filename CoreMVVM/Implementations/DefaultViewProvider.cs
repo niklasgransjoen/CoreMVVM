@@ -9,6 +9,9 @@ namespace CoreMVVM.Implementations
     {
         public void FindView(ViewProviderContext context)
         {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
             string viewTypeName = context.ViewModelType.FullName
                 .Replace("ViewModel", "View")
                 .Replace("WindowModel", "Window");

@@ -5,7 +5,15 @@
     /// </summary>
     public class IncompatibleGenericTypeDefinitionException : IncompatibleTypeException
     {
+        public IncompatibleGenericTypeDefinitionException()
+        {
+        }
+
         public IncompatibleGenericTypeDefinitionException(string message) : base(message)
+        {
+        }
+
+        public IncompatibleGenericTypeDefinitionException(string message, System.Exception innerException) : base(message, innerException)
         {
         }
     }

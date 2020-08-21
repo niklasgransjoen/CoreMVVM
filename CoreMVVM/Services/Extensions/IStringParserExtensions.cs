@@ -21,8 +21,8 @@ namespace CoreMVVM
         /// </summary>
         public static string? GetResource(this IStringParser stringParser, IResourceService resourceService, string key, params StringTagPair[] args)
         {
-            if (stringParser is null)
-                throw new ArgumentNullException(nameof(stringParser));
+            if (stringParser is null) throw new ArgumentNullException(nameof(stringParser));
+            if (resourceService is null) throw new ArgumentNullException(nameof(resourceService));
 
             string? resource = resourceService.GetString(key);
             if (resource is null)
@@ -38,8 +38,8 @@ namespace CoreMVVM
         /// </summary>
         public static string? GetResource(this IStringParser stringParser, IResourceService resourceService, ReadOnlySpan<char> key, params StringTagPair[] args)
         {
-            if (stringParser is null)
-                throw new ArgumentNullException(nameof(stringParser));
+            if (stringParser is null) throw new ArgumentNullException(nameof(stringParser));
+            if (resourceService is null) throw new ArgumentNullException(nameof(resourceService));
 
             string? resource = resourceService.GetString(key);
             if (resource is null)

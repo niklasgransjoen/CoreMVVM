@@ -7,7 +7,7 @@ using System.Windows.Markup;
 namespace CoreMVVM.Windows.Markup
 {
     /// <summary>
-    /// Markup extension for using the <see cref="CoreMVVM.StringParser"/> through XAML.
+    /// Markup extension for using the <see cref="CoreMVVM.IStringParser"/> through XAML.
     /// </summary>
     public sealed class StringParser : MarkupExtension
     {
