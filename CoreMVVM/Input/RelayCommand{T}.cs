@@ -9,10 +9,12 @@ namespace CoreMVVM.Input
     public class RelayCommand<T> : ICommandExt
     {
 #pragma warning disable CA1000 // Do not declare static members on generic types
+
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
         public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
+
 #pragma warning restore CA1000 // Do not declare static members on generic types
 
         #region Fields
@@ -138,17 +140,37 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Returns a value indicating if this command can be executed.
         /// </summary>
-        public bool CanExecute(object parameter)
+        ///<remarks>If <paramref name="parameter"/> is null, default(<typeparamref name="T"/>) is passed as the command's argument.</remarks>
+        bool ICommand.CanExecute(object? parameter)
         {
-            return _canExecute?.Invoke((T)parameter) ?? true;
+            T castParam = ProcessParameter(parameter);
+            return CanExecute(castParam);
+        }
+
+        /// <summary>
+        /// Returns a value indicating if this command can be executed.
+        /// </summary>
+        public bool CanExecute(T parameter)
+        {
+            return _canExecute?.Invoke(parameter) ?? true;
         }
 
         ///<summary>
         /// Executes this command.
         ///</summary>
-        public void Execute(object parameter)
+        ///<remarks>If <paramref name="parameter"/> is null, default(<typeparamref name="T"/>) is passed as the command's argument.</remarks>
+        void ICommand.Execute(object? parameter)
         {
-            _execute((T)parameter);
+            T castParam = ProcessParameter(parameter);
+            Execute(castParam);
+        }
+
+        ///<summary>
+        /// Executes this command.
+        ///</summary>
+        public void Execute(T parameter)
+        {
+            _execute(parameter);
         }
 
         #endregion ICommand Members
@@ -166,5 +188,23 @@ namespace CoreMVVM.Input
                 _canExecuteChanged?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        #region Utilities
+
+        /// <summary>
+        /// Processes a command parameter.
+        /// </summary>
+        /// <param name="parameter">The parameter to process.</param>
+        /// <returns>The cast parameter, or default(<typeparamref name="T"/>) if <paramref name="parameter"/> is null.</returns>
+        /// <exception cref="ArgumentException">parameter is not null and of the wrong type.</exception>
+        protected static T ProcessParameter(object? parameter) => parameter switch
+        {
+            T castParam => castParam,
+            null => default!,
+
+            _ => throw new ArgumentException($"Expected parameter to be of type '{typeof(T)}', was '{parameter.GetType()}'.", nameof(parameter))
+        };
+
+        #endregion Utilities
     }
 }
