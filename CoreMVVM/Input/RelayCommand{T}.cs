@@ -6,7 +6,7 @@ namespace CoreMVVM.Input
     /// <summary>
     /// A default generic implementation of <see cref="ICommand"/>.
     /// </summary>
-    public class RelayCommand<T> : ICommandExt
+    public class RelayCommand<T> : ICommand<T>
     {
 #pragma warning disable CA1000 // Do not declare static members on generic types
 
