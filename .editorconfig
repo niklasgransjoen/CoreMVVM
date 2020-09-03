@@ -12,7 +12,6 @@ dotnet_naming_style.underscore_camel_case_style.required_prefix = _
 dotnet_naming_style.interface_pascal_case.capitalization = pascal_case
 dotnet_naming_style.interface_pascal_case.required_prefix = I
 
-
 # Constants are to be styles as PascalCase
 dotnet_naming_rule.constants_pascal_cased.symbols = constant_symbols
 
@@ -32,10 +31,10 @@ dotnet_naming_symbols.non_field_symbols.applicable_accessibilities = *
 dotnet_naming_rule.non_fields_pascal_cased.style = pascal_case_style
 dotnet_naming_rule.non_fields_pascal_cased.severity = suggestion
 
-# Private fields are to be styled as _camelCase
+# Private fields and events are to be styled as _camelCase
 dotnet_naming_rule.private_fields_camel_cased.symbols = private_field_symbols
 
-dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field, event
 dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
 
 dotnet_naming_rule.private_fields_camel_cased.style = underscore_camel_case_style

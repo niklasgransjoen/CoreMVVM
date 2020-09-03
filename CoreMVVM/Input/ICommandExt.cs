@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace CoreMVVM
+namespace CoreMVVM.Input
 {
     /// <summary>
     /// An extension of the <see cref="ICommand"/> interface.

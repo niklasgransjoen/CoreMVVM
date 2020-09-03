@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace CoreMVVM
+namespace CoreMVVM.Input
 {
     /// <summary>
     /// An empty command.
@@ -19,9 +19,9 @@ namespace CoreMVVM
 
         event EventHandler ICommand.CanExecuteChanged { add { } remove { } }
 
-        bool ICommand.CanExecute(object parameter) => true;
+        bool ICommand.CanExecute(object? parameter) => true;
 
-        void ICommand.Execute(object parameter)
+        void ICommand.Execute(object? parameter)
         { }
     }
 }
