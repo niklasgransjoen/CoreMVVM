@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <PackageId>Viv.CoreMVVM.Extensions.DependencyInjection</PackageId>
-    <Authors>Niklas Gransjøen</Authors>
+    <Authors>Vivian Vea</Authors>
     <Description>Integration with Microsoft.Extensions.DependencyInjection.</Description>
-    <PackageProjectUrl>https://github.com/niklasgransjoen/CoreMVVM</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/niklasgransjoen/CoreMVVM</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/vivianvea/CoreMVVM</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vivianvea/CoreMVVM</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>MVVM, IOC</PackageTags>
     <Version>2.1.0</Version>
