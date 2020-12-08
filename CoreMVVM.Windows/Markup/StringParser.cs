@@ -36,7 +36,7 @@ namespace CoreMVVM.Windows.Markup
             if (_binder is null)
             {
                 var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
-                if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
+                if (valueTargetProvider.TargetObject is not DependencyObject dependencyObject)
                     return $"!{Value}!";
 
                 var lifetimeScope = dependencyObject.RequireServiceProvider();

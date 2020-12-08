@@ -23,7 +23,7 @@ namespace CoreMVVM.Windows.Threading.Tests
             await threadCheck;
         }
 
-        private async Task PerformDispatcherSwitch(Dispatcher dispatcher)
+        private static async Task PerformDispatcherSwitch(Dispatcher dispatcher)
         {
             Assert.True(dispatcher.CheckAccess());
 
@@ -41,7 +41,6 @@ namespace CoreMVVM.Windows.Threading.Tests
         /// </summary>
         private static class DispatcherUtil
         {
-            [SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.UnmanagedCode)]
             public static void DoEvents()
             {
                 DispatcherFrame frame = new DispatcherFrame();

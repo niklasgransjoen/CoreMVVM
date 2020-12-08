@@ -145,12 +145,12 @@ namespace CoreMVVM.IOC.Core
             return component != null;
         }
 
-        private static readonly IRegistration IContainerRegistration = new Registration(typeof(Container), ComponentScope.Singleton);
-        private static readonly IRegistration IServiceProviderRegistration = new Registration(typeof(LifetimeScope), ComponentScope.LifetimeScope);
-        private static readonly IRegistration IEnumerableRegistration = new Registration(typeof(List<>), ComponentScope.Transient);
-        private static readonly IRegistration FuncRegistration = new Registration(typeof(Func<>), ComponentScope.Transient);
-        private static readonly IRegistration LazyRegistration = new Registration(typeof(Lazy<>), ComponentScope.Transient);
-        private static readonly IRegistration IOwnedRegistration = new Registration(typeof(Owned<>), ComponentScope.Transient);
+        internal static readonly IRegistration IContainerRegistration = new Registration(typeof(Container), ComponentScope.Singleton);
+        internal static readonly IRegistration IServiceProviderRegistration = new Registration(typeof(LifetimeScope), ComponentScope.LifetimeScope);
+        internal static readonly IRegistration IEnumerableRegistration = new Registration(typeof(List<>), ComponentScope.Transient);
+        internal static readonly IRegistration FuncRegistration = new Registration(typeof(Func<>), ComponentScope.Transient);
+        internal static readonly IRegistration LazyRegistration = new Registration(typeof(Lazy<>), ComponentScope.Transient);
+        internal static readonly IRegistration IOwnedRegistration = new Registration(typeof(Owned<>), ComponentScope.Transient);
 
         private bool TryResolveRegistration(Type type, [NotNullWhen(true)] out IRegistration? registration)
         {

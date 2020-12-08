@@ -152,13 +152,12 @@ namespace CoreMVVM.IOC.Core.Tests
         [Scope(ComponentScope.Singleton)]
         private sealed class MultiInterfaceClass : IInterface1, IInterface2 { }
 
-
-
         [Scope(ComponentScope.Singleton)]
         private sealed class SingletonService2
         {
             public SingletonService2(SingletonService3 singletonService3)
             {
+                GC.KeepAlive(singletonService3);
             }
         }
 
@@ -167,10 +166,9 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             public SingletonService3(SingletonService2 singletonService2)
             {
+                GC.KeepAlive(singletonService2);
             }
         }
-
-
 
         #endregion Resources
     }

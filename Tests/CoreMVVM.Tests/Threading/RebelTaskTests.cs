@@ -76,22 +76,22 @@ namespace CoreMVVM.Threading.Tests
 
         #region Tools
 
-        private RebelTask Await1()
+        private static RebelTask Await1()
         {
             return Task.Delay(1);
         }
 
-        private async RebelTask Await2()
+        private static async RebelTask Await2()
         {
             await Task.Yield();
         }
 
-        private RebelTask<string> Await3()
+        private static RebelTask<string> Await3()
         {
             return RebelTask.FromResult("JOIN THE ASCENDENCY!");
         }
 
-        private async RebelTask<string> Await4()
+        private static async RebelTask<string> Await4()
         {
             await Task.Yield();
             return "WHAT'S UP DANGER";

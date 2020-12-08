@@ -15,7 +15,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         #region LifetimeScope_Resolves_IEnumerable
 
-        private void LifetimeScope_Resolves_IEnumerable_Setup(ContainerBuilder builder)
+        private static void LifetimeScope_Resolves_IEnumerable_Setup(ContainerBuilder builder)
         {
             builder.RegisterTransient<Service1>().As<IServiceA>();
             builder.RegisterTransient<Service2>().As<IServiceA>();
@@ -48,7 +48,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         #region LifetimeScope_Resolves_IEnumerable_With_Duplicate_Registrations
 
-        private void LifetimeScope_Resolves_IEnumerable_With_Duplicate_Registrations_Setup(ContainerBuilder builder)
+        private static void LifetimeScope_Resolves_IEnumerable_With_Duplicate_Registrations_Setup(ContainerBuilder builder)
         {
             builder.RegisterTransient<Service3>().As<IServiceB>();
             builder.RegisterTransient<Service3>().As<IServiceB>();

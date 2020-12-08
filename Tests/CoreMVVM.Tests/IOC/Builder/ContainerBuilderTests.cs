@@ -100,7 +100,7 @@ namespace CoreMVVM.IOC.Builder.Tests
 
         #region Helpers
 
-        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
+        private static void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
         {
             Assert.Equal(expectedType, regBuilder.Type);
             Assert.Equal(scope, regBuilder.Scope);
