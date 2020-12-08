@@ -48,12 +48,12 @@ namespace CoreMVVM.Validation
         /// </summary>
         /// <param name="propertyName">The name of the property to retrieve validation errors for; or null or <see cref="string.Empty"/>,
         /// to retrieve entity-level errors.</param>
-        public IEnumerable GetErrors(string propertyName)
+        public IEnumerable GetErrors(string? propertyName)
         {
             if (string.IsNullOrEmpty(propertyName))
                 return _errors.SelectMany(e => e.Value);
 
-            if (_errors.TryGetValue(propertyName, out IEnumerable<string> errors))
+            if (_errors.TryGetValue(propertyName!, out var errors))
                 return errors;
 
             return Enumerable.Empty<string>();

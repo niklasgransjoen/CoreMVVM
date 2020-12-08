@@ -37,7 +37,7 @@ namespace CoreMVVM.Threading
             Task = new Task(action, cancellationToken);
         }
 
-        public RebelTask(Action<object> action, object state, CancellationToken cancellationToken = default)
+        public RebelTask(Action<object?> action, object state, CancellationToken cancellationToken = default)
         {
             Task = new Task(action, state, cancellationToken);
         }
@@ -63,12 +63,12 @@ namespace CoreMVVM.Threading
         /// </summary>
         public void Start()
         {
-            Task.Start();
+            GetTaskOrComplete().Start();
         }
 
         public void Start(TaskScheduler taskScheduler)
         {
-            Task.Start(taskScheduler);
+            GetTaskOrComplete().Start(taskScheduler);
         }
 
         /// <summary>
@@ -163,8 +163,10 @@ namespace CoreMVVM.Threading
 
         public static RebelTask WhenAll(IEnumerable<RebelTask> tasks)
         {
-            IEnumerable<Task> wrappedTasks = tasks.Select(t => t.Task);
-            Task result = Task.WhenAll(wrappedTasks);
+            var wrappedTasks = tasks
+                .Select(t => t.Task)
+                .OfType<Task>();
+            var result = Task.WhenAll(wrappedTasks);
 
             return new RebelTask(result);
         }
@@ -190,7 +192,8 @@ namespace CoreMVVM.Threading
         public static RebelTask<TResult[]> WhenAll<TResult>(IEnumerable<RebelTask<TResult>> tasks)
         {
             var wrappedTasks = tasks
-                .Select(task => task.Task);
+                .Select(task => task.Task)
+                .OfType<Task<TResult>>();
 
             var result = Task.WhenAll(wrappedTasks);
 
@@ -201,12 +204,9 @@ namespace CoreMVVM.Threading
 
         #region Operators
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (!(obj is RebelTask other))
-                return false;
-
-            return Equals(other);
+            return obj is RebelTask other && Equals(other);
         }
 
         public bool Equals(RebelTask other)
@@ -216,10 +216,14 @@ namespace CoreMVVM.Threading
 
         public override int GetHashCode()
         {
+#if NETCORE
+            return HashCode.Combine(Task);
+#else
             int hash = 17;
             hash = (hash * 7) + GetTaskOrComplete().GetHashCode();
 
             return hash;
+#endif
         }
 
         public static bool operator ==(RebelTask left, RebelTask right)

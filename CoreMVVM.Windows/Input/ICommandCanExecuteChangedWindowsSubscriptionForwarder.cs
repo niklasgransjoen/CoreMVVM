@@ -13,12 +13,12 @@ namespace CoreMVVM.Windows.Input
         {
         }
 
-        public virtual void Subscribe(EventHandler eventHandler)
+        public virtual void Subscribe(EventHandler? eventHandler)
         {
             CommandManager.RequerySuggested += eventHandler;
         }
 
-        public virtual void Unsubscribe(EventHandler eventHandler)
+        public virtual void Unsubscribe(EventHandler? eventHandler)
         {
             CommandManager.RequerySuggested -= eventHandler;
         }

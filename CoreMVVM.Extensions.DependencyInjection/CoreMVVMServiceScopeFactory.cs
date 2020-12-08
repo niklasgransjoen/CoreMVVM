@@ -90,7 +90,7 @@ namespace CoreMVVM.Extensions.DependencyInjection
                     _scopes.Pop();
             }
 
-            public object GetService(Type serviceType)
+            public object? GetService(Type serviceType)
             {
                 if (serviceType == typeof(IServiceProvider))
                     return this;

@@ -33,7 +33,7 @@ namespace CoreMVVM.Validation
         /// <param name="propertyName">The name of the property holdign this value. Not null.</param>
         /// <returns>An instance holding information about the result of the validation.</returns>
         /// <exception cref="ArgumentNullException">propertyName is null.</exception>
-        public ValidationResult Validate(object value, string propertyName)
+        public ValidationResult Validate(object? value, string propertyName)
         {
             if (propertyName is null)
                 throw new ArgumentNullException(nameof(propertyName));
@@ -56,6 +56,6 @@ namespace CoreMVVM.Validation
         /// </summary>
         /// <param name="value">The value to validate.</param>
         /// <returns>True is value passed validation.</returns>
-        protected abstract bool IsValid(object value);
+        protected abstract bool IsValid(object? value);
     }
 }

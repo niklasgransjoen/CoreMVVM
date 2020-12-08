@@ -21,18 +21,22 @@ namespace CoreMVVM.IOC.Builder
             {
                 var componentScope = getComponentScope(service.Lifetime);
 
-                if (service.ImplementationFactory != null)
+                if (service.ImplementationFactory is not null)
                 {
                     var implementationType = service.ImplementationFactory.GetType().GetGenericArguments()[1];
                     builder.Register(implementationType, componentScope, service.ImplementationFactory).As(service.ServiceType);
                 }
-                else if (service.ImplementationInstance != null)
+                else if (service.ImplementationInstance is not null)
                 {
                     builder.Register(service.ImplementationInstance.GetType(), componentScope, c => service.ImplementationInstance).As(service.ServiceType);
                 }
-                else
+                else if (service.ImplementationType is not null)
                 {
                     builder.Register(service.ImplementationType, componentScope).As(service.ServiceType);
+                }
+                else
+                {
+                    builder.Register(service.ServiceType, componentScope).AsSelf();
                 }
 
                 static ComponentScope getComponentScope(ServiceLifetime serviceLifetime) => serviceLifetime switch

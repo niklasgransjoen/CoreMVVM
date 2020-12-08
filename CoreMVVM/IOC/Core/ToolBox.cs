@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace CoreMVVM.IOC.Core
 {
@@ -27,8 +26,7 @@ namespace CoreMVVM.IOC.Core
 
         public bool TryGetRegistration(Type serviceType, [NotNullWhen(true)] out IRegistration? registration)
         {
-            bool result = _registrations.TryGetValue(serviceType, out var registrations);
-            if (result)
+            if (_registrations.TryGetValue(serviceType, out var registrations))
             {
                 registration = registrations[registrations.Count - 1];
                 return true;
@@ -131,7 +129,7 @@ namespace CoreMVVM.IOC.Core
             return registration;
         }
 
-        public ConstructorInfo GetConstructor(Type type, bool validateParameters = true, Func<IEnumerable<ConstructorInfo>, ConstructorInfo>? constructorSelector = null)
+        public ConstructorInfo GetConstructor(Type type, bool validateParameters = true, Func<IEnumerable<ConstructorInfo>, ConstructorInfo?>? constructorSelector = null)
         {
             if (_constructors.TryGetValue(type, out var constructor))
             {
@@ -147,7 +145,7 @@ namespace CoreMVVM.IOC.Core
 
         #region Private methods
 
-        private ConstructorInfo AddConstructor(Type type, bool validateParameters, Func<IEnumerable<ConstructorInfo>, ConstructorInfo> constructorSelector)
+        private ConstructorInfo AddConstructor(Type type, bool validateParameters, Func<IEnumerable<ConstructorInfo>, ConstructorInfo?> constructorSelector)
         {
             ConstructorInfo[] constructors = type.GetConstructors();
             if (constructors.Length == 0)
@@ -165,12 +163,12 @@ namespace CoreMVVM.IOC.Core
 
         private ParameterInfo[] AddParameterInfo(ConstructorInfo constructor, bool validateParameters)
         {
-            var parameters = constructor.GetParameters();
             if (validateParameters)
             {
-                ValidateParameters(constructor.DeclaringType, parameters);
+                ValidateParameters(constructor);
             }
 
+            var parameters = constructor.GetParameters();
             _parameters[constructor] = parameters;
 
             return parameters;
@@ -180,16 +178,16 @@ namespace CoreMVVM.IOC.Core
 
         #region Utilities
 
-        private static ConstructorInfo DefaultConstructorSelector(IEnumerable<ConstructorInfo> constructors)
+        private static ConstructorInfo? DefaultConstructorSelector(IEnumerable<ConstructorInfo> constructors)
         {
             return constructors.OrderByDescending(c => c.GetParameters().Length)
                 .FirstOrDefault();
         }
 
-        private static void ValidateParameters(Type type, ParameterInfo[] parameters)
+        private static void ValidateParameters(MethodBase method)
         {
             List<ResolveException>? exceptions = null;
-            foreach (var parameter in parameters)
+            foreach (var parameter in method.GetParameters())
             {
                 if (parameter.ParameterType.IsValueType)
                 {
@@ -200,7 +198,7 @@ namespace CoreMVVM.IOC.Core
             if (exceptions != null)
             {
                 var aggregateException = new AggregateException(exceptions);
-                throw new ResolveException($"One or more parameters in the constructor of type '{type}' were invalid.", aggregateException);
+                throw new ResolveException($"One or more parameters in the constructor of type '{method.DeclaringType}' were invalid.", aggregateException);
             }
 
             void addException(string message)

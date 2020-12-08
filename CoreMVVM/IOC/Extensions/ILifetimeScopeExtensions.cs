@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CoreMVVM.IOC
 {
@@ -63,14 +64,10 @@ namespace CoreMVVM.IOC
         /// <exception cref="ArgumentNullException">provider or serviceType is null.</exception>
         public static IEnumerable<object> ResolveServices(this IServiceProvider provider, Type serviceType)
         {
-            if (provider is null) throw new ArgumentNullException(nameof(provider));
             if (serviceType is null) throw new ArgumentNullException(nameof(serviceType));
 
-            if (serviceType.IsValueType)
-                throw new NotSupportedException($"Value types are not supported types for services.");
-
             var enumerable = typeof(IEnumerable<>).MakeGenericType(serviceType);
-            return (IEnumerable<object>)provider.GetService(enumerable);
+            return (IEnumerable<object>)(ResolveService(provider, enumerable) ?? Array.CreateInstance(serviceType, 0));
         }
 
         /// <summary>

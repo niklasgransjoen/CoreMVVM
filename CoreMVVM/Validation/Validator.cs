@@ -24,7 +24,7 @@ namespace CoreMVVM.Validation
                 ValidatableProperty property = properties[i];
 
                 PropertyInfo pInfo = property.PropertyInfo;
-                object value = pInfo.GetValue(context.ValidationModel);
+                var value = pInfo.GetValue(context.ValidationModel);
 
                 result[i] = property.Attribute.Validate(value, pInfo.Name);
             }

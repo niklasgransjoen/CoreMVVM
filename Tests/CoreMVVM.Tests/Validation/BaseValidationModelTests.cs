@@ -31,7 +31,7 @@ namespace CoreMVVM.Tests.Validation
 
         private sealed class AlwaysFalseValidationAttribute : ValidationAttribute
         {
-            protected override bool IsValid(object value)
+            protected override bool IsValid(object? value)
             {
                 return false;
             }
@@ -53,7 +53,7 @@ namespace CoreMVVM.Tests.Validation
 
         private sealed class TrueWhenZeroValidationAttribute : ValidationAttribute
         {
-            protected override bool IsValid(object value)
+            protected override bool IsValid(object? value)
             {
                 return value is int intVal && intVal == 0;
             }

@@ -8,8 +8,8 @@ namespace CoreMVVM.Input
     /// </summary>
     public interface ICommandCanExecuteChangedSubscriptionForwarder
     {
-        void Subscribe(EventHandler eventHandler);
+        void Subscribe(EventHandler? eventHandler);
 
-        void Unsubscribe(EventHandler eventHandler);
+        void Unsubscribe(EventHandler? eventHandler);
     }
 }
