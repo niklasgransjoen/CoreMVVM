@@ -18,7 +18,7 @@
     <RepositoryUrl>https://github.com/vivianvea/CoreMVVM</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>MVVM</PackageTags>
-    <Version>2.1.0.1</Version>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
