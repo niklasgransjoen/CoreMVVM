@@ -7,10 +7,10 @@ namespace CoreMVVM.IOC.Core.Tests
     {
         protected LifetimeScopeTestBase()
         {
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             RegisterComponents(builder);
 
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
             LifetimeScope = container;
         }

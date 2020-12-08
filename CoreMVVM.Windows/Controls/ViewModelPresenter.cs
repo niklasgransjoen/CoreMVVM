@@ -15,7 +15,7 @@ namespace CoreMVVM.Windows
     /// </summary>
     public class ViewModelPresenter : FrameworkElement
     {
-        private readonly Dictionary<Type, FrameworkElement> _cachedViews = new Dictionary<Type, FrameworkElement>();
+        private readonly Dictionary<Type, FrameworkElement> _cachedViews = new();
 
         static ViewModelPresenter()
         {
@@ -62,7 +62,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         public static readonly DependencyProperty CacheViewsProperty =
             DependencyProperty.Register(nameof(CacheViews), typeof(bool), typeof(ViewModelPresenter),
-                new PropertyMetadata(true, CacheViewsPropertyChanged));
+                new FrameworkPropertyMetadata(true, CacheViewsPropertyChanged));
 
         /// <summary>
         /// Gets or sets a value indicating if resolved views should be cached.
@@ -92,7 +92,7 @@ namespace CoreMVVM.Windows
         /// </summary>
         public static readonly DependencyProperty CacheViewsWithDataContextProperty =
             DependencyProperty.Register(nameof(CacheViewsWithDataContext), typeof(bool), typeof(ViewModelPresenter),
-                new PropertyMetadata(false, CacheViewsWithDataContextPropertyChanged));
+                new FrameworkPropertyMetadata(false, CacheViewsWithDataContextPropertyChanged));
 
         /// <summary>
         /// Gets or sets a value indicating if views should be cached without clearing their <see cref="FrameworkElement.DataContext"/>.
@@ -187,7 +187,7 @@ namespace CoreMVVM.Windows
             if (View is null)
                 return finalSize;
 
-            View.Arrange(new Rect(finalSize));
+            View.Arrange(new(finalSize));
             return View.RenderSize;
         }
 

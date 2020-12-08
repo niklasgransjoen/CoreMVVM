@@ -1,5 +1,4 @@
-﻿using System.Security.Permissions;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows.Threading;
 using Xunit;
 
@@ -10,14 +9,14 @@ namespace CoreMVVM.Windows.Threading.Tests
         [Fact]
         public async Task SwitchesThread()
         {
-            Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
+            var dispatcher = Dispatcher.CurrentDispatcher;
 
-            Task threadCheck = PerformDispatcherSwitch(dispatcher);
+            var threadCheck = PerformDispatcherSwitch(dispatcher);
 
             // Make sure dispatcher is invoked before awaiting thread switch task.
             // This is ugly, but works (apparently).
             Assert.True(dispatcher.CheckAccess());
-            for (int i = 0; i < 10_000; i++)
+            for (var i = 0; i < 10_000; i++)
                 DispatcherUtil.DoEvents();
 
             await threadCheck;
@@ -43,7 +42,7 @@ namespace CoreMVVM.Windows.Threading.Tests
         {
             public static void DoEvents()
             {
-                DispatcherFrame frame = new DispatcherFrame();
+                var frame = new DispatcherFrame();
                 Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, new DispatcherOperationCallback(ExitFrame), frame);
                 Dispatcher.PushFrame(frame);
             }

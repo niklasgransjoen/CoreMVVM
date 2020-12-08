@@ -25,7 +25,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesFromSubscope_ToSingleInstance()
         {
-            using ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
+            using var subscope = LifetimeScope.BeginLifetimeScope();
 
             object subject1 = subscope.ResolveRequiredService<IInterface>();
             object subject2 = subscope.ResolveRequiredService<IInterface>();
@@ -36,7 +36,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_UniqueInstance_FromDifferentScopes()
         {
-            ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
+            using var subscope = LifetimeScope.BeginLifetimeScope();
 
             object subject1 = LifetimeScope.ResolveRequiredService<IInterface>();
             object subject2 = subscope.ResolveRequiredService<IInterface>();
@@ -47,8 +47,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
         {
-            ILifetimeScope subscope = LifetimeScope.BeginLifetimeScope();
-            List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
+            var subscope = LifetimeScope.BeginLifetimeScope();
+            var resolvingTasks = new List<Task<IInterface>>
             {
                 Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
                 Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
@@ -59,13 +59,13 @@ namespace CoreMVVM.IOC.Core.Tests
                 Task.Run(() => subscope.ResolveRequiredService<IInterface>()),
             };
 
-            List<IInterface> interfaces = new List<IInterface>();
+            var interfaces = new List<IInterface>();
             foreach (var task in resolvingTasks)
                 interfaces.Add(await task);
 
             while (interfaces.Count > 1)
             {
-                for (int i = 1; i < interfaces.Count; i++)
+                for (var i = 1; i < interfaces.Count; i++)
                     Assert.Same(interfaces[0], interfaces[i]);
 
                 interfaces.RemoveAt(0);

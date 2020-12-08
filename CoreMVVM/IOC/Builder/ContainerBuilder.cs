@@ -8,7 +8,7 @@ namespace CoreMVVM.IOC.Builder
     /// </summary>
     public sealed class ContainerBuilder
     {
-        private readonly ToolBox _toolBox = new ToolBox();
+        private readonly ToolBox _toolBox = new();
 
         #region Constructors
 
@@ -93,7 +93,7 @@ namespace CoreMVVM.IOC.Builder
         /// </summary>
         public IContainer Build()
         {
-            Container container = new Container(_toolBox);
+            var container = new Container(_toolBox);
 
             OnBuild?.Invoke(container);
 

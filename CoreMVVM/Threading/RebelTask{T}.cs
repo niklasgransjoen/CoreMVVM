@@ -32,13 +32,13 @@ namespace CoreMVVM.Threading
 
         public RebelTask(Func<TResult> function, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function, cancellationToken);
+            Task = new(function, cancellationToken);
             _result = default;
         }
 
         public RebelTask(Func<object?, TResult> function, object state, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function, state, cancellationToken);
+            Task = new(function, state, cancellationToken);
             _result = default;
         }
 
@@ -180,15 +180,15 @@ namespace CoreMVVM.Threading
 
         public static implicit operator RebelTask<TResult>(Task<TResult> task)
         {
-            return new RebelTask<TResult>(task);
+            return new(task);
         }
 
         public static implicit operator RebelTask(RebelTask<TResult> rebelTask)
         {
             if (rebelTask.Task is null)
-                return new RebelTask(System.Threading.Tasks.Task.FromResult(rebelTask._result));
+                return new(System.Threading.Tasks.Task.FromResult(rebelTask._result));
 
-            return new RebelTask(rebelTask.Task);
+            return new(rebelTask.Task);
         }
 
         #endregion Operators

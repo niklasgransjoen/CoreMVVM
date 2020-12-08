@@ -14,8 +14,8 @@ namespace CoreMVVM.IOC.Core
         private readonly LifetimeScope? _parent;
         private readonly IResolveUnregisteredInterfaceService? _resolveUnregisteredInterfaceService;
 
-        private readonly ICollection<IDisposable> _disposables = new List<IDisposable>();
-        private readonly HashSet<IRegistration> _resolvingScopedComponents = new HashSet<IRegistration>();
+        private readonly List<IDisposable> _disposables = new();
+        private readonly HashSet<IRegistration> _resolvingScopedComponents = new();
 
         public LifetimeScope(ToolBox toolBox)
         {
@@ -34,7 +34,7 @@ namespace CoreMVVM.IOC.Core
         /// <summary>
         /// Gets a collection of resolved instances with limited scoping.
         /// </summary>
-        public Dictionary<(Type concreteType, IRegistration registration), object> ResolvedInstances { get; } = new Dictionary<(Type, IRegistration), object>();
+        public Dictionary<(Type concreteType, IRegistration registration), object> ResolvedInstances { get; } = new();
 
         #endregion Properties
 
@@ -54,7 +54,7 @@ namespace CoreMVVM.IOC.Core
             if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ILifetimeScope));
 
-            ILifetimeScope childScope = new LifetimeScope(_toolBox, this);
+            var childScope = new LifetimeScope(_toolBox, this);
             _disposables.Add(childScope);
 
             return childScope;
@@ -485,10 +485,10 @@ namespace CoreMVVM.IOC.Core
             ParameterInfo parameter = null!;
             foreach (ConstructorInfo c in constructors)
             {
-                ParameterInfo[] parameters = c.GetParameters();
+                var parameters = c.GetParameters();
                 if (parameters.Length == 1)
                 {
-                    Type paramType = parameters[0].ParameterType;
+                    var paramType = parameters[0].ParameterType;
                     if (paramType.IsGenericType && paramType.GetGenericTypeDefinition() == typeof(Func<>) &&
                         paramType.GenericTypeArguments[0] == type.GenericTypeArguments[0])
                     {
@@ -500,8 +500,8 @@ namespace CoreMVVM.IOC.Core
                 }
             }
 
-            Func<object> factory = ConstructFactory(parameter.ParameterType, isOwned);
-            object[] args = new object[] { factory };
+            var factory = ConstructFactory(parameter.ParameterType, isOwned);
+            var args = new object[] { factory };
 
             return constructor.Invoke(args);
         }

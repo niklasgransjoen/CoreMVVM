@@ -21,9 +21,9 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Fallback_Caches()
         {
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
             var service = (ResolveLoggerService)container.ResolveRequiredService<IResolveUnregisteredInterfaceService>();
             service.Cache = true;
@@ -43,9 +43,9 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Fallback_DoesNot_Cache()
         {
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             builder.RegisterSingleton<ResolveLoggerService>().As<IResolveUnregisteredInterfaceService>();
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
             var service = (ResolveLoggerService)container.ResolveRequiredService<IResolveUnregisteredInterfaceService>();
             service.Cache = false;

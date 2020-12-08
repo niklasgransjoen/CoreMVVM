@@ -12,8 +12,8 @@ namespace CoreMVVM.Threading.Tests
             await Await1();
             await Await2();
 
-            string res1 = await Await3();
-            string res2 = await Await4();
+            var res1 = await Await3();
+            var res2 = await Await4();
 
             Assert.Equal("JOIN THE ASCENDENCY!", res1);
             Assert.Equal("WHAT'S UP DANGER", res2);
@@ -22,24 +22,24 @@ namespace CoreMVVM.Threading.Tests
         [Fact]
         public async Task RebelTask_Awaits_CompleteTask()
         {
-            int threadID = Thread.CurrentThread.ManagedThreadId;
+            var threadID = Thread.CurrentThread.ManagedThreadId;
 
             await RebelTask.CompletedTask;
 
-            int currentThreadID = Thread.CurrentThread.ManagedThreadId;
+            var currentThreadID = Thread.CurrentThread.ManagedThreadId;
             Assert.Equal(threadID, currentThreadID);
         }
 
         [Fact]
         public async Task RebelTask_Returns_WrappedResult()
         {
-            string strExp = "JOIN THE ASCENDENCY!";
-            string strRes = await RebelTask.FromResult(strExp);
+            var strExp = "JOIN THE ASCENDENCY!";
+            var strRes = await RebelTask.FromResult(strExp);
 
             Assert.Equal(strExp, strRes);
 
-            bool boolExp = true;
-            bool boolRes = await RebelTask.FromResult(boolExp);
+            var boolExp = true;
+            var boolRes = await RebelTask.FromResult(boolExp);
 
             Assert.Equal(boolExp, boolRes);
         }
@@ -47,13 +47,13 @@ namespace CoreMVVM.Threading.Tests
         [Fact]
         public async Task RebelTask_Returns_Result()
         {
-            string strExp = "JOIN THE ASCENDENCY!";
-            string strRes = await new RebelTask<string>(Task.Run(() => strExp));
+            var strExp = "JOIN THE ASCENDENCY!";
+            var strRes = await new RebelTask<string>(Task.Run(() => strExp));
 
             Assert.Equal(strExp, strRes);
 
-            bool boolExp = true;
-            bool boolRes = await new RebelTask<bool>(Task.Run(() => boolExp));
+            var boolExp = true;
+            var boolRes = await new RebelTask<bool>(Task.Run(() => boolExp));
 
             Assert.Equal(boolExp, boolRes);
         }
@@ -69,7 +69,7 @@ namespace CoreMVVM.Threading.Tests
         public async Task GenericRebelTask_Supports_Default()
         {
             var task = default(RebelTask<int>);
-            int result = await task;
+            var result = await task;
 
             Assert.Equal(0, result);
         }

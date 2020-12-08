@@ -17,7 +17,7 @@ namespace CoreMVVM.Validation
                 throw new ArgumentNullException(nameof(context));
 
             var properties = context.GetProperties();
-            ValidationResult[] result = new ValidationResult[properties.Count];
+            var result = new ValidationResult[properties.Count];
 
             for (int i = 0; i < properties.Count; i++)
             {

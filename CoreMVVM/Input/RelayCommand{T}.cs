@@ -13,7 +13,7 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
-        public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
+        public static RelayCommand<T> Empty { get; } = new(() => { });
 
 #pragma warning restore CA1000 // Do not declare static members on generic types
 

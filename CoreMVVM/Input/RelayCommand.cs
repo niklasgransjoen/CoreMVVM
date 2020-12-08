@@ -23,7 +23,7 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
-        public static RelayCommand Empty { get; } = new RelayCommand(() => { });
+        public static RelayCommand Empty { get; } = new(() => { });
 
         #region Fields
 

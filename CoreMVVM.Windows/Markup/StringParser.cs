@@ -43,7 +43,7 @@ namespace CoreMVVM.Windows.Markup
                 _binder = lifetimeScope.ResolveRequiredService<StringParserBinder>();
             }
 
-            Binding binding = new Binding($"[{Value}]")
+            var binding = new Binding($"[{Value}]")
             {
                 Mode = BindingMode.OneWay,
                 Source = _binder,

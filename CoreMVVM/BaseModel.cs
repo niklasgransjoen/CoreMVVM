@@ -43,7 +43,7 @@ namespace CoreMVVM
         /// Invokes the <see cref="PropertyChanged"/> event on a property.
         /// </summary>
         /// <param name="name">The name of the property to invoke the event on.</param>
-        protected void RaisePropertyChanged(string? name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void RaisePropertyChanged(string? name) => PropertyChanged?.Invoke(this, new(name));
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on the calling member (should be a property).
@@ -53,7 +53,7 @@ namespace CoreMVVM
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on all properties.
         /// </summary>
-        protected void RaiseAllPropertiesChanged() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+        protected void RaiseAllPropertiesChanged() => PropertyChanged?.Invoke(this, new(null));
 
         #endregion Protected methods
     }

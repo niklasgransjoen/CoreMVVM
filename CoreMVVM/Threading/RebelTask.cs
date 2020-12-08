@@ -20,9 +20,9 @@ namespace CoreMVVM.Threading
     public readonly struct RebelTask : IEquatable<RebelTask>
     {
 #if NETCORE || NETSTANDARD
-        public static RebelTask CompletedTask { get; } = new RebelTask(Task.CompletedTask);
+        public static RebelTask CompletedTask { get; } = new(Task.CompletedTask);
 #else
-        public static RebelTask CompletedTask { get; } = new RebelTask(Task.FromResult<object?>(null));
+        public static RebelTask CompletedTask { get; } = new(Task.FromResult<object?>(null));
 #endif
 
         #region Constructors
@@ -34,17 +34,17 @@ namespace CoreMVVM.Threading
 
         public RebelTask(Action action, CancellationToken cancellationToken = default)
         {
-            Task = new Task(action, cancellationToken);
+            Task = new(action, cancellationToken);
         }
 
         public RebelTask(Action<object?> action, object state, CancellationToken cancellationToken = default)
         {
-            Task = new Task(action, state, cancellationToken);
+            Task = new(action, state, cancellationToken);
         }
 
         public static RebelTask<TResult> FromResult<TResult>(TResult result)
         {
-            return new RebelTask<TResult>(result);
+            return new(result);
         }
 
         #endregion Constructors
@@ -103,49 +103,49 @@ namespace CoreMVVM.Threading
         public static RebelTask Delay(int millisecondsDelay, CancellationToken cancellationToken = default)
         {
             Task result = Task.Delay(millisecondsDelay, cancellationToken);
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask Delay(TimeSpan delay, CancellationToken cancellationToken = default)
         {
             Task result = Task.Delay(delay, cancellationToken);
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask Run(Action action, CancellationToken cancellationToken = default)
         {
             Task result = Task.Run(action, cancellationToken);
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask<TResult> Run<TResult>(Func<TResult> action, CancellationToken cancellationToken = default)
         {
             Task<TResult> result = Task.Run(action, cancellationToken);
-            return new RebelTask<TResult>(result);
+            return new(result);
         }
 
         public static RebelTask Run(Func<RebelTask> action, CancellationToken cancellationToken = default)
         {
             Task result = Task.Run(() => action().Task, cancellationToken);
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask<TResult> Run<TResult>(Func<RebelTask<TResult>> action, CancellationToken cancellationToken = default)
         {
             Task<TResult> result = Task.Run(() => action().Task, cancellationToken);
-            return new RebelTask<TResult>(result);
+            return new(result);
         }
 
         public static RebelTask Run(Func<Task> action, CancellationToken cancellationToken = default)
         {
             Task result = Task.Run(action, cancellationToken);
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask<TResult> Run<TResult>(Func<Task<TResult>> action, CancellationToken cancellationToken = default)
         {
             Task<TResult> result = Task.Run(action, cancellationToken);
-            return new RebelTask<TResult>(result);
+            return new(result);
         }
 
         public static RebelTask WhenAll(params RebelTask[] tasks) => WhenAll((IReadOnlyCollection<RebelTask>)tasks);
@@ -168,7 +168,7 @@ namespace CoreMVVM.Threading
                 .OfType<Task>();
             var result = Task.WhenAll(wrappedTasks);
 
-            return new RebelTask(result);
+            return new(result);
         }
 
         public static RebelTask<TResult[]> WhenAll<TResult>(params RebelTask<TResult>[] tasks) => WhenAll((IReadOnlyCollection<RebelTask<TResult>>)tasks);
@@ -197,7 +197,7 @@ namespace CoreMVVM.Threading
 
             var result = Task.WhenAll(wrappedTasks);
 
-            return new RebelTask<TResult[]>(result);
+            return new(result);
         }
 
         #endregion Static utilities
@@ -238,7 +238,7 @@ namespace CoreMVVM.Threading
 
         public static implicit operator RebelTask(Task task)
         {
-            return new RebelTask(task);
+            return new(task);
         }
 
         #endregion Operators

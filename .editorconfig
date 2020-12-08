@@ -57,7 +57,14 @@ dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
 dotnet_naming_rule.interfaces_begins_with_i.style = interface_pascal_case
 dotnet_naming_rule.interfaces_begins_with_i.severity = suggestion
 
-# Temp suppress index and range operator suggestions (only available for .NET Core targets)
+### General
+
+# Implicit types
+csharp_style_var_for_built_in_types=true:error
+csharp_style_var_when_type_is_apparent=true:error
+csharp_style_var_elsewhere=true:error
+
+### Temp suppress index and range operator suggestions (only available for .NET Core targets)
 
 # IDE0057: Use range operator
 dotnet_diagnostic.IDE0057.severity = none
@@ -65,7 +72,7 @@ dotnet_diagnostic.IDE0057.severity = none
 # IDE0056: Use index operator
 dotnet_diagnostic.IDE0056.severity = none
 
-# Temp suppress xml warnings
+### Temp suppress xml warnings
 
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = none

@@ -12,11 +12,11 @@ namespace CoreMVVM.IOC.Core
     /// </summary>
     internal sealed class ToolBox
     {
-        private readonly Dictionary<(Type implementationType, ComponentScope scope), IRegistration> _registrationMap = new Dictionary<(Type implementationType, ComponentScope scope), IRegistration>();
-        private readonly Dictionary<Type, List<IRegistration>> _registrations = new Dictionary<Type, List<IRegistration>>();
+        private readonly Dictionary<(Type implementationType, ComponentScope scope), IRegistration> _registrationMap = new();
+        private readonly Dictionary<Type, List<IRegistration>> _registrations = new();
 
-        private readonly Dictionary<Type, ConstructorInfo> _constructors = new Dictionary<Type, ConstructorInfo>();
-        private readonly Dictionary<ConstructorInfo, ParameterInfo[]> _parameters = new Dictionary<ConstructorInfo, ParameterInfo[]>();
+        private readonly Dictionary<Type, ConstructorInfo> _constructors = new();
+        private readonly Dictionary<ConstructorInfo, ParameterInfo[]> _parameters = new();
 
         public ToolBox()
         {
@@ -113,7 +113,7 @@ namespace CoreMVVM.IOC.Core
 
             if (!_registrations.TryGetValue(serviceType, out var serviceRegistrations))
             {
-                serviceRegistrations = new List<IRegistration>();
+                serviceRegistrations = new();
                 _registrations.Add(serviceType, serviceRegistrations);
             }
             serviceRegistrations.Add(registration);
@@ -203,9 +203,7 @@ namespace CoreMVVM.IOC.Core
 
             void addException(string message)
             {
-                if (exceptions == null)
-                    exceptions = new List<ResolveException>();
-
+                exceptions ??= new();
                 exceptions.Add(new ResolveException(message));
             }
         }

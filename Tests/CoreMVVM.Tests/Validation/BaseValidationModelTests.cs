@@ -10,7 +10,7 @@ namespace CoreMVVM.Tests.Validation
 
         public BaseValidationModelTests()
         {
-            _validationModel = new ValidationModel();
+            _validationModel = new();
             _validationModel.ErrorsChanged += Model_ErrorsChanged;
         }
 
@@ -25,7 +25,7 @@ namespace CoreMVVM.Tests.Validation
         public void ValidationModel_Raises_ErrorsChanged()
         {
             Assert.Equal(0, _errorsChangedCount);
-            _validationModel.SimpleProperty = new object();
+            _validationModel.SimpleProperty = new();
             Assert.Equal(1, _errorsChangedCount);
         }
 
