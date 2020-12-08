@@ -54,7 +54,7 @@ namespace CoreMVVM
 
         public string Value { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is StringTagPair other && Equals(other);
         }

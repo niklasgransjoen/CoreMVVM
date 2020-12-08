@@ -11,10 +11,10 @@ namespace CoreMVVM.IOC.Builder.Tests
         [Fact]
         public void RegistrationBuilder_OverridesOnDuplicate()
         {
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             builder.RegisterTransient<Impl1>().As<ISimple>();
             builder.RegisterTransient<Impl2>().As<ISimple>();
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
             var instance = container.ResolveRequiredService<ISimple>();
             Assert.IsType<Impl2>(instance);

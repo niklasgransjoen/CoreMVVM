@@ -1,6 +1,5 @@
 ﻿using CoreMVVM.IOC.Builder;
 using CoreMVVM.Tests;
-using System;
 using Xunit;
 
 namespace CoreMVVM.IOC.Tests
@@ -10,12 +9,12 @@ namespace CoreMVVM.IOC.Tests
         [Fact]
         public void Owned_Downcasts()
         {
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             builder.RegisterTransient<Implementation>().As<IInterface>();
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
-            IOwned<IInterface> instance = container.ResolveRequiredService<IOwned<IInterface>>();
-            Exception e = Record.Exception(() =>
+            var instance = container.ResolveRequiredService<IOwned<IInterface>>();
+            var e = Record.Exception(() =>
             {
                 IOwned<object> downcastOwned = instance;
             });

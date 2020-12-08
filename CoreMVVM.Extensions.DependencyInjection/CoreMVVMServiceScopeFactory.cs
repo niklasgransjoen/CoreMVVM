@@ -27,7 +27,7 @@ namespace CoreMVVM.Extensions.DependencyInjection
 
         public CoreMVVMServiceScopeFactory(IContainer container)
         {
-            _scopeableILifetimeScope = new ScopeableILifetimeScope(container);
+            _scopeableILifetimeScope = new(container);
         }
 
         public IServiceProvider ServiceProvider => _scopeableILifetimeScope;
@@ -65,7 +65,7 @@ namespace CoreMVVM.Extensions.DependencyInjection
         /// </summary>
         private sealed class ScopeableILifetimeScope : ILifetimeScope
         {
-            private readonly Stack<ILifetimeScope> _scopes = new Stack<ILifetimeScope>();
+            private readonly Stack<ILifetimeScope> _scopes = new();
 
             public ScopeableILifetimeScope(ILifetimeScope initialScope)
             {
@@ -90,7 +90,7 @@ namespace CoreMVVM.Extensions.DependencyInjection
                     _scopes.Pop();
             }
 
-            public object GetService(Type serviceType)
+            public object? GetService(Type serviceType)
             {
                 if (serviceType == typeof(IServiceProvider))
                     return this;

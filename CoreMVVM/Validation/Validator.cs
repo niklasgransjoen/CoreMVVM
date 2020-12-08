@@ -17,14 +17,14 @@ namespace CoreMVVM.Validation
                 throw new ArgumentNullException(nameof(context));
 
             var properties = context.GetProperties();
-            ValidationResult[] result = new ValidationResult[properties.Count];
+            var result = new ValidationResult[properties.Count];
 
             for (int i = 0; i < properties.Count; i++)
             {
                 ValidatableProperty property = properties[i];
 
                 PropertyInfo pInfo = property.PropertyInfo;
-                object value = pInfo.GetValue(context.ValidationModel);
+                var value = pInfo.GetValue(context.ValidationModel);
 
                 result[i] = property.Attribute.Validate(value, pInfo.Name);
             }

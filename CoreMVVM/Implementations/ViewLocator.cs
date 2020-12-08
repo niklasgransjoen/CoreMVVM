@@ -11,7 +11,7 @@ namespace CoreMVVM.Implementations
     /// </summary>
     public sealed class ViewLocator : IViewLocator
     {
-        private readonly Dictionary<Type, Type> _viewCache = new Dictionary<Type, Type>();
+        private readonly Dictionary<Type, Type> _viewCache = new();
 
         private readonly ILifetimeScope _lifetimeScope;
         private readonly IViewProvider[] _viewProviders;
@@ -136,7 +136,7 @@ namespace CoreMVVM.Implementations
 
         private ViewProviderContext? LocateViewType(Type viewModelType)
         {
-            ViewProviderContext context = new ViewProviderContext(viewModelType);
+            var context = new ViewProviderContext(viewModelType);
             foreach (var viewProvider in _viewProviders)
             {
                 // Keep going until a provider finds the view.

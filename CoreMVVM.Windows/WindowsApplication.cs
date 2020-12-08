@@ -34,7 +34,7 @@ namespace CoreMVVM.Windows
         {
             base.OnStartup(e);
 
-            ContainerBuilder builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
 
             builder.AddWindowsServices();
 

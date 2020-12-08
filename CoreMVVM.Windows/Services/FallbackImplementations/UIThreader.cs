@@ -13,11 +13,11 @@ namespace CoreMVVM.Windows.FallbackImplementations
     public class UIThreader : IUIThreader, IDisposable
     {
         private bool _isDisposed;
-        private readonly object _disposeLock = new object();
+        private readonly object _disposeLock = new();
 
-        private readonly Timer _timer = new Timer(interval: 1);
-        private readonly List<Action> _scheduledActions = new List<Action>();
-        private readonly object _scheduleLock = new object();
+        private readonly Timer _timer = new(interval: 1);
+        private readonly List<Action> _scheduledActions = new();
+        private readonly object _scheduleLock = new();
 
         #region Construct & Dispose
 

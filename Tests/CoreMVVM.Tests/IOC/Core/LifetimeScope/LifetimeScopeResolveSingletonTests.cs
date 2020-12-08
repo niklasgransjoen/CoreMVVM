@@ -30,8 +30,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Resolves_InterfaceAndImplementation_ToSameInstance()
         {
-            IInterface s1 = LifetimeScope.ResolveRequiredService<IInterface>();
-            Implementation s2 = LifetimeScope.ResolveRequiredService<Implementation>();
+            var s1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            var s2 = LifetimeScope.ResolveRequiredService<Implementation>();
 
             Assert.Same(s1, s2);
         }
@@ -39,8 +39,8 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_ResolvesSingleton_FromSubScope()
         {
-            IInterface instance1 = LifetimeScope.ResolveRequiredService<IInterface>();
-            IInterface instance2 = LifetimeScope.BeginLifetimeScope().ResolveRequiredService<IInterface>();
+            var instance1 = LifetimeScope.ResolveRequiredService<IInterface>();
+            var instance2 = LifetimeScope.BeginLifetimeScope().ResolveRequiredService<IInterface>();
 
             Assert.Same(instance1, instance2);
         }
@@ -81,7 +81,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public async Task LifetimeScope_ResolveSingleton_ThreadSafe()
         {
-            List<Task<IInterface>> resolvingTasks = new List<Task<IInterface>>
+            var resolvingTasks = new List<Task<IInterface>>
             {
                 Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
                 Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
@@ -92,13 +92,13 @@ namespace CoreMVVM.IOC.Core.Tests
                 Task.Run(() => LifetimeScope.ResolveRequiredService<IInterface>()),
             };
 
-            List<IInterface> interfaces = new List<IInterface>();
+            var interfaces = new List<IInterface>();
             foreach (var task in resolvingTasks)
                 interfaces.Add(await task);
 
             while (interfaces.Count > 1)
             {
-                for (int i = 1; i < interfaces.Count; i++)
+                for (var i = 1; i < interfaces.Count; i++)
                     Assert.Same(interfaces[0], interfaces[i]);
 
                 interfaces.RemoveAt(0);
@@ -110,7 +110,7 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             using var subscope = LifetimeScope.BeginLifetimeScope();
 
-            SimpleSingleton disposable = subscope.ResolveRequiredService<SimpleSingleton>();
+            var disposable = subscope.ResolveRequiredService<SimpleSingleton>();
             Assert.Same(LifetimeScope, disposable.LifetimeScope);
         }
 
@@ -152,13 +152,12 @@ namespace CoreMVVM.IOC.Core.Tests
         [Scope(ComponentScope.Singleton)]
         private sealed class MultiInterfaceClass : IInterface1, IInterface2 { }
 
-
-
         [Scope(ComponentScope.Singleton)]
         private sealed class SingletonService2
         {
             public SingletonService2(SingletonService3 singletonService3)
             {
+                GC.KeepAlive(singletonService3);
             }
         }
 
@@ -167,10 +166,9 @@ namespace CoreMVVM.IOC.Core.Tests
         {
             public SingletonService3(SingletonService2 singletonService2)
             {
+                GC.KeepAlive(singletonService2);
             }
         }
-
-
 
         #endregion Resources
     }

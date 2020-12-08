@@ -20,10 +20,7 @@ namespace CoreMVVM.CompilerServices
         {
         }
 
-        public static RebelTaskMethodBuilder Create()
-        {
-            return new RebelTaskMethodBuilder();
-        }
+        public static RebelTaskMethodBuilder Create() => new();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Start<TStateMachine>(ref TStateMachine stateMachine)
@@ -60,7 +57,7 @@ namespace CoreMVVM.CompilerServices
         public RebelTask Task
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => new RebelTask(_builder.Task);
+            get => new(_builder.Task);
         }
 
         public void SetResult()
@@ -84,10 +81,7 @@ namespace CoreMVVM.CompilerServices
         {
         }
 
-        public static RebelTaskMethodBuilder<TResult> Create()
-        {
-            return new RebelTaskMethodBuilder<TResult>();
-        }
+        public static RebelTaskMethodBuilder<TResult> Create() => new();
 
         public void SetResult(TResult result)
         {
@@ -124,7 +118,7 @@ namespace CoreMVVM.CompilerServices
             _builder.SetStateMachine(stateMachine);
         }
 
-        public RebelTask<TResult> Task => new RebelTask<TResult>(_builder.Task);
+        public RebelTask<TResult> Task => new(_builder.Task);
 
         internal object ObjectIdForDebugger { get; } = Guid.NewGuid();
     }

@@ -13,7 +13,7 @@ namespace CoreMVVM.Input
         /// <summary>
         /// Gets a reference to an empty relay command.
         /// </summary>
-        public static RelayCommand<T> Empty { get; } = new RelayCommand<T>(() => { });
+        public static RelayCommand<T> Empty { get; } = new(() => { });
 
 #pragma warning restore CA1000 // Do not declare static members on generic types
 
@@ -123,7 +123,7 @@ namespace CoreMVVM.Input
         ///<summary>
         /// Occurs when changes occur that affect whether or not the command should execute.
         ///</summary>
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add
             {

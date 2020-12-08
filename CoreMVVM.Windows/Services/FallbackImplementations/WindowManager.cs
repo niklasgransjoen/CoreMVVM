@@ -71,7 +71,7 @@ namespace CoreMVVM.Windows.FallbackImplementations
 
         private static Window CastWindowAndAssignOwner(Type viewModelType, object view, Window? owner)
         {
-            if (!(view is Window window))
+            if (view is not Window window)
                 throw new InvalidOperationException($"View resolved for view model '{viewModelType}' is of type '{view.GetType()}', which does not inherit from '{typeof(Window)}'.");
 
             window.Owner = owner;

@@ -14,7 +14,7 @@ namespace CoreMVVM.Validation
     {
         #region Fields
 
-        private readonly Dictionary<string, IEnumerable<string>> _errors = new Dictionary<string, IEnumerable<string>>();
+        private readonly Dictionary<string, IEnumerable<string>> _errors = new();
 
         #endregion Fields
 
@@ -48,12 +48,12 @@ namespace CoreMVVM.Validation
         /// </summary>
         /// <param name="propertyName">The name of the property to retrieve validation errors for; or null or <see cref="string.Empty"/>,
         /// to retrieve entity-level errors.</param>
-        public IEnumerable GetErrors(string propertyName)
+        public IEnumerable GetErrors(string? propertyName)
         {
             if (string.IsNullOrEmpty(propertyName))
                 return _errors.SelectMany(e => e.Value);
 
-            if (_errors.TryGetValue(propertyName, out IEnumerable<string> errors))
+            if (_errors.TryGetValue(propertyName!, out var errors))
                 return errors;
 
             return Enumerable.Empty<string>();
@@ -90,8 +90,8 @@ namespace CoreMVVM.Validation
         /// <param name="propertyName">The name of the property to validate.</param>
         protected void ValidateProperty(string? propertyName)
         {
-            ValidationContext context = new ValidationContext(this, propertyName);
-            ValidationResult[] results = Validator.Validate(context);
+            var context = new ValidationContext(this, propertyName);
+            var results = Validator.Validate(context);
 
             var groupedResult = results.GroupBy(r => r.PropertyName);
             foreach (var result in groupedResult)
@@ -135,7 +135,7 @@ namespace CoreMVVM.Validation
         /// Invokes the <see cref="PropertyChanged"/> event on a property.
         /// </summary>
         /// <param name="name">The name of the property to invoke the event on.</param>
-        protected void RaisePropertyChanged(string? name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void RaisePropertyChanged(string? name) => PropertyChanged?.Invoke(this, new(name));
 
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on the calling member (should be a property).
@@ -145,13 +145,13 @@ namespace CoreMVVM.Validation
         /// <summary>
         /// Invokes the <see cref="PropertyChanged"/> event on all properties.
         /// </summary>
-        protected void RaiseAllPropertiesChanged() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+        protected void RaiseAllPropertiesChanged() => PropertyChanged?.Invoke(this, new(null));
 
         /// <summary>
         /// Invokes the <see cref="ErrorsChanged"/> event on a property.
         /// </summary>
         /// <param name="name">The name of the property to invoke the event on.</param>
-        protected void RaiseErrorsChanged(string name) => ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(name));
+        protected void RaiseErrorsChanged(string name) => ErrorsChanged?.Invoke(this, new(name));
 
         #endregion Protected methods
     }

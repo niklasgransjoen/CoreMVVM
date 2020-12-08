@@ -14,15 +14,9 @@
             ErrorMessage = errorMessage;
         }
 
-        public static ValidationResult Success(string propertyName)
-        {
-            return new ValidationResult(propertyName, true, null);
-        }
+        public static ValidationResult Success(string propertyName) => new(propertyName, true, null);
 
-        public static ValidationResult Fail(string propertyName, string errorMessage)
-        {
-            return new ValidationResult(propertyName, false, errorMessage);
-        }
+        public static ValidationResult Fail(string propertyName, string errorMessage) => new(propertyName, false, errorMessage);
 
         #endregion Constructors
 

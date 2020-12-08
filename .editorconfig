@@ -1,10 +1,9 @@
 ﻿# This file configures the VS editor for project wide properties
 
-root = true
-
 [*.cs]
 # Naming styles
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.camel_case_style.capitalization = camel_case
 
 dotnet_naming_style.underscore_camel_case_style.capitalization = camel_case
 dotnet_naming_style.underscore_camel_case_style.required_prefix = _
@@ -22,16 +21,25 @@ dotnet_naming_symbols.constant_symbols.required_modifiers = const
 dotnet_naming_rule.constants_pascal_cased.style = pascal_case_style
 dotnet_naming_rule.constants_pascal_cased.severity = suggestion
 
-# Non-fields are to be styled as PascalCase
-dotnet_naming_rule.non_fields_pascal_cased.symbols = non_field_symbols
+# Public members are to be styled as PascalCase
+dotnet_naming_rule.public_members_pascal_cased.symbols = public_symbols
 
-dotnet_naming_symbols.non_field_symbols.applicable_kinds = property, method, event
-dotnet_naming_symbols.non_field_symbols.applicable_accessibilities = *
+dotnet_naming_symbols.public_symbols.applicable_kinds = property, method, event, field
+dotnet_naming_symbols.public_symbols.applicable_accessibilities = public, internal
 
-dotnet_naming_rule.non_fields_pascal_cased.style = pascal_case_style
-dotnet_naming_rule.non_fields_pascal_cased.severity = suggestion
+dotnet_naming_rule.public_members_pascal_cased.style = pascal_case_style
+dotnet_naming_rule.public_members_pascal_cased.severity = suggestion
 
-# Private fields and events are to be styled as _camelCase
+# Protected members are to be styles as camelCase
+dotnet_naming_rule.protected_members_pascal_cased.symbols = protected_symbols
+
+dotnet_naming_symbols.protected_symbols.applicable_kinds = event, field
+dotnet_naming_symbols.protected_symbols.applicable_accessibilities = protected
+
+dotnet_naming_rule.protected_members_pascal_cased.style = camel_case_style
+dotnet_naming_rule.protected_members_pascal_cased.severity = suggestion
+
+# Private fields are to be styled as _camelCase
 dotnet_naming_rule.private_fields_camel_cased.symbols = private_field_symbols
 
 dotnet_naming_symbols.private_field_symbols.applicable_kinds = field, event
@@ -49,14 +57,22 @@ dotnet_naming_symbols.interface_symbols.applicable_accessibilities = *
 dotnet_naming_rule.interfaces_begins_with_i.style = interface_pascal_case
 dotnet_naming_rule.interfaces_begins_with_i.severity = suggestion
 
-# CA1030: Use events where appropriate
-dotnet_diagnostic.CA1030.severity = none
+### General
 
-# CA1062: Validate arguments of public methods
-dotnet_diagnostic.CA1062.severity = error
+# Implicit types
+csharp_style_var_for_built_in_types=true:error
+csharp_style_var_when_type_is_apparent=true:error
+csharp_style_var_elsewhere=true:error
 
+### Temp suppress index and range operator suggestions (only available for .NET Core targets)
 
-# Temp suppress xml warnings
+# IDE0057: Use range operator
+dotnet_diagnostic.IDE0057.severity = none
+
+# IDE0056: Use index operator
+dotnet_diagnostic.IDE0056.severity = none
+
+### Temp suppress xml warnings
 
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = none

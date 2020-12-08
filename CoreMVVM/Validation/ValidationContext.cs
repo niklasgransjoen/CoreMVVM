@@ -57,16 +57,12 @@ namespace CoreMVVM.Validation
             if (!string.IsNullOrEmpty(PropertyName))
                 properties = properties.Where(p => p.Name == PropertyName);
 
-            List<ValidatableProperty> result = new List<ValidatableProperty>();
-            foreach (PropertyInfo property in properties)
+            var result = new List<ValidatableProperty>();
+            foreach (var property in properties)
             {
-                IEnumerable<Attribute> attributes = property.GetCustomAttributes();
-                foreach (Attribute attribute in attributes)
+                foreach (var attribute in property.GetCustomAttributes<ValidationAttribute>())
                 {
-                    if (attribute is ValidationAttribute validationAttribute)
-                    {
-                        result.Add(new ValidatableProperty(property, validationAttribute));
-                    }
+                    result.Add(new(property, attribute));
                 }
             }
 

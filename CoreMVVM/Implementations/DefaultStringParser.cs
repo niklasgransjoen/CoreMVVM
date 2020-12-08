@@ -55,9 +55,9 @@ namespace CoreMVVM.Implementations
                 if (output is null)
                 {
                     if (pos == 0)
-                        output = new StringBuilder();
+                        output = new();
                     else
-                        output = new StringBuilder(value, 0, pos, pos + 16);
+                        output = new(value, 0, pos, pos + 16);
                 }
                 else
                 {

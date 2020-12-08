@@ -10,7 +10,7 @@ namespace CoreMVVM
     /// </summary>
     public abstract class BaseDialog : BaseValidationModel, IDialog
     {
-        private readonly TaskCompletionSource<int> _taskCompletionSource = new TaskCompletionSource<int>();
+        private readonly TaskCompletionSource<int> _taskCompletionSource = new();
 
         protected BaseDialog()
         {
@@ -52,7 +52,7 @@ namespace CoreMVVM
     /// </summary>
     public abstract class BaseDialog<TResult> : BaseValidationModel, IDialog<TResult>
     {
-        private readonly TaskCompletionSource<TResult> _taskCompletionSource = new TaskCompletionSource<TResult>();
+        private readonly TaskCompletionSource<TResult> _taskCompletionSource = new();
 
         protected BaseDialog()
         {

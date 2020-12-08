@@ -49,7 +49,7 @@ namespace CoreMVVM.IOC.Core.Tests
         [Fact]
         public void LifetimeScope_Initializes_NestedTypes_Once()
         {
-            InitClass2 instance = (InitClass2)LifetimeScope.ResolveRequiredService<IInit>();
+            var instance = (InitClass2)LifetimeScope.ResolveRequiredService<IInit>();
 
             Assert.Equal(1, instance.InitClass.InitializationCount);
         }

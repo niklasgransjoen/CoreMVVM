@@ -7,7 +7,7 @@ namespace CoreMVVM.IOC.Builder.Tests
 {
     public class ContainerBuilderTests
     {
-        private readonly ContainerBuilder _builder = new ContainerBuilder();
+        private readonly ContainerBuilder _builder = new();
 
         #region No scope
 
@@ -15,14 +15,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetTypes))]
         public void Builder_Registers(Type type)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterTransient(type);
+            var regBuilder = _builder.RegisterTransient(type);
             ValidateRegistrationBuilder(regBuilder, type, ComponentScope.Transient);
         }
 
         [Fact]
         public void Builder_Registers_Generics()
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterTransient<IInterface>();
+            var regBuilder = _builder.RegisterTransient<IInterface>();
             ValidateRegistrationBuilder(regBuilder, typeof(IInterface), ComponentScope.Transient);
         }
 
@@ -30,7 +30,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetFactories))]
         public void Builder_Registers_Factories(Func<ILifetimeScope, object> factory)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterTransient(factory);
+            var regBuilder = _builder.RegisterTransient(factory);
             ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.Transient);
         }
 
@@ -42,14 +42,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetTypes))]
         public void Builder_Registers_Singleton(Type type)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterSingleton(type);
+            var regBuilder = _builder.RegisterSingleton(type);
             ValidateRegistrationBuilder(regBuilder, type, ComponentScope.Singleton);
         }
 
         [Fact]
         public void Builder_Registers_GenericSingleton()
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterSingleton<Class>();
+            var regBuilder = _builder.RegisterSingleton<Class>();
             ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.Singleton);
         }
 
@@ -57,7 +57,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetFactories))]
         public void Builder_Registers_Singleton_Factories(Func<ILifetimeScope, object> factory)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterSingleton(factory);
+            var regBuilder = _builder.RegisterSingleton(factory);
             ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.Singleton);
         }
 
@@ -69,14 +69,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetTypes))]
         public void Builder_Registers_LifetimeScope(Type type)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(type);
+            var regBuilder = _builder.RegisterLifetimeScope(type);
             ValidateRegistrationBuilder(regBuilder, type, ComponentScope.LifetimeScope);
         }
 
         [Fact]
         public void Builder_Registers_GenericLifetimeScope()
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope<Class>();
+            var regBuilder = _builder.RegisterLifetimeScope<Class>();
             ValidateRegistrationBuilder(regBuilder, typeof(Class), ComponentScope.LifetimeScope);
         }
 
@@ -84,7 +84,7 @@ namespace CoreMVVM.IOC.Builder.Tests
         [MemberData(nameof(GetFactories))]
         public void Builder_Registers_LifetimeScope_Factories(Func<ILifetimeScope, object> factory)
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterLifetimeScope(factory);
+            var regBuilder = _builder.RegisterLifetimeScope(factory);
             ValidateRegistrationBuilder(regBuilder, typeof(object), ComponentScope.LifetimeScope);
         }
 
@@ -93,14 +93,14 @@ namespace CoreMVVM.IOC.Builder.Tests
         [Fact]
         public void Builder_ThrowsOn_ConflictingTypes()
         {
-            IRegistrationBuilder regBuilder = _builder.RegisterTransient<Class>();
+            var regBuilder = _builder.RegisterTransient<Class>();
 
             Assert.Throws<IncompatibleTypeException>(() => regBuilder.As<IInterface>());
         }
 
         #region Helpers
 
-        private void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
+        private static void ValidateRegistrationBuilder(IRegistrationBuilder regBuilder, Type expectedType, ComponentScope scope)
         {
             Assert.Equal(expectedType, regBuilder.Type);
             Assert.Equal(scope, regBuilder.Scope);

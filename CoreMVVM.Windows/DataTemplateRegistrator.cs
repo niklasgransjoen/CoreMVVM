@@ -15,7 +15,7 @@ namespace CoreMVVM.Windows
         private static readonly string[] _empty = new string[0];
 #endif
 
-        private static readonly HashSet<Type> _resolvedViewModels = new HashSet<Type>();
+        private static readonly HashSet<Type> _resolvedViewModels = new();
 
         /// <summary>
         /// Creates a datatemplate for the given view/viewmodel, if one has not already been created.
@@ -43,12 +43,12 @@ namespace CoreMVVM.Windows
             const string xamlTemplate = "<DataTemplate DataType=\"{{x:Type vm:{0}}}\"><v:{1} /></DataTemplate>";
             string xaml = string.Format(CultureInfo.InvariantCulture, xamlTemplate, viewModelType.Name, viewType.Name);
 
-            ParserContext context = new ParserContext
+            var context = new ParserContext
             {
 #if !NET45
-                XamlTypeMapper = new XamlTypeMapper(Array.Empty<string>())
+                XamlTypeMapper = new(Array.Empty<string>())
 #else
-                XamlTypeMapper = new XamlTypeMapper(_empty)
+                XamlTypeMapper = new(_empty)
 
 #endif
             };

@@ -36,14 +36,14 @@ namespace CoreMVVM.Windows.Markup
             if (_binder is null)
             {
                 var valueTargetProvider = serviceProvider.ResolveRequiredService<IProvideValueTarget>();
-                if (!(valueTargetProvider.TargetObject is DependencyObject dependencyObject))
+                if (valueTargetProvider.TargetObject is not DependencyObject dependencyObject)
                     return $"!{Value}!";
 
                 var lifetimeScope = dependencyObject.RequireServiceProvider();
                 _binder = lifetimeScope.ResolveRequiredService<StringParserBinder>();
             }
 
-            Binding binding = new Binding($"[{Value}]")
+            var binding = new Binding($"[{Value}]")
             {
                 Mode = BindingMode.OneWay,
                 Source = _binder,

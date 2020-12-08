@@ -12,12 +12,16 @@ namespace CoreMVVM.Implementations
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
 
-            string viewTypeName = context.ViewModelType.FullName
+            var vmTypeName = context.ViewModelType.FullName;
+            if (vmTypeName is null)
+                return;
+
+            string viewTypeName = vmTypeName
                 .Replace("ViewModel", "View")
                 .Replace("WindowModel", "Window");
 
-            Type viewType = context.ViewModelType.Assembly.GetType(viewTypeName);
-            if (viewType != null)
+            var viewType = context.ViewModelType.Assembly.GetType(viewTypeName);
+            if (viewType is not null)
             {
                 context.SetViewType(viewType, cacheView: true);
             }

@@ -17,7 +17,7 @@ namespace CoreMVVM.Input
         {
         }
 
-        event EventHandler ICommand.CanExecuteChanged { add { } remove { } }
+        event EventHandler? ICommand.CanExecuteChanged { add { } remove { } }
 
         bool ICommand.CanExecute(object? parameter) => true;
 

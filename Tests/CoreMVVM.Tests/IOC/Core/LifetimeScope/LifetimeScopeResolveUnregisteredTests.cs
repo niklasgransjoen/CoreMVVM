@@ -19,7 +19,7 @@ namespace CoreMVVM.IOC.Core.Tests
             ClassWithConstructor subject = LifetimeScope.ResolveRequiredService<ClassWithConstructor>();
 
             Assert.NotNull(subject);
-            Assert.NotNull(subject.a);
+            Assert.NotNull(subject.A);
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace CoreMVVM.IOC.Core.Tests
             ClassWithEmptyConstructor subject = LifetimeScope.ResolveRequiredService<ClassWithEmptyConstructor>();
 
             Assert.NotNull(subject);
-            Assert.True(subject.constructorWasInvoked);
+            Assert.True(subject.ConstructorWasInvoked);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         internal class ClassWithConstructor
         {
-            public Class? a;
+            public Class? A;
 
             public ClassWithConstructor()
             {
@@ -71,17 +71,17 @@ namespace CoreMVVM.IOC.Core.Tests
 
             public ClassWithConstructor(Class a)
             {
-                this.a = a;
+                A = a;
             }
         }
 
         internal class ClassWithEmptyConstructor
         {
-            public bool constructorWasInvoked;
+            public bool ConstructorWasInvoked;
 
             public ClassWithEmptyConstructor()
             {
-                constructorWasInvoked = true;
+                ConstructorWasInvoked = true;
             }
         }
 

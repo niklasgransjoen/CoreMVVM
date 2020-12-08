@@ -32,13 +32,13 @@ namespace CoreMVVM.Threading
 
         public RebelTask(Func<TResult> function, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function, cancellationToken);
+            Task = new(function, cancellationToken);
             _result = default;
         }
 
-        public RebelTask(Func<object, TResult> function, object state, CancellationToken cancellationToken = default)
+        public RebelTask(Func<object?, TResult> function, object state, CancellationToken cancellationToken = default)
         {
-            Task = new Task<TResult>(function, state, cancellationToken);
+            Task = new(function, state, cancellationToken);
             _result = default;
         }
 
@@ -128,10 +128,10 @@ namespace CoreMVVM.Threading
                 throw new TaskCanceledException(Task);
             }
 
-            if (Task.Exception != null)
+            if (Task.Exception is not null)
             {
-                Exception taskException = Task.Exception.InnerException;
-                ExceptionDispatchInfo.Capture(taskException).Throw();
+                var taskException = Task.Exception;
+                ExceptionDispatchInfo.Capture(taskException.InnerException ?? taskException).Throw();
                 throw taskException; // Is never called.
             }
 
@@ -142,12 +142,9 @@ namespace CoreMVVM.Threading
 
         #region Operators
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (!(obj is RebelTask<TResult> other))
-                return false;
-
-            return Equals(other);
+            return obj is RebelTask<TResult> other && Equals(other);
         }
 
         public bool Equals(RebelTask<TResult> other)
@@ -160,11 +157,15 @@ namespace CoreMVVM.Threading
 
         public override int GetHashCode()
         {
+#if NETCORE
+            return HashCode.Combine(Task, _result);
+#else
             int hash = 39;
             hash = (hash * 7) + _result?.GetHashCode() ?? 13;
             hash = (hash * 7) + Task?.GetHashCode() ?? 13;
 
             return hash;
+#endif
         }
 
         public static bool operator ==(RebelTask<TResult> left, RebelTask<TResult> right)
@@ -179,15 +180,15 @@ namespace CoreMVVM.Threading
 
         public static implicit operator RebelTask<TResult>(Task<TResult> task)
         {
-            return new RebelTask<TResult>(task);
+            return new(task);
         }
 
         public static implicit operator RebelTask(RebelTask<TResult> rebelTask)
         {
             if (rebelTask.Task is null)
-                return new RebelTask(System.Threading.Tasks.Task.FromResult(rebelTask._result));
+                return new(System.Threading.Tasks.Task.FromResult(rebelTask._result));
 
-            return new RebelTask(rebelTask.Task);
+            return new(rebelTask.Task);
         }
 
         #endregion Operators

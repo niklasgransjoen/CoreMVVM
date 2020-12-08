@@ -37,7 +37,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         #region LifetimeScope_Handles_RegistrationOverrides
 
-        private void LifetimeScope_Handles_RegistrationOverrides_Setup(ContainerBuilder builder)
+        private static void LifetimeScope_Handles_RegistrationOverrides_Setup(ContainerBuilder builder)
         {
             builder.RegisterSingleton<Service1>().As<IService1>();
             builder.RegisterSingleton<Service2>().As<IService2>();
@@ -75,7 +75,7 @@ namespace CoreMVVM.IOC.Core.Tests
 
         #region LifetimeScope_Handles_Registrations_In_Different_Scopes
 
-        private void LifetimeScope_Handles_Registrations_In_Different_Scopes_Setup(ContainerBuilder builder)
+        private static void LifetimeScope_Handles_Registrations_In_Different_Scopes_Setup(ContainerBuilder builder)
         {
             builder.RegisterSingleton<Service3>().As<IService3>();
             builder.RegisterLifetimeScope<Service3>().As<IService4>();
