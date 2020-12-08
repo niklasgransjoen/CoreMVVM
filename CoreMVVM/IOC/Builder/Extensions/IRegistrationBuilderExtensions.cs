@@ -23,7 +23,6 @@ namespace CoreMVVM.IOC.Builder
         /// <summary>
         /// Registers a component.
         /// </summary>
-        /// <typeparam name="T">The service type to register the componet as.</typeparam>
         /// <exception cref="IncompatibleTypeException">The component does not inherit from or implement T.</exception>
         public static IRegistrationBuilder AsSelf(this IRegistrationBuilder registrationBuilder)
         {
